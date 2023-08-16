@@ -3,7 +3,7 @@ namespace PEAS.Entities.Authentication
 {
     public enum Role
     {
-        Admin,
-        User
+       Admin,
+       User
     }
 }
