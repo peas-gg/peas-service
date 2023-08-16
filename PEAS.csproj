@@ -10,10 +10,12 @@
   <ItemGroup>
     <None Remove="Models\" />
     <None Remove="Entities\" />
+    <None Remove="Entities\Authentication\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
     <Folder Include="Entities\" />
+    <Folder Include="Entities\Authentication\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.10" />
