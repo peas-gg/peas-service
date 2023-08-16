@@ -22,6 +22,7 @@ namespace PEAS.Migrations
                     Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LoginAttempt = table.Column<int>(type: "int", nullable: false),
                     AcceptTerms = table.Column<bool>(type: "bit", nullable: false),
                     IsLocked = table.Column<bool>(type: "bit", nullable: false),
                     Role = table.Column<string>(type: "nvarchar(24)", nullable: false),

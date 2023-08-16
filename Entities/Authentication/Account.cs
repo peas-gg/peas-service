@@ -17,6 +17,8 @@ namespace PEAS.Entities.Authentication
 
         public required string Password { get; set; }
 
+        public int LoginAttempt { get; set; }
+
         public bool AcceptTerms { get; set; }
 
         public bool IsLocked { get; set; }

@@ -11,11 +11,13 @@
     <None Remove="Models\" />
     <None Remove="Entities\" />
     <None Remove="Entities\Authentication\" />
+    <None Remove="Migrations\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
     <Folder Include="Entities\" />
     <Folder Include="Entities\Authentication\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.10" />

@@ -12,7 +12,7 @@ using PEAS.Entities;
 namespace PEAS.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230816020122_Account")]
+    [Migration("20230816034038_Account")]
     partial class Account
     {
         /// <inheritdoc />
@@ -53,6 +53,9 @@ namespace PEAS.Migrations
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("LoginAttempt")
+                        .HasColumnType("int");
 
                     b.Property<string>("Password")
                         .IsRequired()
