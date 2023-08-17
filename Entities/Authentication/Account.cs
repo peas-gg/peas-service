@@ -8,8 +8,11 @@ namespace PEAS.Entities.Authentication
     public class Account
     {
         public int Id { get; set; }
+
         public required string FirstName { get; set; }
+
         public required string LastName { get; set; }
+
         public required string Email { get; set; }
 
         [StringLength(15)]
@@ -27,9 +30,11 @@ namespace PEAS.Entities.Authentication
         public Role Role { get; set; }
 
         public DateTime Created { get; set; }
+
         public DateTime? Updated { get; set; }
 
         public List<RefreshToken>? RefreshTokens { get; set; }
+
         public List<Device>? Devices { get; set; }
 
         public bool OwnsToken(string token)
