@@ -218,7 +218,7 @@ namespace PEAS.Services
 
         private bool isPasswordValid(string password)
         {
-            return password.Trim().Length > 6;
+            return password.Trim().Length >= 6;
         }
 
         private bool isNameValid(string name)
