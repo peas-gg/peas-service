@@ -14,7 +14,6 @@ namespace PEAS.Entities.Authentication
 
         public required string Email { get; set; }
 
-        [StringLength(15)]
         public required string Phone { get; set; }
 
         public required string Password { get; set; }
