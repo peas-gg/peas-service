@@ -17,11 +17,11 @@ namespace PEAS.Services
 {
     public interface IAccountService
     {
-        AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress);
+        //AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress);
         AuthenticateResponse Register(RegisterRequest model, string ipAddress);
     }
 
-    public class AccountService
+    public class AccountService : IAccountService
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;

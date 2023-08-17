@@ -12,7 +12,7 @@
 
         public required string PasswordText { get; set; }
 
-        public required string OTPCode { get; set; }
+        public required string OtpCode { get; set; }
 
         public bool AcceptTerms { get; set; }
     }

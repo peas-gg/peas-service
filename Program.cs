@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PEAS.Entities;
 using PEAS.Middleware;
+using PEAS.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+builder.Services.AddScoped<IAccountService, AccountService>();
 
 builder.Services.AddDbContext<DataContext>();
 
