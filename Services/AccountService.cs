@@ -182,7 +182,7 @@ namespace PEAS.Services
                 throw new AppException("Invalid Email");
             }
 
-            if (String.IsNullOrWhiteSpace(model.FirstName) || String.IsNullOrWhiteSpace(model.LastName))
+            if (!isNameValid(model.FirstName) || !isNameValid(model.LastName))
             {
                 throw new AppException("Invalid first name or last name");
             }
@@ -219,6 +219,16 @@ namespace PEAS.Services
         private bool isPasswordValid(string password)
         {
             return password.Trim().Length > 6;
+        }
+
+        private bool isNameValid(string name)
+        {
+            string namePattern = @"^[A-Z][a-zA-Z]*$";
+            if (string.IsNullOrEmpty(name))
+                return false;
+
+            Regex regex = new Regex(namePattern);
+            return regex.IsMatch(name);
         }
 
         private string generateJwtToken(Account account)
