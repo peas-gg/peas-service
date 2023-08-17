@@ -20,7 +20,7 @@ namespace PEAS.Migrations
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(16)", maxLength: 16, nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LoginAttempt = table.Column<int>(type: "int", nullable: false),
                     AcceptTerms = table.Column<bool>(type: "bit", nullable: false),
