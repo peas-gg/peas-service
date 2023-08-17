@@ -19,7 +19,7 @@ builder.Services.AddDbContext<DataContext>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (builder.Configuration["Environment"] == "Development")
 {
     app.UseSwagger();
     app.UseSwaggerUI();
