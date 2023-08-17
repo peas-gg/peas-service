@@ -14,6 +14,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<ITwilioService, TwilioService>();
 
 builder.Services.AddDbContext<DataContext>();
 

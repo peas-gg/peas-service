@@ -18,11 +18,13 @@ namespace PEAS.Services
     {
         AuthenticateResponse? Authenticate(AuthenticateRequest model, string ipAddress);
         AuthenticateResponse Register(RegisterRequest model, string ipAddress);
+        string? ValidatePhoneNumber(string phoneNumber);
     }
 
     public class AccountService : IAccountService
     {
         private readonly DataContext _context;
+        private readonly ITwilioService _twilioService;
         private readonly IMapper _mapper;
         private readonly AppSettings _appSettings;
 
@@ -30,11 +32,13 @@ namespace PEAS.Services
 
         public AccountService(
             DataContext context,
+            ITwilioService twilioService,
             IMapper mapper,
             IOptions<AppSettings> appSettings,
             ILogger<AccountService> logger)
         {
             _context = context;
+            _twilioService = twilioService;
             _mapper = mapper;
             _appSettings = appSettings.Value;
             _logger = logger;
@@ -175,6 +179,11 @@ namespace PEAS.Services
             }
         }
 
+        public string? ValidatePhoneNumber(string phoneNumber)
+        {
+            return _twilioService.ValidatePhoneNumber(phoneNumber);
+        }
+
         private void validateRegisterModel(RegisterRequest model)
         {
             if (!isValidEmail(model.Email))
@@ -187,7 +196,7 @@ namespace PEAS.Services
                 throw new AppException("Invalid first name or last name");
             }
 
-            if (String.IsNullOrWhiteSpace(model.Phone))
+            if (ValidatePhoneNumber(model.Phone) == null)
             {
                 throw new AppException("Invalid phone number");
             }

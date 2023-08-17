@@ -29,6 +29,13 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [HttpGet("validatePhone")]
+        public ActionResult<string?> ValidatePhoneNumber(string number)
+        {
+            var response = _accountService.ValidatePhoneNumber(number);
+            return Ok(response);
+        }
+
         private string ipAddress()
         {
             if (Request.Headers.ContainsKey("X-Forwarded-For"))
