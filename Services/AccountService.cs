@@ -86,6 +86,7 @@ namespace PEAS.Services
             }
             catch(Exception e)
             {
+                AppLogger.Log(_logger, e);
                 throw new AppException(e.Message);
             }
         }
