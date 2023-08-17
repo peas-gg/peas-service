@@ -1,4 +1,6 @@
-﻿namespace PEAS.Models.Account
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PEAS.Models.Account
 {
     public class RegisterRequest
     {

@@ -1,5 +1,4 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -17,7 +16,7 @@ namespace PEAS.Services
 {
     public interface IAccountService
     {
-        //AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress);
+        AuthenticateResponse? Authenticate(AuthenticateRequest model, string ipAddress);
         AuthenticateResponse Register(RegisterRequest model, string ipAddress);
     }
 
@@ -39,6 +38,91 @@ namespace PEAS.Services
             _mapper = mapper;
             _appSettings = appSettings.Value;
             _logger = logger;
+        }
+
+        public AuthenticateResponse? Authenticate(AuthenticateRequest model, string ipAddress)
+        {
+            try
+            {
+                var account = _context.Accounts.SingleOrDefault(x => x.Email == model.Email);
+
+                if (account == null)
+                {
+                    throw new AppException("Email or password is incorrect");
+                }
+
+                string accountLockedMessage = "Your account is locked due to multiple incorrect passwords. Please reset your password";
+                //Check if account is locked
+                if (account.IsLocked)
+                {
+                    throw new AppException(accountLockedMessage);
+                }
+
+
+                //Check Login Attempt and set maximum of 10 attempts then lock
+                if (!BC.Verify(model.Password, account.Password))
+                {
+                    account.LoginAttempt++;
+                    if (account.LoginAttempt >= 10)
+                    {
+                        account.IsLocked = true;
+                        //Save changes to db
+                        _context.Update(account);
+                        _context.SaveChanges();
+                        throw new AppException(accountLockedMessage);
+                    }
+                    //Save changes to db
+                    _context.Update(account);
+                    _context.SaveChanges();
+                    throw new AppException("Email or password is incorrect");
+                }
+
+                //Reset login attempt to zero after successful login
+                account.LoginAttempt = 0;
+
+
+                //Check Otp
+                if (model.OtpCode == null)
+                {
+                    //Save changes to db
+                    _context.Update(account);
+                    _context.SaveChanges();
+
+                    //Return null here and send request to Twilio
+                    return null;
+                } else
+                {
+                    //Check Twilio
+                    if (false)
+                    {
+                        throw new AppException("Invalid One Time passcode");
+                    }
+
+                    // authentication successful so generate jwt and refresh tokens
+                    var jwtToken = generateJwtToken(account);
+                    var refreshToken = generateRefreshToken(account, ipAddress);
+
+
+                    // remove old refresh tokens from account
+                    removeOldRefreshTokens(account);
+
+                    account.RefreshTokens?.Add(refreshToken);
+
+                    //Save changes to db
+                    _context.Update(account);
+                    _context.SaveChanges();
+
+                    var response = _mapper.Map<AuthenticateResponse>(account);
+                    response.JwtToken = jwtToken;
+                    response.RefreshToken = refreshToken.Token;
+                    return response;
+                }
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException(e.Message);
+            }
         }
 
         public AuthenticateResponse Register(RegisterRequest model, string ipAddress)
@@ -169,6 +253,12 @@ namespace PEAS.Services
             var randomNumber = new byte[40];
             rng.GetBytes(randomNumber);
             return Convert.ToBase64String(randomNumber);
+        }
+
+        private void removeOldRefreshTokens(Account account)
+        {
+            //Remove all refresh tokens. This should prevent the user from having two active sessions at a time
+            account.RefreshTokens?.RemoveAll(x => x.Created <= DateTime.UtcNow);
         }
     }
 }

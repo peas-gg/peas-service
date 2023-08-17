@@ -1,10 +1,13 @@
-﻿using System;
+﻿using System.ComponentModel.DataAnnotations;
+
 namespace PEAS.Models.Account
 {
     public class AuthenticateRequest
     {
-        public AuthenticateRequest()
-        {
-        }
+        public required string Email { get; set; }
+
+        public required string Password { get; set; }
+
+        public string? OtpCode { get; set; }
     }
 }

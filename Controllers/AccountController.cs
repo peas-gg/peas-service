@@ -15,13 +15,19 @@ namespace PEAS.Controllers
             _accountService = accountService;
         }
 
+        [HttpPost("authenticate")]
+        public ActionResult<AuthenticateResponse> Authenticate([FromBody] AuthenticateRequest model)
+        {
+            var response = _accountService.Authenticate(model, ipAddress());
+            return Ok(response);
+        }
+
         [HttpPost("register")]
         public ActionResult<AuthenticateResponse> Register([FromBody] RegisterRequest model)
         {
             var response = _accountService.Register(model, ipAddress());
             return Ok(response);
         }
-
 
         private string ipAddress()
         {
