@@ -224,7 +224,7 @@ namespace PEAS.Services
         private bool isNameValid(string name)
         {
             string namePattern = @"^[A-Z][a-zA-Z]*$";
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name) || name.Length > 20)
                 return false;
 
             Regex regex = new Regex(namePattern);
