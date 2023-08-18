@@ -24,9 +24,12 @@ namespace PEAS.Services
         private readonly string _authToken;
         private readonly string _pathServiceId;
 
-        public TwilioService(IConfiguration configuration)
+        private readonly ILogger<TwilioService> _logger;
+
+        public TwilioService(IConfiguration configuration, ILogger<TwilioService> logger)
         {
             _configuration = configuration;
+            _logger = logger;
             _accountSid = _configuration.GetSection("Twilio:AccountSid").Value ?? "";
             _authToken = _configuration.GetSection("Twilio:AuthToken").Value ?? "";
             _pathServiceId = _configuration.GetSection("Twilio:PathServiceSid").Value ?? "";
@@ -53,15 +56,23 @@ namespace PEAS.Services
 
         public bool IsCodeValid(string number, string code)
         {
-            TwilioClient.Init(_accountSid, _authToken);
+            try
+            {
+                TwilioClient.Init(_accountSid, _authToken);
 
-            var verificationCheck = VerificationCheckResource.Create(
-                to: number,
-                code: code,
-                pathServiceSid: _pathServiceId
-            );
+                var verificationCheck = VerificationCheckResource.Create(
+                    to: number,
+                    code: code,
+                    pathServiceSid: _pathServiceId
+                );
 
-            return verificationCheck.Status == "approved";
+                return verificationCheck.Status == "approved";
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException("Invalid code");
+            }
         }
     }
 }
