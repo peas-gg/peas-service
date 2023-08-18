@@ -20,7 +20,6 @@ namespace PEAS.Services
         AuthenticateResponse Register(RegisterRequest model, string ipAddress);
         string? ValidatePhoneNumber(string phoneNumber);
         EmptyResponse RequestVerificationCode(string phoneNumber);
-        EmptyResponse ValidateVerificationCode(string phoneNumber, string code);
     }
 
     public class AccountService : IAccountService
@@ -98,7 +97,7 @@ namespace PEAS.Services
                 } else
                 {
                     //Check Twilio
-                    _ = ValidateVerificationCode(account.Phone, model.Code);
+                    _ = validateVerificationCode(account.Phone, model.Code);
 
                     // authentication successful so generate jwt and refresh tokens
                     var jwtToken = generateJwtToken(account);
@@ -198,26 +197,6 @@ namespace PEAS.Services
             }
         }
 
-        public EmptyResponse ValidateVerificationCode(string phoneNumber, string code)
-        {
-            try
-            {
-                bool result = _twilioService.IsCodeValid(phoneNumber, code);
-
-                if (!result)
-                {
-                    throw new AppException("Invalid Code");
-                }
-
-                return new EmptyResponse();
-            }
-            catch (Exception e)
-            {
-                AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
-            }
-        }
-
         public string? ValidatePhoneNumber(string phoneNumber)
         {
             return _twilioService.ValidatePhoneNumber(phoneNumber);
@@ -251,7 +230,27 @@ namespace PEAS.Services
             }
 
             //Validate the OTPCode
-            _ = ValidateVerificationCode(model.Phone, model.Code);
+            _ = validateVerificationCode(model.Phone, model.Code);
+        }
+
+        private EmptyResponse validateVerificationCode(string phoneNumber, string code)
+        {
+            try
+            {
+                bool result = _twilioService.IsCodeValid(phoneNumber, code);
+
+                if (!result)
+                {
+                    throw new AppException("Invalid Code");
+                }
+
+                return new EmptyResponse();
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException(e.Message);
+            }
         }
 
         private bool isValidEmail(string email)

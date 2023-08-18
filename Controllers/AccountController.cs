@@ -44,13 +44,6 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
-        [HttpPost("validateCode")]
-        public ActionResult<EmptyResponse> ValidateVerificationCode(string number, string code)
-        {
-            var response = _accountService.ValidateVerificationCode(number, code);
-            return Ok(response);
-        }
-
         private string ipAddress()
         {
             if (Request.Headers.ContainsKey("X-Forwarded-For"))
