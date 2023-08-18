@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using PEAS.Models;
 using PEAS.Models.Account;
 using PEAS.Services;
 
@@ -33,6 +34,20 @@ namespace PEAS.Controllers
         public ActionResult<string?> ValidatePhoneNumber(string number)
         {
             var response = _accountService.ValidatePhoneNumber(number);
+            return Ok(response);
+        }
+
+        [HttpGet("code")]
+        public ActionResult<EmptyResponse> RequestVerificationCode(string number)
+        {
+            var response = _accountService.RequestVerificationCode(number);
+            return Ok(response);
+        }
+
+        [HttpPost("validateCode")]
+        public ActionResult<EmptyResponse> ValidateVerificationCode(string number, string code)
+        {
+            var response = _accountService.ValidateVerificationCode(number, code);
             return Ok(response);
         }
 

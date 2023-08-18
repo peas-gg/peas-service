@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using PEAS.Entities;
 using PEAS.Entities.Authentication;
 using PEAS.Helpers;
+using PEAS.Models;
 using PEAS.Models.Account;
 using BC = BCrypt.Net.BCrypt;
 
@@ -19,6 +20,8 @@ namespace PEAS.Services
         AuthenticateResponse? Authenticate(AuthenticateRequest model, string ipAddress);
         AuthenticateResponse Register(RegisterRequest model, string ipAddress);
         string? ValidatePhoneNumber(string phoneNumber);
+        EmptyResponse RequestVerificationCode(string phoneNumber);
+        EmptyResponse ValidateVerificationCode(string phoneNumber, string code);
     }
 
     public class AccountService : IAccountService
@@ -173,6 +176,47 @@ namespace PEAS.Services
                 return response;
             }
             catch(Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException(e.Message);
+            }
+        }
+
+        public EmptyResponse RequestVerificationCode(string phoneNumber)
+        {
+            try
+            {
+                string? validatedPhoneNumber = ValidatePhoneNumber(phoneNumber);
+
+                if (validatedPhoneNumber == null)
+                {
+                    throw new AppException("Invalid Phone Number");
+                }
+
+                _twilioService.RequestCode(validatedPhoneNumber);
+                return new EmptyResponse();
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException(e.Message);
+            }
+        }
+
+        public EmptyResponse ValidateVerificationCode(string phoneNumber, string code)
+        {
+            try
+            {
+                bool result = _twilioService.IsCodeValid(phoneNumber, code);
+
+                if (!result)
+                {
+                    throw new AppException("Invalid Code");
+                }
+
+                return new EmptyResponse();
+            }
+            catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
                 throw new AppException(e.Message);
