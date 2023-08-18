@@ -8,6 +8,6 @@ namespace PEAS.Models.Account
 
         public required string Password { get; set; }
 
-        public string? OtpCode { get; set; }
+        public string? Code { get; set; }
     }
 }

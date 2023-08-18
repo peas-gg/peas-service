@@ -14,7 +14,7 @@ namespace PEAS.Models.Account
 
         public required string PasswordText { get; set; }
 
-        public required string OtpCode { get; set; }
+        public required string Code { get; set; }
 
         public bool AcceptTerms { get; set; }
     }

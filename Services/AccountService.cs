@@ -87,7 +87,7 @@ namespace PEAS.Services
 
 
                 //Check Otp
-                if (model.OtpCode == null)
+                if (model.Code == null)
                 {
                     //Save changes to db
                     _context.Update(account);
@@ -98,7 +98,7 @@ namespace PEAS.Services
                 } else
                 {
                     //Check Twilio
-                    _ = ValidateVerificationCode(account.Phone, model.OtpCode);
+                    _ = ValidateVerificationCode(account.Phone, model.Code);
 
                     // authentication successful so generate jwt and refresh tokens
                     var jwtToken = generateJwtToken(account);
@@ -251,7 +251,7 @@ namespace PEAS.Services
             }
 
             //Validate the OTPCode
-            _ = ValidateVerificationCode(model.Phone, model.OtpCode);
+            _ = ValidateVerificationCode(model.Phone, model.Code);
         }
 
         private bool isValidEmail(string email)
