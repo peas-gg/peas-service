@@ -4,14 +4,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using AutoMapper;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using PEAS.Entities;
 using PEAS.Entities.Authentication;
 using PEAS.Helpers;
 using PEAS.Models;
 using PEAS.Models.Account;
-using Twilio.Types;
 using BC = BCrypt.Net.BCrypt;
 
 namespace PEAS.Services
@@ -28,23 +26,23 @@ namespace PEAS.Services
     public class AccountService : IAccountService
     {
         private readonly DataContext _context;
+        private readonly IConfiguration _configuration;
         private readonly ITwilioService _twilioService;
         private readonly IMapper _mapper;
-        private readonly AppSettings _appSettings;
 
         private readonly ILogger<AccountService> _logger;
 
         public AccountService(
             DataContext context,
+            IConfiguration configuration,
             ITwilioService twilioService,
             IMapper mapper,
-            IOptions<AppSettings> appSettings,
             ILogger<AccountService> logger)
         {
             _context = context;
+            _configuration = configuration;
             _twilioService = twilioService;
             _mapper = mapper;
-            _appSettings = appSettings.Value;
             _logger = logger;
         }
 
@@ -163,11 +161,8 @@ namespace PEAS.Services
                     refreshToken
                 };
 
-                //Save account
-                _context.Accounts.Add(account);
-
                 //Save changes to db
-                _context.Update(account);
+                _context.Accounts.Add(account);
                 _context.SaveChanges();
 
                 var response = _mapper.Map<AuthenticateResponse>(account);
@@ -288,7 +283,7 @@ namespace PEAS.Services
         private string generateJwtToken(Account account)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            var key = Encoding.ASCII.GetBytes(_configuration.GetSection("Secret").Value!);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] { new Claim("id", account.Id.ToString()) }),
