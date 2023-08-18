@@ -11,6 +11,7 @@ using PEAS.Entities.Authentication;
 using PEAS.Helpers;
 using PEAS.Models;
 using PEAS.Models.Account;
+using Twilio.Types;
 using BC = BCrypt.Net.BCrypt;
 
 namespace PEAS.Services
@@ -65,7 +66,6 @@ namespace PEAS.Services
                     throw new AppException(accountLockedMessage);
                 }
 
-
                 //Check Login Attempt and set maximum of 10 attempts then lock
                 if (!BC.Verify(model.Password, account.Password))
                 {
@@ -95,15 +95,12 @@ namespace PEAS.Services
                     _context.Update(account);
                     _context.SaveChanges();
 
-                    //Return null here and send request to Twilio
+                    _ = RequestVerificationCode(account.Phone);
                     return null;
                 } else
                 {
                     //Check Twilio
-                    if (false)
-                    {
-                        throw new AppException("Invalid One Time passcode");
-                    }
+                    _ = ValidateVerificationCode(account.Phone, model.OtpCode);
 
                     // authentication successful so generate jwt and refresh tokens
                     var jwtToken = generateJwtToken(account);
@@ -136,6 +133,9 @@ namespace PEAS.Services
         {
             try
             {
+                string validatedPhoneNumber = ValidatePhoneNumber(model.Phone) ?? "";
+                model.Phone = validatedPhoneNumber;
+
                 //Validate model
                 validateRegisterModel(model);
 
@@ -156,7 +156,7 @@ namespace PEAS.Services
                 //Generate jwt and refresh tokens for authentication
                 var jwtToken = generateJwtToken(account);
                 var refreshToken = generateRefreshToken(account, ipAddress);
-
+                
                 //Add Refresh Token
                 account.RefreshTokens = new List<RefreshToken>
                 {
@@ -240,7 +240,7 @@ namespace PEAS.Services
                 throw new AppException("Invalid first name or last name");
             }
 
-            if (ValidatePhoneNumber(model.Phone) == null)
+            if (string.IsNullOrEmpty(model.Phone))
             {
                 throw new AppException("Invalid phone number");
             }
@@ -256,6 +256,7 @@ namespace PEAS.Services
             }
 
             //Validate the OTPCode
+            _ = ValidateVerificationCode(model.Phone, model.OtpCode);
         }
 
         private bool isValidEmail(string email)
