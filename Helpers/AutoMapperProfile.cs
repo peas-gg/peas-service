@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using PEAS.Entities.Authentication;
+using PEAS.Models.Account;
 
 namespace PEAS.Helpers
 {
@@ -6,6 +8,8 @@ namespace PEAS.Helpers
     {
         public AutoMapperProfile()
         {
+            CreateMap<Account, AuthenticateResponse>();
+            CreateMap<RegisterRequest, Account>();
         }
     }
 }
