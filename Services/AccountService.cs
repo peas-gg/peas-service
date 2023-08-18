@@ -20,6 +20,8 @@ namespace PEAS.Services
         AuthenticateResponse Register(RegisterRequest model, string ipAddress);
         string? ValidatePhoneNumber(string phoneNumber);
         EmptyResponse RequestVerificationCode(string phoneNumber);
+        EmptyResponse RequestPasswordReset(string email);
+        EmptyResponse ResetPassword(ResetPasswordRequest model);
     }
 
     public class AccountService : IAccountService
@@ -94,7 +96,8 @@ namespace PEAS.Services
 
                     _ = RequestVerificationCode(account.Phone);
                     return null;
-                } else
+                }
+                else
                 {
                     //Check Twilio
                     _ = validateVerificationCode(account.Phone, model.Code);
@@ -153,7 +156,7 @@ namespace PEAS.Services
                 //Generate jwt and refresh tokens for authentication
                 var jwtToken = generateJwtToken(account);
                 var refreshToken = generateRefreshToken(account, ipAddress);
-                
+
                 //Add Refresh Token
                 account.RefreshTokens = new List<RefreshToken>
                 {
@@ -169,7 +172,56 @@ namespace PEAS.Services
                 response.RefreshToken = refreshToken.Token;
                 return response;
             }
-            catch(Exception e)
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException(e.Message);
+            }
+        }
+
+        public EmptyResponse RequestPasswordReset(string email)
+        {
+            try
+            {
+                var account = _context.Accounts.SingleOrDefault(x => x.Email == email);
+                if (account != null)
+                {
+                    _twilioService.RequestCode(account.Phone);
+                }
+                return new EmptyResponse();
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                return new EmptyResponse();
+            }
+        }
+
+        public EmptyResponse ResetPassword(ResetPasswordRequest model)
+        {
+            try
+            {
+                var account = _context.Accounts.SingleOrDefault(x => x.Email == model.Email);
+
+                if (account == null)
+                {
+                    throw new AppException("Please ensure your email address is correct");
+                }
+
+                //Validate Otp Code
+                _ = validateVerificationCode(account.Phone, model.Code);
+
+                //Update password
+                account.Password = BC.HashPassword(model.Password);
+
+                //Remove old refresh tokens from account
+                removeOldRefreshTokens(account);
+
+                _context.Accounts.Update(account);
+                _context.SaveChanges();
+                return new EmptyResponse();
+            }
+            catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
                 throw new AppException(e.Message);

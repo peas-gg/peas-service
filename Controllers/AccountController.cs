@@ -44,6 +44,20 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [HttpGet("password/reset")]
+        public ActionResult<EmptyResponse> RequestPasswordReset(string email)
+        {
+            var response = _accountService.RequestPasswordReset(email);
+            return Ok(response);
+        }
+
+        [HttpPost("password/reset")]
+        public ActionResult<EmptyResponse> RequestPasswordReset([FromBody] ResetPasswordRequest model)
+        {
+            var response = _accountService.ResetPassword(model);
+            return Ok(response);
+        }
+
         private string ipAddress()
         {
             if (Request.Headers.ContainsKey("X-Forwarded-For"))
