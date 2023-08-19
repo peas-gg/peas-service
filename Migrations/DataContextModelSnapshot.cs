@@ -60,8 +60,7 @@ namespace PEAS.Migrations
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Role")
                         .IsRequired()

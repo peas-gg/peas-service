@@ -12,7 +12,7 @@ using PEAS.Entities;
 namespace PEAS.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230817225905_Account_RefreshToken_Device")]
+    [Migration("20230819211648_Account_RefreshToken_Device")]
     partial class Account_RefreshToken_Device
     {
         /// <inheritdoc />
@@ -63,8 +63,7 @@ namespace PEAS.Migrations
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Role")
                         .IsRequired()
