@@ -1,12 +1,13 @@
 ﻿using PEAS.Entities.Authentication;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PEAS.Entities.Site
 {
     public class Business
     {
-        [Key]
-        public int Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid Id { get; set; }
 
         public required Account Account { get; set; }
 
