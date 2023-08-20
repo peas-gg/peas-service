@@ -4,6 +4,7 @@ using AutoMapper;
 using PEAS.Entities;
 using PEAS.Entities.Authentication;
 using PEAS.Entities.Site;
+using PEAS.Helpers;
 using PEAS.Models.Business;
 
 namespace PEAS.Services
@@ -31,7 +32,39 @@ namespace PEAS.Services
 
         public Business AddBusiness(Account account, CreateBusiness model)
         {
-            throw new NotImplementedException();
+            try
+            {
+                validateModel(model);
+
+                var business = new Business
+                {
+                    Account = account,
+                    Sign = model.Sign,
+                    Name = model.Name,
+                    Category = model.Category,
+                    Color = model.Color,
+                    Description = model.Description,
+                    ProfilePhoto = model.ProfilePhoto,
+                    Twitter = model.Twitter,
+                    Instagram = model.Instagram,
+                    Tiktok = model.Tiktok,
+                    Location = "", //Fetch City & Country from GoogleMaps API
+                    Latitude = model.Latitude,
+                    Longitude = model.Longitude,
+                    IsActive = true,
+                    Created = DateTime.UtcNow
+                };
+
+                _context.Businesses.Add(business);
+                _context.SaveChanges();
+
+                return business;
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException(e.Message);
+            }
         }
 
         public List<Template> GetTemplate()
@@ -42,6 +75,19 @@ namespace PEAS.Services
         public Template AddTemplate()
         {
             throw new NotImplementedException();
+        }
+
+        private void validateModel(CreateBusiness model)
+        {
+            if (model.Sign.Length < 3)
+            {
+                throw new AppException("Invalid PEAS Sign: Your PEAS sign needs to be a minimum of 3 characters");
+            }
+
+            if (model.Name.Length < 5)
+            {
+                throw new AppException("Invalid Name: Your business name needs to be a minimum of 5 characters");
+            }
         }
     }
 }

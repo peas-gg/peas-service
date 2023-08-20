@@ -16,11 +16,11 @@ namespace PEAS.Models.Business
 
         public required Uri ProfilePhoto { get; set; }
 
-        public string? TwitterLink { get; set; }
+        public string? Twitter { get; set; }
 
-        public string? InstagramLink { get; set; }
+        public string? Instagram { get; set; }
 
-        public string? TikTokLink { get; set; }
+        public string? Tiktok { get; set; }
 
         public required double Latitude { get; set; }
 
