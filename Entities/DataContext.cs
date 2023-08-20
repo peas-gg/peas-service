@@ -1,11 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PEAS.Entities.Authentication;
+using PEAS.Entities.Site;
 
 namespace PEAS.Entities
 {
     public class DataContext : DbContext
     {
         public DbSet<Account> Accounts { get; set; }
+
+        public DbSet<Business> Businesses { get; set; }
+
+        public DbSet<Template> Templates { get; set; }
 
         private readonly IConfiguration Configuration;
 
@@ -27,12 +32,16 @@ namespace PEAS.Entities
                 .IsUnique();
 
             builder.Entity<Account>()
-            .HasIndex(x => new { x.Phone })
-            .IsUnique();
+                .HasIndex(x => new { x.Phone })
+                .IsUnique();
+
+            builder.Entity<Business>()
+                .HasIndex(x => new { x.Sign })
+                .IsUnique();
 
             builder.Entity<Account>()
-            .Property(x => x.Role)
-            .HasConversion<string>();
+                .Property(x => x.Role)
+                .HasConversion<string>();
 
             builder.Entity<Account>().OwnsMany(p => p.Devices, a =>
             {

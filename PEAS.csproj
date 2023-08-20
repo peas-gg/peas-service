@@ -16,7 +16,7 @@
     <None Remove="Helpers\" />
     <None Remove="Middleware\" />
     <None Remove="Migrations\" />
-    <None Remove="Entities\Business\" />
+    <None Remove="Entities\Site\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -28,7 +28,7 @@
     <Folder Include="Helpers\" />
     <Folder Include="Middleware\" />
     <Folder Include="Migrations\" />
-    <Folder Include="Entities\Business\" />
+    <Folder Include="Entities\Site\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.10" />

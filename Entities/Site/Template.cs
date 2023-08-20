@@ -1,9 +1,8 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace PEAS.Entities.Business
+namespace PEAS.Entities.Site
 {
-    public class BusinessTemplate
+    public class Template
     {
         [Key]
         public int Id { get; set; }

@@ -1,10 +1,11 @@
 ﻿using PEAS.Entities.Authentication;
 using System.ComponentModel.DataAnnotations;
 
-namespace PEAS.Entities.Business
+namespace PEAS.Entities.Site
 {
     public class Business
     {
+        [Key]
         public int Id { get; set; }
 
         public required Account Account { get; set; }
