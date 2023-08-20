@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PEAS.Entities.Site;
+using PEAS.Models.Business;
 using PEAS.Services;
 
 namespace PEAS.Controllers
@@ -15,10 +17,25 @@ namespace PEAS.Controllers
             _businessService = businessService;
         }
 
+        [Authorize]
+        [HttpPost]
+        public ActionResult<Business> AddBusiness([FromBody] CreateBusiness model)
+        {
+            var response = _businessService.AddBusiness(Account!, model);
+            return Ok(response);
+        }
+
         [HttpGet("templates")]
         public ActionResult<List<Template>> GetTemplates()
         {
             var response = _businessService.GetTemplate();
+            return Ok(response);
+        }
+
+        [HttpPost("template")]
+        public ActionResult<Template> AddTemplate()
+        {
+            var response = _businessService.AddTemplate();
             return Ok(response);
         }
     }
