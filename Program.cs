@@ -24,21 +24,6 @@ builder.Services.AddScoped<ITwilioService, TwilioService>();
 
 builder.Services.AddDbContext<DataContext>();
 
-var app = builder.Build();
-
-if (builder.Configuration["Environment"] == "Development")
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-//Migrate Database
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<DataContext>();
-    dbContext.Database.Migrate();
-}
-
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -66,6 +51,21 @@ builder.Services
             context.HttpContext.Items["Account"] = await dbContext.Accounts.FindAsync(accountId);
         };
     });
+
+var app = builder.Build();
+
+if (builder.Configuration["Environment"] == "Development")
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+//Migrate Database
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<DataContext>();
+    dbContext.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 app.UseAuthorization();
