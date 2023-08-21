@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using PEAS.Entities.Authentication;
+using PEAS.Entities.Site;
 using PEAS.Models.Account;
+using PEAS.Models.Business;
 
 namespace PEAS.Helpers
 {
@@ -10,6 +12,7 @@ namespace PEAS.Helpers
         {
             CreateMap<Account, AuthenticateResponse>();
             CreateMap<RegisterRequest, Account>();
+            CreateMap<Business, BusinessResponse>();
         }
     }
 }

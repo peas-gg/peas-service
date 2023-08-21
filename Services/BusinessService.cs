@@ -5,13 +5,15 @@ using PEAS.Entities;
 using PEAS.Entities.Authentication;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
+using PEAS.Models.Account;
 using PEAS.Models.Business;
 
 namespace PEAS.Services
 {
     public interface IBusinessService
     {
-        Business AddBusiness(Account account, CreateBusiness model);
+        BusinessResponse AddBusiness(Account account, CreateBusiness model);
+        BusinessResponse UpdateBusiness(Account account, UpdateBusiness model);
         Template AddTemplate();
         List<Template> GetTemplate();
     }
@@ -31,11 +33,12 @@ namespace PEAS.Services
             _logger = logger;
         }
 
-        public Business AddBusiness(Account account, CreateBusiness model)
+        public BusinessResponse AddBusiness(Account account, CreateBusiness model)
         {
             try
             {
-                validateModel(model);
+                validateSign(model.Sign);
+                validateSign(model.Name);
 
                 string location = _mapService.GetLocation(model.Latitude, model.Longitude).Result;
                 string timeZone = _mapService.GetTimeZone(model.Latitude, model.Longitude).Result;
@@ -63,7 +66,84 @@ namespace PEAS.Services
                 _context.Businesses.Add(business);
                 _context.SaveChanges();
 
-                return business;
+                var response = _mapper.Map<BusinessResponse>(business);
+
+                return response;
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException(e.Message);
+            }
+        }
+
+        public BusinessResponse UpdateBusiness(Account account, UpdateBusiness model)
+        {
+            try
+            {
+                var business = _context.Businesses.SingleOrDefault(x => x.Id == model.Id);
+
+                if (business == null || business.Account != account)
+                {
+                    throw new AppException("Invalid Buisness Id");
+                }
+
+                if (model.Sign != null)
+                {
+                    validateSign(model.Sign);
+                    business.Sign = model.Sign;
+                }
+
+                if (model.Name != null)
+                {
+                    validateName(model.Name);
+                    business.Name = model.Name;
+                }
+
+                if (model.Color != null)
+                {
+                    business.Color = model.Color;
+                }
+
+                if (model.Description != null)
+                {
+                    business.Description = model.Description;
+                }
+
+                if (model.ProfilePhoto != null)
+                {
+                    business.ProfilePhoto = model.ProfilePhoto;
+                }
+
+                if (model.Twitter != null)
+                {
+                    business.Twitter = model.Twitter;
+                }
+
+                if (model.Instagram != null)
+                {
+                    business.Instagram = model.Instagram;
+                }
+
+                if (model.Tiktok != null)
+                {
+                    business.Tiktok = model.Tiktok;
+                }
+
+                if (model.Latitude != null && model.Longitude != null)
+                {
+                    string location = _mapService.GetLocation(model.Latitude.Value, model.Longitude.Value).Result;
+                    string timeZone = _mapService.GetTimeZone(model.Latitude.Value, model.Longitude.Value).Result;
+                    business.Location = location;
+                    business.TimeZone = timeZone;
+                }
+
+                _context.Businesses.Update(business);
+                _context.SaveChanges();
+
+                var response = _mapper.Map<BusinessResponse>(business);
+
+                return response;
             }
             catch (Exception e)
             {
@@ -82,14 +162,17 @@ namespace PEAS.Services
             throw new NotImplementedException();
         }
 
-        private void validateModel(CreateBusiness model)
+        private void validateSign(string sign)
         {
-            if (model.Sign.Length < 3)
+            if (sign.Length < 3)
             {
                 throw new AppException("Invalid PEAS Sign: Your PEAS sign needs to be a minimum of 3 characters");
             }
+        }
 
-            if (model.Name.Length < 5)
+        private void validateName(string name)
+        {
+            if (name.Length < 5)
             {
                 throw new AppException("Invalid Name: Your business name needs to be a minimum of 5 characters");
             }

@@ -25,6 +25,14 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [Authorize]
+        [HttpPatch]
+        public ActionResult<Business> UpdateBusiness([FromBody] UpdateBusiness model)
+        {
+            var response = _businessService.UpdateBusiness(Account!, model);
+            return Ok(response);
+        }
+
         [HttpGet("templates")]
         public ActionResult<List<Template>> GetTemplates()
         {
