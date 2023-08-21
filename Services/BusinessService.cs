@@ -38,6 +38,7 @@ namespace PEAS.Services
                 validateModel(model);
 
                 string location = _mapService.GetLocation(model.Latitude, model.Longitude).Result;
+                string timeZone = _mapService.GetTimeZone(model.Latitude, model.Longitude).Result;
 
                 var business = new Business
                 {
@@ -52,6 +53,7 @@ namespace PEAS.Services
                     Instagram = model.Instagram,
                     Tiktok = model.Tiktok,
                     Location = location,
+                    TimeZone = timeZone,
                     Latitude = model.Latitude,
                     Longitude = model.Longitude,
                     IsActive = true,

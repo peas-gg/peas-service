@@ -33,6 +33,8 @@ namespace PEAS.Entities.Site
 
         public required string Location { get; set; }
 
+        public required string TimeZone { get; set; }
+
         public required double Latitude { get; set; }
 
         public required double Longitude { get; set; }
