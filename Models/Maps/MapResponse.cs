@@ -29,4 +29,15 @@ namespace PEAS.Models.Maps
         public SummaryRoot Summary { get; set; }
         public List<AddressRoot> Addresses { get; set; }
     }
+
+    public struct TimeZoneResponse
+    {
+        public struct TimeZoneExpanded
+        {
+            public string Id { get; set; }
+        }
+
+        public string Version { get; set; }
+        public List<TimeZoneExpanded> TimeZones { get; set; }
+    }
 }

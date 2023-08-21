@@ -19,13 +19,14 @@ namespace PEAS.Services
     public class BusinessService : IBusinessService
     {
         private readonly DataContext _context;
+        private readonly IMapService _mapService;
         private readonly IMapper _mapper;
-
         private readonly ILogger<BusinessService> _logger;
 
-        public BusinessService(DataContext context, IMapper mapper, ILogger<BusinessService> logger)
+        public BusinessService(DataContext context, IMapService mapService, IMapper mapper, ILogger<BusinessService> logger)
         {
             _context = context;
+            _mapService = mapService;
             _mapper = mapper;
             _logger = logger;
         }
@@ -35,6 +36,8 @@ namespace PEAS.Services
             try
             {
                 validateModel(model);
+
+                string location = _mapService.GetLocation(model.Latitude, model.Longitude).Result;
 
                 var business = new Business
                 {
@@ -48,7 +51,7 @@ namespace PEAS.Services
                     Twitter = model.Twitter,
                     Instagram = model.Instagram,
                     Tiktok = model.Tiktok,
-                    Location = "", //Fetch City & Country from GoogleMaps API
+                    Location = location,
                     Latitude = model.Latitude,
                     Longitude = model.Longitude,
                     IsActive = true,
