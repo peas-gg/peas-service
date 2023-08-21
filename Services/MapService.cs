@@ -13,14 +13,12 @@ namespace PEAS.Services
 
     public class MapService : IMapService
     {
-        private readonly IConfiguration _configuration;
         private readonly string _key;
         private readonly HttpClient _client;
         private readonly ILogger<MapService> _logger;
 
         public MapService(IConfiguration configuration, ILogger<MapService> logger)
         {
-            _configuration = configuration;
             _key = configuration.GetSection("AzureMap").Value ?? "";
             _client = new HttpClient();
             _logger = logger;
