@@ -24,11 +24,9 @@ namespace PEAS.Migrations
 
             modelBuilder.Entity("PEAS.Entities.Authentication.Account", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("AcceptTerms")
                         .HasColumnType("bit");
@@ -86,8 +84,8 @@ namespace PEAS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("AccountId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Category")
                         .HasColumnType("nvarchar(max)");
@@ -158,11 +156,9 @@ namespace PEAS.Migrations
 
             modelBuilder.Entity("PEAS.Entities.Site.Template", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("BusinessId")
                         .HasColumnType("uniqueidentifier");
@@ -189,14 +185,12 @@ namespace PEAS.Migrations
                 {
                     b.OwnsMany("PEAS.Entities.Authentication.Device", "Devices", b1 =>
                         {
-                            b1.Property<int>("Id")
+                            b1.Property<Guid>("AccountId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
-
-                            b1.Property<int>("AccountId")
-                                .HasColumnType("int");
+                                .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Description")
                                 .IsRequired()
@@ -210,9 +204,7 @@ namespace PEAS.Migrations
                                 .IsRequired()
                                 .HasColumnType("nvarchar(24)");
 
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("AccountId");
+                            b1.HasKey("AccountId", "Id");
 
                             b1.ToTable("Device");
 
@@ -224,14 +216,12 @@ namespace PEAS.Migrations
 
                     b.OwnsMany("PEAS.Entities.Authentication.RefreshToken", "RefreshTokens", b1 =>
                         {
-                            b1.Property<int>("Id")
+                            b1.Property<Guid>("AccountId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
-
-                            b1.Property<int>("AccountId")
-                                .HasColumnType("int");
+                                .HasColumnType("uniqueidentifier");
 
                             b1.Property<DateTime>("Created")
                                 .HasColumnType("datetime2");
@@ -256,9 +246,7 @@ namespace PEAS.Migrations
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("AccountId");
+                            b1.HasKey("AccountId", "Id");
 
                             b1.ToTable("RefreshToken");
 

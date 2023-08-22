@@ -15,7 +15,6 @@
     <None Remove="Models\Account\" />
     <None Remove="Helpers\" />
     <None Remove="Middleware\" />
-    <None Remove="Migrations\" />
     <None Remove="Entities\Site\" />
     <None Remove="Models\Business\" />
     <None Remove="Models\Maps\" />
@@ -29,7 +28,6 @@
     <Folder Include="Helpers\" />
     <Folder Include="Helpers\" />
     <Folder Include="Middleware\" />
-    <Folder Include="Migrations\" />
     <Folder Include="Entities\Site\" />
     <Folder Include="Models\Business\" />
     <Folder Include="Models\Maps\" />
