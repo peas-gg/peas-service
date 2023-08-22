@@ -14,8 +14,9 @@ namespace PEAS.Services
     {
         BusinessResponse AddBusiness(Account account, CreateBusiness model);
         BusinessResponse UpdateBusiness(Account account, UpdateBusiness model);
-        Template AddTemplate();
-        List<Template> GetTemplate();
+        Template AddTemplate(CreateTemplate model);
+        void DeleteTemplate(Guid id);
+        List<Template> GetTemplates();
     }
 
     public class BusinessService : IBusinessService
@@ -152,14 +153,68 @@ namespace PEAS.Services
             }
         }
 
-        public List<Template> GetTemplate()
+        public List<Template> GetTemplates()
         {
-            throw new NotImplementedException();
+            try
+            {
+                return _context.Templates.ToList();
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException(e.Message);
+            }
         }
 
-        public Template AddTemplate()
+        public Template AddTemplate(CreateTemplate model)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var business = _context.Businesses.Find(model.BusinessId);
+
+                if (business == null)
+                {
+                    throw new AppException("Invalid Buisness Id");
+                }
+                Template template = new Template
+                {
+                    Category = model.Category,
+                    Details = model.Details,
+                    Photo = model.Photo,
+                    Business = business
+                };
+
+                _context.Templates.Add(template);
+                _context.SaveChanges();
+
+                return template;
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException(e.Message);
+            }
+        }
+
+        public void DeleteTemplate(Guid id)
+        {
+            try
+            {
+                var template = _context.Templates.Find(id);
+
+                if (template == null)
+                {
+                    throw new AppException("Invalid Template Id");
+                }
+
+                _context.Templates.Remove(template);
+                _context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException(e.Message);
+            }
         }
 
         private void validateSign(string sign)

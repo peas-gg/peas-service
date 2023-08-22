@@ -36,15 +36,22 @@ namespace PEAS.Controllers
         [HttpGet("templates")]
         public ActionResult<List<Template>> GetTemplates()
         {
-            var response = _businessService.GetTemplate();
+            var response = _businessService.GetTemplates();
             return Ok(response);
         }
 
         [HttpPost("template")]
-        public ActionResult<Template> AddTemplate()
+        public ActionResult<Template> AddTemplate([FromBody] CreateTemplate model)
         {
-            var response = _businessService.AddTemplate();
+            var response = _businessService.AddTemplate(model);
             return Ok(response);
+        }
+
+        [HttpDelete("template")]
+        public ActionResult DeleteTemplate(Guid id)
+        {
+            _businessService.DeleteTemplate(id);
+            return Ok();
         }
     }
 }
