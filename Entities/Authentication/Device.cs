@@ -13,8 +13,8 @@ namespace PEAS.Entities.Authentication
             android
         }
 
-        [Key]
-        public int Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid Id { get; set; }
 
         public required Account Account { get; set; }
 

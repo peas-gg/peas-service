@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace PEAS.Entities.Authentication
@@ -7,8 +6,8 @@ namespace PEAS.Entities.Authentication
     [Owned]
     public class RefreshToken
     {
-        [Key]
-        public int Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid Id { get; set; }
 
         public required Account Account { get; set; }
 
