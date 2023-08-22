@@ -39,7 +39,7 @@ namespace PEAS.Services
             try
             {
                 validateSign(model.Sign);
-                validateSign(model.Name);
+                validateName(model.Name);
 
                 string location = _mapService.GetLocation(model.Latitude, model.Longitude).Result;
                 string timeZone = _mapService.GetTimeZone(model.Latitude, model.Longitude).Result;
@@ -223,6 +223,11 @@ namespace PEAS.Services
             {
                 throw new AppException("Invalid PEAS Sign: Your PEAS sign needs to be a minimum of 3 characters");
             }
+
+            if (sign.Length > 16)
+            {
+                throw new AppException("Invalid PEAS Sign: Your PEAS sign needs to be a maximum of 16 characters");
+            }
         }
 
         private void validateName(string name)
@@ -230,6 +235,11 @@ namespace PEAS.Services
             if (name.Length < 5)
             {
                 throw new AppException("Invalid Name: Your business name needs to be a minimum of 5 characters");
+            }
+
+            if (name.Length > 30)
+            {
+                throw new AppException("Invalid Name: Your business name needs to be a maximum of 30 characters");
             }
         }
     }
