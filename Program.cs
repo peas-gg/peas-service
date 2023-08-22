@@ -50,7 +50,11 @@ builder.Services
             var jwtToken = (JwtSecurityToken)token;
             var accountId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
             DataContext dbContext = context.HttpContext.RequestServices.GetService<DataContext>()!;
-            context.HttpContext.Items["Account"] = await dbContext.Accounts.FindAsync(accountId);
+            Account? account = await dbContext.Accounts.FindAsync(accountId);
+            if (account != null)
+            {
+                context.HttpContext.Items["Account"] = account;
+            }
         };
     });
 
