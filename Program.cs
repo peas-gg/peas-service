@@ -48,13 +48,9 @@ builder.Services
         {
             var token = context.SecurityToken;
             var jwtToken = (JwtSecurityToken)token;
-            var accountId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+            _ = Guid.TryParse(jwtToken.Claims.First(x => x.Type == "id").Value, out Guid accountId);
             DataContext dbContext = context.HttpContext.RequestServices.GetService<DataContext>()!;
-            Account? account = await dbContext.Accounts.FindAsync(accountId);
-            if (account != null)
-            {
-                context.HttpContext.Items["Account"] = account;
-            }
+            context.HttpContext.Items["Account"] = await dbContext.Accounts.FindAsync(accountId);
         };
     });
 
