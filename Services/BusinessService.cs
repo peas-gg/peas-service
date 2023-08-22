@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using PEAS.Entities;
 using PEAS.Entities.Authentication;
 using PEAS.Entities.Site;
@@ -14,9 +15,9 @@ namespace PEAS.Services
     {
         BusinessResponse AddBusiness(Account account, CreateBusiness model);
         BusinessResponse UpdateBusiness(Account account, UpdateBusiness model);
-        Template AddTemplate(CreateTemplate model);
+        TemplateResponse AddTemplate(CreateTemplate model);
         void DeleteTemplate(Guid id);
-        List<Template> GetTemplates();
+        List<TemplateResponse> GetTemplates();
     }
 
     public class BusinessService : IBusinessService
@@ -153,11 +154,23 @@ namespace PEAS.Services
             }
         }
 
-        public List<Template> GetTemplates()
+        public List<TemplateResponse> GetTemplates()
         {
             try
             {
-                return _context.Templates.ToList();
+                var templates = _context.Templates
+                    .Include(x => x.Business)
+                    .AsNoTracking()
+                    .Select(x => new TemplateResponse {
+                        Id = x.Id,
+                        Category = x.Category,
+                        Details = x.Details,
+                        Photo = x.Photo,
+                        Business = _mapper.Map<BusinessResponse>(x.Business)
+                    })
+                    .ToList();
+
+                return templates;
             }
             catch (Exception e)
             {
@@ -166,7 +179,7 @@ namespace PEAS.Services
             }
         }
 
-        public Template AddTemplate(CreateTemplate model)
+        public TemplateResponse AddTemplate(CreateTemplate model)
         {
             try
             {
@@ -187,7 +200,14 @@ namespace PEAS.Services
                 _context.Templates.Add(template);
                 _context.SaveChanges();
 
-                return template;
+                return new TemplateResponse
+                {
+                    Id = template.Id,
+                    Category = template.Category,
+                    Details = template.Details,
+                    Photo = template.Photo,
+                    Business = _mapper.Map<BusinessResponse>(template.Business)
+                };
             }
             catch (Exception e)
             {

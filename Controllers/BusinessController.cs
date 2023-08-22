@@ -19,7 +19,7 @@ namespace PEAS.Controllers
 
         [Authorize]
         [HttpPost]
-        public ActionResult<Business> AddBusiness([FromBody] CreateBusiness model)
+        public ActionResult<BusinessResponse> AddBusiness([FromBody] CreateBusiness model)
         {
             var response = _businessService.AddBusiness(Account!, model);
             return Ok(response);
@@ -27,21 +27,21 @@ namespace PEAS.Controllers
 
         [Authorize]
         [HttpPatch]
-        public ActionResult<Business> UpdateBusiness([FromBody] UpdateBusiness model)
+        public ActionResult<BusinessResponse> UpdateBusiness([FromBody] UpdateBusiness model)
         {
             var response = _businessService.UpdateBusiness(Account!, model);
             return Ok(response);
         }
 
         [HttpGet("templates")]
-        public ActionResult<List<Template>> GetTemplates()
+        public ActionResult<List<TemplateResponse>> GetTemplates()
         {
             var response = _businessService.GetTemplates();
             return Ok(response);
         }
 
         [HttpPost("template")]
-        public ActionResult<Template> AddTemplate([FromBody] CreateTemplate model)
+        public ActionResult<TemplateResponse> AddTemplate([FromBody] CreateTemplate model)
         {
             var response = _businessService.AddTemplate(model);
             return Ok(response);
