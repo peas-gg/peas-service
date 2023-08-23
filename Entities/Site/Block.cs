@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 namespace PEAS.Entities.Site
@@ -7,6 +8,7 @@ namespace PEAS.Entities.Site
     [Owned]
     public class Block
     {
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum Type
         {
             Genesis

@@ -86,7 +86,6 @@ namespace PEAS.Services
                 //Reset login attempt to zero after successful login
                 account.LoginAttempt = 0;
 
-
                 //Check Otp
                 if (model.Code == null)
                 {

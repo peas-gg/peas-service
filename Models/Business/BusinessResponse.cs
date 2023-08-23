@@ -1,4 +1,6 @@
-﻿namespace PEAS.Models.Business
+﻿using PEAS.Entities.Site;
+
+namespace PEAS.Models.Business
 {
     public class BusinessResponse
     {
@@ -27,5 +29,7 @@
         public required string TimeZone { get; set; }
 
         public required bool IsActive { get; set; }
+
+        public required List<Block> Blocks { get; set; }
     }
 }
