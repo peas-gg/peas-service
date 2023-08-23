@@ -360,11 +360,6 @@ namespace PEAS.Services
         {
             if (blocks == null || blocks.Count == 0)
             {
-                throw new AppException("Please add a block");
-            }
-
-            if (blocks.Count == 0)
-            {
                 throw new AppException("You must have at least 1 block at any given time");
             }
 
