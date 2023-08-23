@@ -15,6 +15,9 @@ namespace PEAS.Services
     {
         BusinessResponse AddBusiness(Account account, CreateBusiness model);
         BusinessResponse UpdateBusiness(Account account, UpdateBusiness model);
+        BusinessResponse AddBlock(Account account, Guid businessId, Block model);
+        BusinessResponse UpdateBlock(Account account, Guid businessId, UpdateBlock model);
+        BusinessResponse DeleteBlock(Account account, Guid businessId, Guid blockId);
         TemplateResponse AddTemplate(CreateTemplate model);
         void DeleteTemplate(Guid id);
         List<TemplateResponse> GetTemplates();
@@ -156,6 +159,106 @@ namespace PEAS.Services
             }
         }
 
+        public BusinessResponse AddBlock(Account account, Guid businessId, Block model)
+        {
+            try
+            {
+                Business business = getBusiness(account, businessId);
+
+                validateBlock(model);
+
+                business.Blocks.Add(model);
+
+                validateBlocks(business.Blocks);
+
+                _context.Businesses.Update(business);
+                _context.SaveChanges();
+
+                var response = _mapper.Map<BusinessResponse>(business);
+
+                return response;
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException(e.Message);
+            }
+        }
+
+        public BusinessResponse UpdateBlock(Account account, Guid businessId, UpdateBlock model)
+        {
+            try
+            {
+                Business business = getBusiness(account, businessId);
+                Block? block = business.Blocks.Where(x => x.Id == model.Id).FirstOrDefault();
+
+                if (block == null)
+                {
+                    throw new AppException("Invalid Block Id");
+                }
+
+                if (model.Image != null)
+                {
+                    block.Image = model.Image;
+                }
+
+                if (model.Price != null)
+                {
+                    block.Price = (double)model.Price;
+                }
+
+                if (model.Duration != null)
+                {
+                    block.Duration = (int)model.Duration;
+                }
+
+                if (model.Title != null)
+                {
+                    block.Title = model.Title;
+                }
+
+                if (model.Description != null)
+                {
+                    block.Description = model.Description;
+                }
+
+                validateBlock(block);
+
+                _context.Businesses.Update(business);
+                _context.SaveChanges();
+
+                var response = _mapper.Map<BusinessResponse>(business);
+
+                return response;
+
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException(e.Message);
+            }
+        }
+
+        public BusinessResponse DeleteBlock(Account account, Guid businessId, Guid blockId)
+        {
+            Business business = getBusiness(account, businessId);
+            Block? block = business.Blocks.Where(x => x.Id == blockId).FirstOrDefault();
+
+            if (block == null)
+            {
+                throw new AppException("Invalid Block Id");
+            }
+
+            business.Blocks.Remove(block);
+
+            _context.Businesses.Update(business);
+            _context.SaveChanges();
+
+            var response = _mapper.Map<BusinessResponse>(business);
+
+            return response;
+        }
+
         public List<TemplateResponse> GetTemplates()
         {
             try
@@ -237,6 +340,18 @@ namespace PEAS.Services
                 AppLogger.Log(_logger, e);
                 throw new AppException(e.Message);
             }
+        }
+
+        private Business getBusiness(Account account, Guid businessId)
+        {
+            var business = _context.Businesses.Include(x => x.Blocks).SingleOrDefault(x => x.Id == businessId);
+
+            if (business == null || business.Account != account)
+            {
+                throw new AppException("Invalid Buisness Id");
+            }
+
+            return business;
         }
 
         private void validateBlocks(List<Block> blocks)
