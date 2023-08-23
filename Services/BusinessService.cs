@@ -222,7 +222,7 @@ namespace PEAS.Services
                     block.Description = model.Description;
                 }
 
-                validateBlock(block);
+                validateBlocks(business.Blocks);
 
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
@@ -250,6 +250,8 @@ namespace PEAS.Services
             }
 
             business.Blocks.Remove(block);
+
+            validateBlocks(business.Blocks);
 
             _context.Businesses.Update(business);
             _context.SaveChanges();
@@ -359,6 +361,11 @@ namespace PEAS.Services
             if (blocks == null || blocks.Count == 0)
             {
                 throw new AppException("Please add a block");
+            }
+
+            if (blocks.Count == 0)
+            {
+                throw new AppException("You must have at least 1 block at any given time");
             }
 
             if (blocks.Count > 5)
