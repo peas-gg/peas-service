@@ -44,5 +44,7 @@ namespace PEAS.Entities.Site
         public required DateTime Created { get; set; }
 
         public DateTime? Deactivated { get; set; }
+
+        public required List<Block> Blocks { get; set; }
     }
 }

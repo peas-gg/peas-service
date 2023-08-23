@@ -41,6 +41,7 @@ namespace PEAS.Services
             {
                 validateSign(model.Sign);
                 validateName(model.Name);
+                validateBlocks(model.Blocks);
 
                 string location = _mapService.GetLocation(model.Latitude, model.Longitude).Result;
                 string timeZone = _mapService.GetTimeZone(model.Latitude, model.Longitude).Result;
@@ -62,7 +63,8 @@ namespace PEAS.Services
                     Latitude = model.Latitude,
                     Longitude = model.Longitude,
                     IsActive = true,
-                    Created = DateTime.UtcNow
+                    Created = DateTime.UtcNow,
+                    Blocks = model.Blocks
                 };
 
                 _context.Businesses.Add(business);
@@ -236,6 +238,55 @@ namespace PEAS.Services
                 throw new AppException(e.Message);
             }
         }
+
+        private void validateBlocks(List<Block> blocks)
+        {
+            if (blocks == null || blocks.Count == 0)
+            {
+                throw new AppException("Please add a block");
+            }
+
+            if (blocks.Count > 5)
+            {
+                throw new AppException("You are only allowed to have 5 blocks at this moment");
+            }
+
+            foreach(Block block in blocks)
+            {
+                validateBlock(block);
+            }
+        }
+
+        private void validateBlock(Block block)
+        {
+            double maxPrice = 5000.00;
+
+            if (!Enum.IsDefined(typeof(Block.Type), block.BlockType))
+            {
+                throw new AppException($"Invalid block type {block.BlockType}");
+            }
+
+            if (block.Price > maxPrice)
+            {
+                throw new AppException($"Please type a price below {maxPrice}");
+            }
+
+            if (block.Price < 0.00)
+            {
+                throw new AppException($"Enter a valid number for the price");
+            }
+
+            if (string.IsNullOrEmpty(block.Title))
+            {
+                throw new AppException($"Please enter a Title");
+            }
+
+            if (string.IsNullOrEmpty(block.Description))
+            {
+                throw new AppException($"Please enter a Description");
+            }
+        }
+
 
         private void validateSign(string sign)
         {

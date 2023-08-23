@@ -18,6 +18,7 @@
     <None Remove="Entities\Site\" />
     <None Remove="Models\Business\" />
     <None Remove="Models\Maps\" />
+    <None Remove="Migrations\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -31,6 +32,7 @@
     <Folder Include="Entities\Site\" />
     <Folder Include="Models\Business\" />
     <Folder Include="Models\Maps\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.10" />

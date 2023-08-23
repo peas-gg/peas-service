@@ -48,6 +48,12 @@ namespace PEAS.Entities
                 a.Property(b => b.DeviceType)
                 .HasConversion<string>();
             });
+
+            builder.Entity<Business>().OwnsMany(p => p.Blocks, a =>
+            {
+                a.Property(b => b.BlockType)
+                .HasConversion<string>();
+            });
         }
     }
 }

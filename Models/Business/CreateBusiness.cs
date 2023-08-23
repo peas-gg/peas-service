@@ -1,4 +1,5 @@
 ﻿using System;
+using PEAS.Entities.Site;
 
 namespace PEAS.Models.Business
 {
@@ -25,5 +26,7 @@ namespace PEAS.Models.Business
         public required double Latitude { get; set; }
 
         public required double Longitude { get; set; }
+
+        public required List<Block> Blocks { get; set; }
     }
 }

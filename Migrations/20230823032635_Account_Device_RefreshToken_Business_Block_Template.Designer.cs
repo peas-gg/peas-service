@@ -12,8 +12,8 @@ using PEAS.Entities;
 namespace PEAS.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230822013519_Account_Device_RefreshToken_Business_Template")]
-    partial class Account_Device_RefreshToken_Business_Template
+    [Migration("20230823032635_Account_Device_RefreshToken_Business_Block_Template")]
+    partial class Account_Device_RefreshToken_Business_Block_Template
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -272,7 +272,48 @@ namespace PEAS.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsMany("PEAS.Entities.Site.Block", "Blocks", b1 =>
+                        {
+                            b1.Property<Guid>("BusinessId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("BlockType")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Description")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<int>("Duration")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Image")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<double>("Price")
+                                .HasColumnType("float");
+
+                            b1.Property<string>("Title")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("BusinessId", "Id");
+
+                            b1.ToTable("Block");
+
+                            b1.WithOwner()
+                                .HasForeignKey("BusinessId");
+                        });
+
                     b.Navigation("Account");
+
+                    b.Navigation("Blocks");
                 });
 
             modelBuilder.Entity("PEAS.Entities.Site.Template", b =>
