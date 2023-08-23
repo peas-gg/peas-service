@@ -33,6 +33,30 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [Authorize]
+        [HttpPost("block")]
+        public ActionResult<BusinessResponse> AddBlock(Guid businessId, [FromBody] Block model)
+        {
+            var response = _businessService.AddBlock(Account!, businessId, model);
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPatch("block")]
+        public ActionResult<BusinessResponse> UpdateBlock(Guid businessId, [FromBody] UpdateBlock model)
+        {
+            var response = _businessService.UpdateBlock(Account!, businessId, model);
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpDelete("block")]
+        public ActionResult<BusinessResponse> DeleteBlock(Guid businessId, Guid blockId)
+        {
+            var response = _businessService.DeleteBlock(Account!, businessId, blockId);
+            return Ok(response);
+        }
+
         [HttpGet("templates")]
         public ActionResult<List<TemplateResponse>> GetTemplates()
         {
