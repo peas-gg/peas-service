@@ -92,7 +92,7 @@ namespace PEAS.Services
 
                 if (business == null || business.Account != account)
                 {
-                    throw new AppException("Invalid Buisness Id");
+                    throw new AppException("Invalid Business Id");
                 }
 
                 if (model.Sign != null)
@@ -294,7 +294,7 @@ namespace PEAS.Services
 
                 if (business == null)
                 {
-                    throw new AppException("Invalid Buisness Id");
+                    throw new AppException("Invalid Business Id");
                 }
                 Template template = new Template
                 {
@@ -350,7 +350,7 @@ namespace PEAS.Services
 
             if (business == null || business.Account != account)
             {
-                throw new AppException("Invalid Buisness Id");
+                throw new AppException("Invalid Business Id");
             }
 
             return business;
