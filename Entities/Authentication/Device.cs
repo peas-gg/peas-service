@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 namespace PEAS.Entities.Authentication
@@ -7,6 +8,7 @@ namespace PEAS.Entities.Authentication
     [Owned]
     public class Device
     {
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum Type
         {
             apple,
