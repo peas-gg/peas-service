@@ -77,5 +77,12 @@ namespace PEAS.Controllers
             _businessService.DeleteTemplate(id);
             return Ok();
         }
+
+        [HttpGet("colors")]
+        public ActionResult<Dictionary<string, string>> GetColors()
+        {
+            var response = _businessService.GetColors();
+            return Ok(response);
+        }
     }
 }

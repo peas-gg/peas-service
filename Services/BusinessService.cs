@@ -1,12 +1,10 @@
-﻿using System;
-using System.Configuration;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using PEAS.Entities;
 using PEAS.Entities.Authentication;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
-using PEAS.Models.Account;
 using PEAS.Models.Business;
 
 namespace PEAS.Services
@@ -21,6 +19,7 @@ namespace PEAS.Services
         TemplateResponse AddTemplate(CreateTemplate model);
         void DeleteTemplate(Guid id);
         List<TemplateResponse> GetTemplates();
+        Dictionary<string, string> GetColors();
     }
 
     public class BusinessService : IBusinessService
@@ -341,6 +340,22 @@ namespace PEAS.Services
             {
                 AppLogger.Log(_logger, e);
                 throw new AppException(e.Message);
+            }
+        }
+
+        public Dictionary<string, string> GetColors()
+        {
+            try
+            {
+                var serializer = new JsonSerializer();
+                using var streamReader = new StreamReader("Models/Colors.json");
+                using var textReader = new JsonTextReader(streamReader);
+                return serializer.Deserialize<Dictionary<string, string>>(textReader)!;
+            }
+            catch(Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException("Error loading business colors");
             }
         }
 
