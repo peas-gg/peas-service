@@ -49,4 +49,7 @@
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.10" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Remove="Entities\Site\Colors.json" />
+  </ItemGroup>
 </Project>
