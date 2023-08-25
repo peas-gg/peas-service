@@ -78,10 +78,10 @@ namespace PEAS.Controllers
             return Ok();
         }
 
-        [HttpGet("colors")]
-        public ActionResult<Dictionary<string, string>> GetColors()
+        [HttpGet("colours")]
+        public ActionResult<Dictionary<string, string>> GetColours()
         {
-            var response = _businessService.GetColors();
+            var response = _businessService.GetColours();
             return Ok(response);
         }
     }

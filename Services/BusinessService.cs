@@ -19,7 +19,7 @@ namespace PEAS.Services
         TemplateResponse AddTemplate(CreateTemplate model);
         void DeleteTemplate(Guid id);
         List<TemplateResponse> GetTemplates();
-        Dictionary<string, string> GetColors();
+        Dictionary<string, string> GetColours();
     }
 
     public class BusinessService : IBusinessService
@@ -343,12 +343,12 @@ namespace PEAS.Services
             }
         }
 
-        public Dictionary<string, string> GetColors()
+        public Dictionary<string, string> GetColours()
         {
             try
             {
                 var serializer = new JsonSerializer();
-                using var streamReader = new StreamReader("Models/Colors.json");
+                using var streamReader = new StreamReader("Models/Colours.json");
                 using var textReader = new JsonTextReader(streamReader);
                 return serializer.Deserialize<Dictionary<string, string>>(textReader)!;
             }
