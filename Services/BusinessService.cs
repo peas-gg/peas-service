@@ -460,9 +460,9 @@ namespace PEAS.Services
 
         private void validateName(string name)
         {
-            if (name.Length < 5)
+            if (name.Length < 1)
             {
-                throw new AppException("Invalid Name: Your business name needs to be a minimum of 5 characters");
+                throw new AppException("Invalid Name: Your business name needs to be a minimum of 1 character");
             }
 
             if (name.Length > 30)
