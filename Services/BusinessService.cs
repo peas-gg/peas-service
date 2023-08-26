@@ -11,6 +11,7 @@ namespace PEAS.Services
 {
     public interface IBusinessService
     {
+        BusinessResponse GetBusiness(string sign);
         BusinessResponse AddBusiness(Account account, CreateBusiness model);
         BusinessResponse UpdateBusiness(Account account, UpdateBusiness model);
         BusinessResponse AddBlock(Account account, Guid businessId, Block model);
@@ -35,6 +36,30 @@ namespace PEAS.Services
             _mapService = mapService;
             _mapper = mapper;
             _logger = logger;
+        }
+
+        public BusinessResponse GetBusiness(string sign)
+        {
+            try
+            {
+                var business = _context.Businesses
+                    .AsNoTracking()
+                    .Include(x => x.Blocks).SingleOrDefault(x => x.Sign == sign);
+
+                if (business != null)
+                {
+                    BusinessResponse response = _mapper.Map<BusinessResponse>(business);
+                    return response;
+                } else
+                {
+                    throw new AppException("Could not find the business you are looking for");
+                }
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException(e.Message);
+            }
         }
 
         public BusinessResponse AddBusiness(Account account, CreateBusiness model)

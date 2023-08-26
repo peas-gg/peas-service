@@ -17,6 +17,13 @@ namespace PEAS.Controllers
             _businessService = businessService;
         }
 
+        [HttpGet]
+        public ActionResult<BusinessResponse> GetBusiness(string sign)
+        {
+            var response = _businessService.GetBusiness(sign);
+            return Ok(response);
+        }
+
         [Authorize]
         [HttpPost]
         public ActionResult<BusinessResponse> AddBusiness([FromBody] CreateBusiness model)
