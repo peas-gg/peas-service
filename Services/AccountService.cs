@@ -152,7 +152,10 @@ namespace PEAS.Services
                 //Hash password
                 account.Password = BC.HashPassword(model.PasswordText);
 
-                //Generate jwt and refresh tokens for authentication
+                //Add Account 
+                _context.Accounts.Add(account);
+
+                //Generate jwt and refresh tokens for newly added account
                 var jwtToken = generateJwtToken(account);
                 var refreshToken = generateRefreshToken(account, ipAddress);
 
@@ -163,7 +166,6 @@ namespace PEAS.Services
                 };
 
                 //Save changes to db
-                _context.Accounts.Add(account);
                 _context.SaveChanges();
 
                 var response = _mapper.Map<AuthenticateResponse>(account);
