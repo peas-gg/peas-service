@@ -456,6 +456,11 @@ namespace PEAS.Services
             {
                 throw new AppException("Invalid PEAS Sign: Your PEAS sign needs to be a maximum of 16 characters");
             }
+
+            if (_context.Businesses.AsNoTracking().Any(x => x.Sign == sign))
+            {
+                throw new AppException("PEAS Sign taken. Please choose another sign");
+            }
         }
 
         private void validateName(string name)
