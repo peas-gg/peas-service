@@ -70,6 +70,11 @@ namespace PEAS.Services
                 validateName(model.Name);
                 validateBlocks(model.Blocks);
 
+                if (_context.Businesses.Any(x => x.Account == account && x.IsActive))
+                {
+                    throw new AppException("You already have an existing business please login");
+                }
+
                 string location = _mapService.GetLocation(model.Latitude, model.Longitude).Result;
                 string timeZone = _mapService.GetTimeZone(model.Latitude, model.Longitude).Result;
 
@@ -443,7 +448,6 @@ namespace PEAS.Services
                 throw new AppException($"Please enter a Description");
             }
         }
-
 
         private void validateSign(string sign)
         {
