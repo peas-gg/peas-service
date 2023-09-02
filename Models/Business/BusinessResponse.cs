@@ -26,6 +26,10 @@ namespace PEAS.Models.Business
 
         public required string Location { get; set; }
 
+        public string? Latitude { get; set; }
+
+        public string? Longitude { get; set; }
+
         public required string TimeZone { get; set; }
 
         public required bool IsActive { get; set; }

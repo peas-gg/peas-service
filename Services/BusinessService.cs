@@ -48,8 +48,7 @@ namespace PEAS.Services
 
                 if (business != null)
                 {
-                    BusinessResponse response = _mapper.Map<BusinessResponse>(business);
-                    return response;
+                    return ConstructBusinessResponse(business);
                 } else
                 {
                     throw new AppException("Could not find the business you are looking for");
@@ -102,9 +101,7 @@ namespace PEAS.Services
                 _context.Businesses.Add(business);
                 _context.SaveChanges();
 
-                var response = _mapper.Map<BusinessResponse>(business);
-
-                return response;
+                return ConstructBusinessResponse(business, false);
             }
             catch (Exception e)
             {
@@ -177,9 +174,7 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                var response = _mapper.Map<BusinessResponse>(business);
-
-                return response;
+                return ConstructBusinessResponse(business, false);
             }
             catch (Exception e)
             {
@@ -203,9 +198,7 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                var response = _mapper.Map<BusinessResponse>(business);
-
-                return response;
+                return ConstructBusinessResponse(business, false);
             }
             catch (Exception e)
             {
@@ -256,7 +249,7 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                var response = _mapper.Map<BusinessResponse>(business);
+                var response = ConstructBusinessResponse(business, false);
 
                 return response;
 
@@ -302,7 +295,7 @@ namespace PEAS.Services
                         Category = x.Category,
                         Details = x.Details,
                         Photo = x.Photo,
-                        Business = _mapper.Map<BusinessResponse>(x.Business)
+                        Business = ConstructBusinessResponse(x.Business, true)
                     })
                     .ToList();
 
@@ -342,7 +335,7 @@ namespace PEAS.Services
                     Category = template.Category,
                     Details = template.Details,
                     Photo = template.Photo,
-                    Business = _mapper.Map<BusinessResponse>(template.Business)
+                    Business = ConstructBusinessResponse(template.Business)
                 };
             }
             catch (Exception e)
@@ -387,6 +380,17 @@ namespace PEAS.Services
                 AppLogger.Log(_logger, e);
                 throw new AppException("Error loading business colors");
             }
+        }
+
+        private BusinessResponse ConstructBusinessResponse(Business business, bool isPublic = true)
+        {
+            var businessResponse = _mapper.Map<BusinessResponse>(business);
+            if (isPublic)
+            {
+                businessResponse.Latitude = null;
+                businessResponse.Longitude = null;
+            }
+            return businessResponse;
         }
 
         private Business getBusiness(Account account, Guid businessId)
