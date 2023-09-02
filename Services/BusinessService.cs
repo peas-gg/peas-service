@@ -277,10 +277,7 @@ namespace PEAS.Services
 
             _context.Businesses.Update(business);
             _context.SaveChanges();
-
-            var response = _mapper.Map<BusinessResponse>(business);
-
-            return response;
+            return ConstructBusinessResponse(business, false);
         }
 
         public List<TemplateResponse> GetTemplates()
@@ -382,14 +379,32 @@ namespace PEAS.Services
             }
         }
 
-        private BusinessResponse ConstructBusinessResponse(Business business, bool isPublic = true)
+        private static BusinessResponse ConstructBusinessResponse(Business business, bool isPublic = true)
         {
-            var businessResponse = _mapper.Map<BusinessResponse>(business);
-            if (isPublic)
+            var businessResponse = new BusinessResponse
             {
-                businessResponse.Latitude = null;
-                businessResponse.Longitude = null;
+                Id = business.Id,
+                Sign = business.Sign,
+                Name = business.Name,
+                Category = business.Category,
+                Color = business.Color,
+                Description = business.Description,
+                ProfilePhoto = business.ProfilePhoto,
+                Twitter = business.Twitter,
+                Instagram = business.Instagram,
+                Tiktok = business.Tiktok,
+                Location = business.Location,
+                TimeZone = business.TimeZone,
+                IsActive = business.IsActive,
+                Blocks = business.Blocks
+            };
+
+            if (!isPublic)
+            {
+                businessResponse.Latitude = business.Latitude;
+                businessResponse.Longitude = business.Longitude;
             }
+
             return businessResponse;
         }
 
