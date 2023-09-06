@@ -48,7 +48,7 @@ namespace PEAS.Services
 
                 if (business != null)
                 {
-                    return ConstructBusinessResponse(business);
+                    return ConstructBusinessResponse(business, null);
                 } else
                 {
                     throw new AppException("Could not find the business you are looking for");
@@ -101,7 +101,7 @@ namespace PEAS.Services
                 _context.Businesses.Add(business);
                 _context.SaveChanges();
 
-                return ConstructBusinessResponse(business, false);
+                return ConstructBusinessResponse(business, account);
             }
             catch (Exception e)
             {
@@ -174,7 +174,7 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                return ConstructBusinessResponse(business, false);
+                return ConstructBusinessResponse(business, account);
             }
             catch (Exception e)
             {
@@ -198,7 +198,7 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                return ConstructBusinessResponse(business, false);
+                return ConstructBusinessResponse(business, account);
             }
             catch (Exception e)
             {
@@ -249,7 +249,7 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                var response = ConstructBusinessResponse(business, false);
+                var response = ConstructBusinessResponse(business, account);
 
                 return response;
 
@@ -277,7 +277,7 @@ namespace PEAS.Services
 
             _context.Businesses.Update(business);
             _context.SaveChanges();
-            return ConstructBusinessResponse(business, false);
+            return ConstructBusinessResponse(business, account);
         }
 
         public List<TemplateResponse> GetTemplates()
@@ -292,7 +292,7 @@ namespace PEAS.Services
                         Category = x.Category,
                         Details = x.Details,
                         Photo = x.Photo,
-                        Business = ConstructBusinessResponse(x.Business, true)
+                        Business = ConstructBusinessResponse(x.Business, null)
                     })
                     .ToList();
 
@@ -332,7 +332,7 @@ namespace PEAS.Services
                     Category = template.Category,
                     Details = template.Details,
                     Photo = template.Photo,
-                    Business = ConstructBusinessResponse(template.Business)
+                    Business = ConstructBusinessResponse(template.Business, null)
                 };
             }
             catch (Exception e)
@@ -379,7 +379,7 @@ namespace PEAS.Services
             }
         }
 
-        private static BusinessResponse ConstructBusinessResponse(Business business, bool isPublic = true)
+        private static BusinessResponse ConstructBusinessResponse(Business business, Account? account)
         {
             var businessResponse = new BusinessResponse
             {
@@ -399,7 +399,7 @@ namespace PEAS.Services
                 Blocks = business.Blocks
             };
 
-            if (!isPublic)
+            if (business.Account == account)
             {
                 businessResponse.Latitude = business.Latitude;
                 businessResponse.Longitude = business.Longitude;
