@@ -12,6 +12,7 @@ namespace PEAS.Services
     public interface IBusinessService
     {
         BusinessResponse GetBusiness(string sign);
+        string GetLocation(double latitude, double longitude);
         BusinessResponse AddBusiness(Account account, CreateBusiness model);
         BusinessResponse UpdateBusiness(Account account, UpdateBusiness model);
         BusinessResponse AddBlock(Account account, Guid businessId, Block model);
@@ -53,6 +54,19 @@ namespace PEAS.Services
                 {
                     throw new AppException("Could not find the business you are looking for");
                 }
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException(e.Message);
+            }
+        }
+
+        public string GetLocation(double latitude, double longitude)
+        {
+            try
+            {
+                return _mapService.GetLocation(latitude, longitude).Result;
             }
             catch (Exception e)
             {

@@ -36,12 +36,17 @@ namespace PEAS.Services
                 LocationResponse jsonResponse = JsonConvert.DeserializeObject<LocationResponse>(responseString);
                 LocationResponse.AddressExpanded address = jsonResponse.Addresses.FirstOrDefault().Address;
 
+                if (address.Country == null)
+                {
+                    throw new Exception("Could not get location. Please verify the coordinates are accurate.");
+                }
+
                 return $"{address.Municipality}, {address.CountrySubdivision}. {address.Country}";
             }
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException("Could not set your business location");
+                throw new AppException("Could not verify your business location");
             }
         }
 

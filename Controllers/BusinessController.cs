@@ -24,6 +24,13 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [HttpGet("location")]
+        public ActionResult<string> GetLocation(double latitude, double longitude)
+        {
+            var response = _businessService.GetLocation(latitude, longitude);
+            return Ok(response);
+        }
+
         [Authorize]
         [HttpPost]
         public ActionResult<BusinessResponse> AddBusiness([FromBody] CreateBusiness model)
