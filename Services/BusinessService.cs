@@ -323,7 +323,10 @@ namespace PEAS.Services
         {
             try
             {
-                var business = _context.Businesses.Find(model.BusinessId);
+                var business = _context.Businesses
+                    .Include(x => x.Account)
+                    .Where(x => x.Id == model.BusinessId)
+                    .FirstOrDefault();
 
                 if (business == null)
                 {
@@ -413,7 +416,7 @@ namespace PEAS.Services
                 Blocks = business.Blocks
             };
 
-            if (business.Account == account)
+            if ((account != null) && (business.Account == account))
             {
                 businessResponse.Latitude = business.Latitude;
                 businessResponse.Longitude = business.Longitude;
