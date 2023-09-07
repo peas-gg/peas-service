@@ -17,7 +17,7 @@ namespace PEAS.Controllers
         }
 
         [HttpPost("authenticate")]
-        public ActionResult<AuthenticateResponse> Authenticate([FromBody] AuthenticateRequest model)
+        public ActionResult<AuthenticateResponse?> Authenticate([FromBody] AuthenticateRequest model)
         {
             var response = _accountService.Authenticate(model, ipAddress());
             return Ok(response);
