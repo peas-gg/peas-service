@@ -324,12 +324,9 @@ namespace PEAS.Services
 
         private bool isNameValid(string name)
         {
-            string namePattern = @"^[A-Z][a-zA-Z]*$";
-            if (string.IsNullOrEmpty(name) || name.Length > 20)
+            if (string.IsNullOrEmpty(name.Trim()))
                 return false;
-
-            Regex regex = new Regex(namePattern);
-            return regex.IsMatch(name);
+            return true;
         }
 
         private string generateJwtToken(Account account)
