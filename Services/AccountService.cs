@@ -212,6 +212,12 @@ namespace PEAS.Services
                 //Validate Otp Code
                 _ = validateVerificationCode(account.Phone, model.Code);
 
+                //Validate Password
+                if (!isPasswordValid(model.Password))
+                {
+                    throw new AppException("Invalid password: Password should be at least 6 characters");
+                }
+
                 //Update password
                 account.Password = BC.HashPassword(model.Password);
 
@@ -319,7 +325,7 @@ namespace PEAS.Services
 
         private bool isPasswordValid(string password)
         {
-            return password.Trim().Length >= 6;
+            return password.Length >= 6;
         }
 
         private bool isNameValid(string name)
