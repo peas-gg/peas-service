@@ -9,6 +9,8 @@ namespace PEAS.Models.Account
 
         public required string Email { get; set; }
 
+        public string? InteracEmail { get; set; }
+
         public required string Phone { get; set; }
 
         public required string Role { get; set; }
