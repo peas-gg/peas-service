@@ -138,7 +138,7 @@ namespace PEAS.Services
                 //Validate model
                 validateRegisterModel(model);
 
-                if (_context.Accounts.Any(x => x.Email == model.Email))
+                if (_context.Accounts.Any(x => x.Email == model.Email || x.Phone == validatedPhoneNumber))
                 {
                     throw new AppException("Account exists. Please login");
                 }
