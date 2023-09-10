@@ -16,14 +16,14 @@ namespace PEAS.Controllers
             _accountService = accountService;
         }
 
-        [HttpGet("authenticate")]
+        [HttpPost("authenticate")]
         public ActionResult<EmptyResponse> Authenticate([FromBody] AuthenticateRequest model)
         {
             _ = _accountService.Authenticate(model, ipAddress());
             return Ok(new EmptyResponse());
         }
 
-        [HttpPost("authenticate")]
+        [HttpPost("authenticateWithCode")]
         public ActionResult<AuthenticateResponse> AuthenticateWithCode([FromBody] AuthenticateRequest model)
         {
             var response = _accountService.Authenticate(model, ipAddress());
