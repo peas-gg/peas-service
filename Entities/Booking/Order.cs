@@ -25,15 +25,17 @@ namespace PEAS.Entities.Booking
 
         public required Customer Customer { get; set; }
 
-        public required string Title { get; set; }
-
-        public required string Detail { get; set; }
-
         public required Currency Currency { get; set; }
 
         public required decimal Price { get; set; }
 
+        public required string Title { get; set; }
+
+        public required string Detail { get; set; }
+
         public required Uri Image { get; set; }
+
+        public string? Note { get; set; }
 
         public required DateTime StartTime { get; set; }
 
@@ -41,13 +43,11 @@ namespace PEAS.Entities.Booking
 
         public required Status OrderStatus  { get; set; }
 
-        public string? Note  { get; set; }
-
         public required DateTime Created { get; set; }
 
-        public DateTime? Paid { get; set; }
-
         public List<Payment>? Payments { get; set; }
+
+        public required DateTime LastUpdated { get; set; }
 
         [Timestamp]
         public required byte[] Version { get; set; }
