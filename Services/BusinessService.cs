@@ -97,6 +97,7 @@ namespace PEAS.Services
                     Sign = model.Sign,
                     Name = model.Name,
                     Category = model.Category,
+                    Currency = Currency.CAD,
                     Color = model.Color,
                     Description = model.Description,
                     ProfilePhoto = model.ProfilePhoto,
@@ -240,7 +241,7 @@ namespace PEAS.Services
 
                 if (model.Price != null)
                 {
-                    block.Price = (double)model.Price;
+                    block.Price = (decimal)model.Price;
                 }
 
                 if (model.Duration != null)
@@ -457,7 +458,9 @@ namespace PEAS.Services
 
         private void validateBlock(Block block)
         {
-            double maxPrice = 5000.00;
+            decimal freePrice = 0M;
+            decimal minPrice = 10M;
+            decimal maxPrice = 5000M;
 
             if (!Enum.IsDefined(typeof(Block.Type), block.BlockType))
             {
@@ -466,12 +469,17 @@ namespace PEAS.Services
 
             if (block.Price > maxPrice)
             {
-                throw new AppException($"Please type a price below {maxPrice}");
+                throw new AppException($"Please enter a price below {maxPrice}");
             }
 
-            if (block.Price < 0.00)
+            if (block.Price < freePrice)
             {
                 throw new AppException($"Enter a valid number for the price");
+            }
+
+            if (block.Price > freePrice && block.Price < minPrice)
+            {
+                throw new AppException($"The minimum price is {minPrice}");
             }
 
             if (string.IsNullOrEmpty(block.Title))

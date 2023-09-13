@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +20,9 @@ namespace PEAS.Entities.Site
 
         public required Uri Image { get; set; }
 
-        public required double Price { get; set; }
+        public required Currency Currency { get; set; }
+
+        public required decimal Price { get; set; }
 
         //In Seconds
         public required int Duration { get; set; }

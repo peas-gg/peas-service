@@ -19,6 +19,8 @@ namespace PEAS.Entities.Site
 
         public string? Category { get; set; }
 
+        public required Currency Currency { get; set; }
+
         public required string Color { get; set; }
 
         public required string Description { get; set; }

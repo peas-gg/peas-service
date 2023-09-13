@@ -1,5 +1,4 @@
-﻿using System;
-namespace PEAS.Models.Business
+﻿namespace PEAS.Models.Business
 {
     public class UpdateBlock
     {
@@ -7,7 +6,7 @@ namespace PEAS.Models.Business
 
         public Uri? Image { get; set; }
 
-        public double? Price { get; set; }
+        public decimal? Price { get; set; }
 
         public int? Duration { get; set; }
 
