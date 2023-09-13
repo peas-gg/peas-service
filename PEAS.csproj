@@ -19,6 +19,7 @@
     <None Remove="Models\Business\" />
     <None Remove="Models\Maps\" />
     <None Remove="Migrations\" />
+    <None Remove="Entities\Booking\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -33,6 +34,7 @@
     <Folder Include="Models\Business\" />
     <Folder Include="Models\Maps\" />
     <Folder Include="Migrations\" />
+    <Folder Include="Entities\Booking\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.10" />

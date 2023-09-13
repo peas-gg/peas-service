@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using PEAS.Entities.Site;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PEAS.Entities.Site
+namespace PEAS.Entities.Booking
 {
     public class Schedule
     {
