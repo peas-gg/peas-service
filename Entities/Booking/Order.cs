@@ -1,11 +1,21 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using PEAS.Entities.Site;
 
 namespace PEAS.Entities.Booking
 {
     public class Order
     {
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public enum Status
+        {
+            Pending,
+            Approved,
+            Declined,
+            Completed
+        }
+
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
@@ -29,7 +39,7 @@ namespace PEAS.Entities.Booking
 
         public required DateTime EndTime { get; set; }
 
-        public required OrderStatus Status  { get; set; }
+        public required Status OrderStatus  { get; set; }
 
         public string? Note  { get; set; }
 
