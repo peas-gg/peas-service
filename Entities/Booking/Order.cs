@@ -37,9 +37,9 @@ namespace PEAS.Entities.Booking
 
         public DateTime? Paid { get; set; }
 
+        public List<Payment>? Payments { get; set; }
+
         [Timestamp]
         public required byte[] Version { get; set; }
-
-        public List<Payment>? Payments { get; set; }
     }
 }
