@@ -3,9 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PEAS.Entities;
 using PEAS.Entities.Authentication;
+using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
 using PEAS.Models.Business;
+using PEAS.Models.Business.Schedule;
 
 namespace PEAS.Services
 {
@@ -199,6 +201,7 @@ namespace PEAS.Services
             }
         }
 
+        //Block
         public BusinessResponse AddBlock(Account account, Guid businessId, Block model)
         {
             try
@@ -287,7 +290,7 @@ namespace PEAS.Services
                 throw new AppException("Invalid Block Id");
             }
 
-            business.Blocks.Remove(block);
+            block.Deleted = DateTime.Now;
 
             validateBlocks(business.Blocks);
 
@@ -296,6 +299,13 @@ namespace PEAS.Services
             return ConstructBusinessResponse(business, account);
         }
 
+        //Schedule
+        //public List<ScheduleResponse> SetSchedules(List<ScheduleRequest> model)
+        //{
+
+        //}
+
+        //Templates
         public List<TemplateResponse> GetTemplates()
         {
             try
