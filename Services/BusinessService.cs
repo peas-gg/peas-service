@@ -439,7 +439,7 @@ namespace PEAS.Services
 
         private Business getBusiness(Account account, Guid businessId)
         {
-            var business = _context.Businesses.Include(x => x.Blocks).SingleOrDefault(x => x.Id == businessId);
+            var business = _context.Businesses.Include(x => x.Blocks.Where(y => !y.IsDeleted)).SingleOrDefault(x => x.Id == businessId);
 
             if (business == null || business.Account != account)
             {

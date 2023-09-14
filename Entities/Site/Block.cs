@@ -32,5 +32,7 @@ namespace PEAS.Entities.Site
         public required string Description { get; set; }
 
         public DateTime? Deleted { get; set; }
+
+        public bool IsDeleted => Deleted != null;
     }
 }
