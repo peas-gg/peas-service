@@ -51,7 +51,7 @@ namespace PEAS.Services
 
                 if (business != null)
                 {
-                    return ConstructBusinessResponse(business, null);
+                    return constructBusinessResponse(business, null);
                 } else
                 {
                     throw new AppException("Could not find the business you are looking for");
@@ -119,7 +119,7 @@ namespace PEAS.Services
                 _context.Businesses.Add(business);
                 _context.SaveChanges();
 
-                return ConstructBusinessResponse(business, account);
+                return constructBusinessResponse(business, account);
             }
             catch (Exception e)
             {
@@ -192,7 +192,7 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                return ConstructBusinessResponse(business, account);
+                return constructBusinessResponse(business, account);
             }
             catch (Exception e)
             {
@@ -217,7 +217,7 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                return ConstructBusinessResponse(business, account);
+                return constructBusinessResponse(business, account);
             }
             catch (Exception e)
             {
@@ -268,7 +268,7 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                var response = ConstructBusinessResponse(business, account);
+                var response = constructBusinessResponse(business, account);
 
                 return response;
 
@@ -296,22 +296,41 @@ namespace PEAS.Services
 
             _context.Businesses.Update(business);
             _context.SaveChanges();
-            return ConstructBusinessResponse(business, account);
+            return constructBusinessResponse(business, account);
         }
 
         //Schedule
-        //public List<ScheduleResponse> SetSchedules(Account account, Guid businessId, List<ScheduleRequest> model)
-        //{
-        //    try
-        //    {
+        public BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleRequest> model)
+        {
+            try
+            {
+                Business business = getBusiness(account, businessId);
+                List<Schedule> schedules = new List<Schedule>();
+                foreach (var schedule in model)
+                {
+                    schedules
+                        .Add(
+                            new Schedule
+                            {
+                                Business = business,
+                                DayOfWeek = schedule.DayOfWeek,
+                                StartTime = schedule.StartTime,
+                                EndTime = schedule.EndTime
+                            }
+                        );
+                }
 
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        AppLogger.Log(_logger, e);
-        //        throw AppException.ConstructException(e); 
-        //    }
-        //}
+                business.Schedules = schedules;
+                _context.Businesses.Update(business);
+                _context.SaveChanges();
+                return constructBusinessResponse(business, account);
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
 
         //Templates
         public List<TemplateResponse> GetTemplates()
@@ -326,7 +345,7 @@ namespace PEAS.Services
                         Category = x.Category,
                         Details = x.Details,
                         Photo = x.Photo,
-                        Business = ConstructBusinessResponse(x.Business, null)
+                        Business = constructBusinessResponse(x.Business, null)
                     })
                     .ToList();
 
@@ -369,7 +388,7 @@ namespace PEAS.Services
                     Category = template.Category,
                     Details = template.Details,
                     Photo = template.Photo,
-                    Business = ConstructBusinessResponse(template.Business, null)
+                    Business = constructBusinessResponse(template.Business, null)
                 };
             }
             catch (Exception e)
@@ -416,7 +435,7 @@ namespace PEAS.Services
             }
         }
 
-        private static BusinessResponse ConstructBusinessResponse(Business business, Account? account)
+        private static BusinessResponse constructBusinessResponse(Business business, Account? account)
         {
             var businessResponse = new BusinessResponse
             {
