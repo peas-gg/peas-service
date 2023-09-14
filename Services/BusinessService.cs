@@ -60,7 +60,7 @@ namespace PEAS.Services
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -73,7 +73,7 @@ namespace PEAS.Services
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -124,7 +124,7 @@ namespace PEAS.Services
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -197,7 +197,7 @@ namespace PEAS.Services
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -222,7 +222,7 @@ namespace PEAS.Services
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -276,7 +276,7 @@ namespace PEAS.Services
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -300,9 +300,17 @@ namespace PEAS.Services
         }
 
         //Schedule
-        //public List<ScheduleResponse> SetSchedules(List<ScheduleRequest> model)
+        //public List<ScheduleResponse> SetSchedules(Account account, Guid businessId, List<ScheduleRequest> model)
         //{
+        //    try
+        //    {
 
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        AppLogger.Log(_logger, e);
+        //        throw AppException.ConstructException(e); 
+        //    }
         //}
 
         //Templates
@@ -327,7 +335,7 @@ namespace PEAS.Services
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -367,7 +375,7 @@ namespace PEAS.Services
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -388,7 +396,7 @@ namespace PEAS.Services
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
