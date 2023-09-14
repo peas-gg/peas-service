@@ -110,7 +110,8 @@ namespace PEAS.Services
                     Longitude = model.Longitude,
                     IsActive = true,
                     Created = DateTime.UtcNow,
-                    Blocks = model.Blocks
+                    Blocks = model.Blocks,
+                    Schedules = null 
                 };
 
                 _context.Businesses.Add(business);

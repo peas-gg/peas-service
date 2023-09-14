@@ -1,4 +1,5 @@
 ﻿using PEAS.Entities.Authentication;
+using PEAS.Entities.Booking;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -48,5 +49,7 @@ namespace PEAS.Entities.Site
         public DateTime? Deactivated { get; set; }
 
         public required List<Block> Blocks { get; set; }
+
+        public required List<Schedule>? Schedules { get; set; }
     }
 }
