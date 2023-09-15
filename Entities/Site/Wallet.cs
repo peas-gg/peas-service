@@ -8,7 +8,9 @@ namespace PEAS.Entities.Site
 
         public required decimal Balance { get; set; }
 
-        public required decimal HoldBalance { get; set; }
+        public required decimal PendingDeposit { get; set; }
+
+        public required decimal PendingWithdrawal { get; set; }
 
         [Timestamp]
         public required byte[] Version { get; set; }
