@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PEAS.Entities.Authentication;
+using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 
 namespace PEAS.Entities
@@ -10,7 +11,17 @@ namespace PEAS.Entities
 
         public DbSet<Business> Businesses { get; set; }
 
+        public DbSet<Wallet> Wallet { get; set; }
+
         public DbSet<Template> Templates { get; set; }
+
+        public DbSet<Customer> Customers { get; set; }
+
+        public DbSet<Order> Orders { get; set; }
+
+        public DbSet<Invoice> Invoices { get; set; }
+
+        public DbSet<Transaction> Transactions { get; set; }
 
         private readonly IConfiguration Configuration;
 
