@@ -6,6 +6,7 @@ using PEAS.Entities.Authentication;
 using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
+using PEAS.Helpers.Utilities;
 using PEAS.Models.Business;
 using PEAS.Models.Business.Schedule;
 
@@ -20,6 +21,8 @@ namespace PEAS.Services
         BusinessResponse AddBlock(Account account, Guid businessId, Block model);
         BusinessResponse UpdateBlock(Account account, Guid businessId, UpdateBlock model);
         BusinessResponse DeleteBlock(Account account, Guid businessId, Guid blockId);
+        BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleRequest> model);
+        List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date);
         TemplateResponse AddTemplate(CreateTemplate model);
         void DeleteTemplate(Guid id);
         List<TemplateResponse> GetTemplates();
@@ -332,6 +335,49 @@ namespace PEAS.Services
             }
         }
 
+        public List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date)
+        {
+            try
+            {
+                //Get business
+                Business? business = _context.Businesses
+                    .Include(x => x.Blocks)
+                    .Include(x => x.Schedules)
+                    .Where(x => x.Id == businessId)
+                    .FirstOrDefault();
+
+                if (business == null)
+                {
+                    throw new AppException("Invalid Business Id");
+                }
+
+                Block block = getBlock(business, blockId);
+
+                //Get availability for the day
+                Schedule? schedule = business.Schedules?.Where(x => x.DayOfWeek == date.DayOfWeek).FirstOrDefault();
+
+                if (schedule == null)
+                {
+                    return new List<DateRange>();
+                }
+                else
+                {
+                    //Get availability
+                    List<Order>? ordersInTheDay = _context.Orders
+                        .Where(x => x.OrderStatus != Order.Status.Declined && x.StartTime.Day == date.Day)
+                        .ToList();
+                    //Get existing orders for the selected date
+                    List<DateRange> ordersDateRanges = ordersInTheDay.Select(x => new DateRange(x.StartTime, x.EndTime)).ToList() ?? new List<DateRange>();
+                    return DateRange.GetAvailability(new DateRange(schedule.StartTime, schedule.EndTime), new TimeSpan(0, 0, block.Duration), ordersDateRanges);
+                }
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
         //Templates
         public List<TemplateResponse> GetTemplates()
         {
@@ -474,6 +520,18 @@ namespace PEAS.Services
             }
 
             return business;
+        }
+
+        private Block getBlock(Business business, Guid blockId)
+        {
+            Block? block = business.Blocks.Where(x => x.Id == blockId && !x.IsDeleted).FirstOrDefault();
+
+            if (block == null)
+            {
+                throw new AppException("Invalid Block Id");
+            }
+
+            return block;
         }
 
         private void validateBlocks(List<Block> blocks)

@@ -47,16 +47,16 @@ namespace PEAS.Helpers.Utilities
             return (Start <= range.Start) && (range.End <= End);
         }
 
-        public static List<DateRange> GetAvailability(DateRange bookingDate, TimeSpan orderDuration, List<DateRange> bookings)
+        public static List<DateRange> GetAvailability(DateRange schedule, TimeSpan orderDuration, List<DateRange> existingOrders)
         {
-            DateTime prevDate = bookingDate.Start;
-            DateTime currentDate = bookingDate.Start;
+            DateTime prevDate = schedule.Start;
+            DateTime currentDate = schedule.Start;
             List<DateRange> availability = new();
-            while (currentDate < bookingDate.End)
+            while (currentDate < schedule.End)
             {
                 currentDate += orderDuration;
                 var timeSlot = new DateRange(prevDate, currentDate);
-                if (!bookings.Any(x => x.WithInRange(timeSlot)))
+                if (!existingOrders.Any(x => x.WithInRange(timeSlot)))
                 {
                     availability.Add(timeSlot);
                 }

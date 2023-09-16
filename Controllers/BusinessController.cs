@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PEAS.Entities.Site;
+using PEAS.Helpers.Utilities;
 using PEAS.Models.Business;
+using PEAS.Models.Business.Schedule;
 using PEAS.Services;
 
 namespace PEAS.Controllers
@@ -68,6 +70,21 @@ namespace PEAS.Controllers
         public ActionResult<BusinessResponse> DeleteBlock(Guid businessId, Guid blockId)
         {
             var response = _businessService.DeleteBlock(Account!, businessId, blockId);
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPost("schedule")]
+        public ActionResult<BusinessResponse> SetSchedule(Guid businessId, [FromBody] List<ScheduleRequest> model)
+        {
+            var response = _businessService.SetSchedule(Account!, businessId, model);
+            return Ok(response);
+        }
+
+        [HttpGet("availability")]
+        public ActionResult<List<DateRange>> GetAvailability(Guid businessId, Guid blockId, DateTime date)
+        {
+            var response = _businessService.GetAvailablity(businessId, blockId, date);
             return Ok(response);
         }
 
