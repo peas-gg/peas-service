@@ -19,8 +19,6 @@ namespace PEAS.Entities
 
         public DbSet<Order> Orders { get; set; }
 
-        public DbSet<Invoice> Invoices { get; set; }
-
         public DbSet<Transaction> Transactions { get; set; }
 
         private readonly IConfiguration Configuration;
