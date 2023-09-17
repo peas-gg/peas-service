@@ -8,6 +8,7 @@ using PEAS.Entities.Site;
 using PEAS.Helpers;
 using PEAS.Helpers.Utilities;
 using PEAS.Models.Business;
+using PEAS.Models.Business.Order;
 using PEAS.Models.Business.Schedule;
 
 namespace PEAS.Services
@@ -23,6 +24,7 @@ namespace PEAS.Services
         BusinessResponse DeleteBlock(Account account, Guid businessId, Guid blockId);
         BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleRequest> model);
         List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date);
+        //OrderResponse CreateOrder(Guid businessId, OrderRequest model);
         TemplateResponse AddTemplate(CreateTemplate model);
         void DeleteTemplate(Guid id);
         List<TemplateResponse> GetTemplates();
@@ -55,7 +57,8 @@ namespace PEAS.Services
                 if (business != null)
                 {
                     return constructBusinessResponse(business, null);
-                } else
+                }
+                else
                 {
                     throw new AppException("Could not find the business you are looking for");
                 }
@@ -116,7 +119,7 @@ namespace PEAS.Services
                     IsActive = true,
                     Created = DateTime.UtcNow,
                     Blocks = model.Blocks,
-                    Schedules = null 
+                    Schedules = null
                 };
 
                 _context.Businesses.Add(business);
@@ -341,6 +344,7 @@ namespace PEAS.Services
             {
                 //Get business
                 Business? business = _context.Businesses
+                    .AsNoTracking()
                     .Include(x => x.Blocks)
                     .Include(x => x.Schedules)
                     .Where(x => x.Id == businessId)
@@ -364,6 +368,7 @@ namespace PEAS.Services
                 {
                     //Get availability
                     List<Order>? ordersInTheDay = _context.Orders
+                        .AsNoTracking()
                         .Where(x => x.OrderStatus != Order.Status.Declined && x.StartTime.Day == date.Day)
                         .ToList();
                     //Get existing orders for the selected date
@@ -378,6 +383,31 @@ namespace PEAS.Services
             }
         }
 
+        //Orders
+        //public OrderResponse CreateOrder(Guid businessId, OrderRequest model)
+        //{
+        //    try
+        //    {
+        //        //Get business
+        //        Business? business = _context.Businesses
+        //            .Include(x => x.Blocks)
+        //            .Where(x => x.Id == businessId)
+        //            .FirstOrDefault();
+
+        //        if (business == null)
+        //        {
+        //            throw new AppException("Invalid Business Id");
+        //        }
+
+        //        Block block = getBlock(business, blockId);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        AppLogger.Log(_logger, e);
+        //        throw AppException.ConstructException(e);
+        //    }
+        //}
+
         //Templates
         public List<TemplateResponse> GetTemplates()
         {
@@ -386,7 +416,8 @@ namespace PEAS.Services
                 var templates = _context.Templates
                     .Include(x => x.Business)
                     .AsNoTracking()
-                    .Select(x => new TemplateResponse {
+                    .Select(x => new TemplateResponse
+                    {
                         Id = x.Id,
                         Category = x.Category,
                         Details = x.Details,
@@ -474,7 +505,7 @@ namespace PEAS.Services
                 using var textReader = new JsonTextReader(streamReader);
                 return serializer.Deserialize<Dictionary<string, string>>(textReader)!;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
                 throw new AppException("Error loading business colors");
@@ -546,7 +577,7 @@ namespace PEAS.Services
                 throw new AppException("You are only allowed to have 5 blocks at this moment");
             }
 
-            foreach(Block block in blocks)
+            foreach (Block block in blocks)
             {
                 validateBlock(block);
             }
