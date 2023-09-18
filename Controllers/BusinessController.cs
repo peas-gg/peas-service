@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PEAS.Entities.Authentication;
 using PEAS.Entities.Site;
 using PEAS.Helpers.Utilities;
 using PEAS.Models.Business;
@@ -111,6 +112,7 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [Helpers.Authorize(Role.Admin)]
         [HttpPost("template")]
         public ActionResult<TemplateResponse> AddTemplate([FromBody] CreateTemplate model)
         {
@@ -118,6 +120,7 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [Helpers.Authorize(Role.Admin)]
         [HttpDelete("template")]
         public ActionResult DeleteTemplate(Guid id)
         {
