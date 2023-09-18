@@ -13,6 +13,8 @@ namespace PEAS.Entities.Booking
 
         public required int Base { get; set; }
 
+        public required int Deposit { get; set; }
+
         public required int Tip { get; set; }
 
         public required int Fee { get; set; }
