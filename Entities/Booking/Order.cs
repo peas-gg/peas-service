@@ -31,7 +31,7 @@ namespace PEAS.Entities.Booking
 
         public required string Title { get; set; }
 
-        public required string Detail { get; set; }
+        public required string Description { get; set; }
 
         public required Uri Image { get; set; }
 
@@ -50,6 +50,8 @@ namespace PEAS.Entities.Booking
         public required DateTime LastUpdated { get; set; }
 
         [Timestamp]
-        public required byte[] Version { get; set; }
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        public byte[] Version { get; set; }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     }
 }

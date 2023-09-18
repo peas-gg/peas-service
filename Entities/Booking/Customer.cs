@@ -1,7 +1,10 @@
-﻿namespace PEAS.Entities.Booking
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PEAS.Entities.Booking
 {
     public class Customer
     {
+        [Key]
         public int Id { get; set; }
 
         public required string FirstName { get; set; }

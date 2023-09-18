@@ -24,7 +24,8 @@ namespace PEAS.Services
         BusinessResponse DeleteBlock(Account account, Guid businessId, Guid blockId);
         BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleRequest> model);
         List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date);
-        //OrderResponse CreateOrder(Guid businessId, OrderRequest model);
+        OrderResponse CreateOrder(Guid businessId, OrderRequest model);
+        OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model);
         TemplateResponse AddTemplate(CreateTemplate model);
         void DeleteTemplate(Guid id);
         List<TemplateResponse> GetTemplates();
@@ -384,29 +385,124 @@ namespace PEAS.Services
         }
 
         //Orders
-        //public OrderResponse CreateOrder(Guid businessId, OrderRequest model)
-        //{
-        //    try
-        //    {
-        //        //Get business
-        //        Business? business = _context.Businesses
-        //            .Include(x => x.Blocks)
-        //            .Where(x => x.Id == businessId)
-        //            .FirstOrDefault();
+        public OrderResponse CreateOrder(Guid businessId, OrderRequest model)
+        {
+            try
+            {
+                //Get business
+                Business? business = _context.Businesses
+                    .Include(x => x.Blocks)
+                    .Where(x => x.Id == businessId)
+                    .FirstOrDefault();
 
-        //        if (business == null)
-        //        {
-        //            throw new AppException("Invalid Business Id");
-        //        }
+                if (business == null)
+                {
+                    throw new AppException("Invalid Business Id");
+                }
 
-        //        Block block = getBlock(business, blockId);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        AppLogger.Log(_logger, e);
-        //        throw AppException.ConstructException(e);
-        //    }
-        //}
+                Block block = getBlock(business, model.BlockId);
+
+                //Get Availability
+                List<DateRange> availabilityDates = GetAvailablity(businessId, model.BlockId, model.DateRange.Start);
+
+                if (!availabilityDates.Contains(model.DateRange))
+                {
+                    throw new AppException("The selected time is unavilable. Please select a different time.");
+                }
+                else
+                {
+                    //Create Customer
+                    Customer? customer = _context.Customers.Where(x => x.Email == model.Email).FirstOrDefault();
+                    if (customer == null)
+                    {
+                        Customer newCustomer = new Customer
+                        {
+                            FirstName = model.FirstName,
+                            LastName = model.Lastname,
+                            Email = model.Email,
+                            Phone = model.Phone
+                        };
+                        _context.Customers.Add(newCustomer);
+                        customer = newCustomer;
+                    }
+                    else
+                    {
+                        customer.FirstName = model.Email;
+                        customer.LastName = model.Lastname;
+                        customer.Phone = model.Phone;
+                        _context.Customers.Update(customer);
+                    }
+
+                    //Create Order
+                    DateTime dateNow = DateTime.UtcNow;
+                    Order order = new Order
+                    {
+                        Business = business,
+                        Block = block,
+                        Customer = customer,
+                        Currency = business.Currency,
+                        Price = block.Price,
+                        Title = block.Title,
+                        Description = block.Description,
+                        Image = block.Image,
+                        Note = model.Note,
+                        StartTime = model.DateRange.Start,
+                        EndTime = model.DateRange.End,
+                        OrderStatus = Order.Status.Pending,
+                        Payments = null,
+                        Created = dateNow,
+                        LastUpdated = dateNow
+                    };
+
+                    _context.Orders.Add(order);
+                    _context.SaveChanges();
+
+                    return _mapper.Map<OrderResponse>(order);
+                }
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        public OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model)
+        {
+            try
+            {
+                Business? business = _context.Businesses
+                    .Where(x => x.Account == account && x.Id == businessId)
+                    .FirstOrDefault();
+
+                if (business == null)
+                {
+                    throw new AppException("Invalid business Id");
+                }
+
+                Order? order = _context.Orders
+                    .Where(x => x.Business.Id == businessId && x.Id == model.OrderId)
+                    .FirstOrDefault();
+
+                if (order == null)
+                {
+                    throw new AppException("Invalid Order Id");
+                }
+
+                order.OrderStatus = model.OrderStatus;
+                order.LastUpdated = DateTime.UtcNow;
+
+                _context.Orders.Update(order);
+                _context.SaveChanges();
+
+                return _mapper.Map<OrderResponse>(order);
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
 
         //Templates
         public List<TemplateResponse> GetTemplates()

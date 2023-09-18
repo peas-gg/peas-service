@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PEAS.Entities.Site;
 using PEAS.Helpers.Utilities;
 using PEAS.Models.Business;
+using PEAS.Models.Business.Order;
 using PEAS.Models.Business.Schedule;
 using PEAS.Services;
 
@@ -78,6 +79,21 @@ namespace PEAS.Controllers
         public ActionResult<BusinessResponse> SetSchedule(Guid businessId, [FromBody] List<ScheduleRequest> model)
         {
             var response = _businessService.SetSchedule(Account!, businessId, model);
+            return Ok(response);
+        }
+
+        [HttpPost("order")]
+        public ActionResult<OrderResponse> CreateOrder(Guid businessId, [FromBody] OrderRequest model)
+        {
+            var response = _businessService.CreateOrder(businessId, model);
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPatch("order")]
+        public ActionResult<OrderResponse> UpdateOrder(Guid businessId, [FromBody] UpdateOrderRequest model)
+        {
+            var response = _businessService.UpdateOrder(Account!, businessId, model);
             return Ok(response);
         }
 
