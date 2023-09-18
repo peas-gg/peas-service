@@ -7,7 +7,7 @@ namespace PEAS.Entities.Site
     public enum Category
     {
         Hair,
-        Photographer,
+        Photography,
         Dj,
         Makeup,
         Modelling,
