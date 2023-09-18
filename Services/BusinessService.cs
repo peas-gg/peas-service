@@ -103,7 +103,7 @@ namespace PEAS.Services
                 var business = new Business
                 {
                     Account = account,
-                    Sign = model.Sign,
+                    Sign = model.Sign.Trim(),
                     Name = model.Name,
                     Category = model.Category,
                     Currency = Currency.CAD,
@@ -728,7 +728,12 @@ namespace PEAS.Services
                 throw new AppException("Invalid PEAS Sign: Your PEAS sign needs to be a maximum of 16 characters");
             }
 
-            if (_context.Businesses.AsNoTracking().Any(x => x.Sign == sign))
+            if (sign.Any(char.IsWhiteSpace))
+            {
+                throw new AppException("Invalid PEAS Sign: Your PEAS sign cannot contain white spaces");
+            }
+
+            if (_context.Businesses.AsNoTracking().Any(x => x.Sign == sign.Trim()))
             {
                 throw new AppException($"PEAS Sign \"{sign}\" taken. Please choose another sign");
             }
