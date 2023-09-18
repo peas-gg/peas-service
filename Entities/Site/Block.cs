@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +20,7 @@ namespace PEAS.Entities.Site
 
         public required Uri Image { get; set; }
 
-        public required double Price { get; set; }
+        public required int Price { get; set; }
 
         //In Seconds
         public required int Duration { get; set; }
@@ -31,5 +30,7 @@ namespace PEAS.Entities.Site
         public required string Description { get; set; }
 
         public DateTime? Deleted { get; set; }
+
+        public bool IsDeleted => Deleted != null;
     }
 }

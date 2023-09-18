@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PEAS.Migrations
 {
     /// <inheritdoc />
-    public partial class Account_Device_RefreshToken_Business_Block_Template : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,6 +19,7 @@ namespace PEAS.Migrations
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    InteracEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Phone = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LoginAttempt = table.Column<int>(type: "int", nullable: false),
@@ -34,6 +35,22 @@ namespace PEAS.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Customers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Customers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Businesses",
                 columns: table => new
                 {
@@ -42,6 +59,7 @@ namespace PEAS.Migrations
                     Sign = table.Column<string>(type: "nvarchar(16)", maxLength: 16, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     Category = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Currency = table.Column<int>(type: "int", nullable: false),
                     Color = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ProfilePhoto = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -114,23 +132,90 @@ namespace PEAS.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Block",
+                name: "Businesses_Blocks",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BusinessId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BlockType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Price = table.Column<double>(type: "float", nullable: false),
+                    Price = table.Column<int>(type: "int", nullable: false),
                     Duration = table.Column<int>(type: "int", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Deleted = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Block", x => new { x.BusinessId, x.Id });
+                    table.PrimaryKey("PK_Businesses_Blocks", x => new { x.BusinessId, x.Id });
                     table.ForeignKey(
-                        name: "FK_Block_Businesses_BusinessId",
+                        name: "FK_Businesses_Blocks_Businesses_BusinessId",
+                        column: x => x.BusinessId,
+                        principalTable: "Businesses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Orders",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BusinessId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Block_Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Block_BlockType = table.Column<int>(type: "int", nullable: false),
+                    Block_Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Block_Price = table.Column<int>(type: "int", nullable: false),
+                    Block_Duration = table.Column<int>(type: "int", nullable: false),
+                    Block_Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Block_Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Block_Deleted = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CustomerId = table.Column<int>(type: "int", nullable: false),
+                    Currency = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<int>(type: "int", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    OrderStatus = table.Column<int>(type: "int", nullable: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Version = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Orders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Orders_Businesses_BusinessId",
+                        column: x => x.BusinessId,
+                        principalTable: "Businesses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Orders_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Schedule",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BusinessId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DayOfWeek = table.Column<int>(type: "int", nullable: false),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Schedule", x => new { x.BusinessId, x.Id });
+                    table.ForeignKey(
+                        name: "FK_Schedule_Businesses_BusinessId",
                         column: x => x.BusinessId,
                         principalTable: "Businesses",
                         principalColumn: "Id",
@@ -154,6 +239,31 @@ namespace PEAS.Migrations
                         name: "FK_Templates_Businesses_BusinessId",
                         column: x => x.BusinessId,
                         principalTable: "Businesses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payment",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Currency = table.Column<int>(type: "int", nullable: false),
+                    Base = table.Column<int>(type: "int", nullable: false),
+                    Tip = table.Column<int>(type: "int", nullable: false),
+                    Fee = table.Column<int>(type: "int", nullable: false),
+                    Total = table.Column<int>(type: "int", nullable: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payment", x => new { x.OrderId, x.Id });
+                    table.ForeignKey(
+                        name: "FK_Payment_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -182,6 +292,22 @@ namespace PEAS.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Customers_Email",
+                table: "Customers",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_BusinessId",
+                table: "Orders",
+                column: "BusinessId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_CustomerId",
+                table: "Orders",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Templates_BusinessId",
                 table: "Templates",
                 column: "BusinessId");
@@ -191,19 +317,31 @@ namespace PEAS.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Block");
+                name: "Businesses_Blocks");
 
             migrationBuilder.DropTable(
                 name: "Device");
 
             migrationBuilder.DropTable(
+                name: "Payment");
+
+            migrationBuilder.DropTable(
                 name: "RefreshToken");
+
+            migrationBuilder.DropTable(
+                name: "Schedule");
 
             migrationBuilder.DropTable(
                 name: "Templates");
 
             migrationBuilder.DropTable(
+                name: "Orders");
+
+            migrationBuilder.DropTable(
                 name: "Businesses");
+
+            migrationBuilder.DropTable(
+                name: "Customers");
 
             migrationBuilder.DropTable(
                 name: "Accounts");

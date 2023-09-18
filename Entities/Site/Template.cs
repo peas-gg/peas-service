@@ -7,7 +7,7 @@ namespace PEAS.Entities.Site
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
-        public required string Category { get; set; }
+        public required Category Category { get; set; }
 
         public string? Details { get; set; }
 

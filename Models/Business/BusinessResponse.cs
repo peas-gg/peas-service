@@ -10,7 +10,7 @@ namespace PEAS.Models.Business
 
         public required string Name { get; set; }
 
-        public string? Category { get; set; }
+        public Category? Category { get; set; }
 
         public required string Color { get; set; }
 

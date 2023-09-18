@@ -17,7 +17,7 @@ namespace PEAS.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.10")
+                .HasAnnotation("ProductVersion", "7.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -81,6 +81,101 @@ namespace PEAS.Migrations
                     b.ToTable("Accounts");
                 });
 
+            modelBuilder.Entity("PEAS.Entities.Booking.Customer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("PEAS.Entities.Booking.Order", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BusinessId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Currency")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrderStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("Version")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("Orders");
+                });
+
             modelBuilder.Entity("PEAS.Entities.Site.Business", b =>
                 {
                     b.Property<Guid>("Id")
@@ -99,6 +194,9 @@ namespace PEAS.Migrations
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Currency")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("Deactivated")
                         .HasColumnType("datetime2");
@@ -264,6 +362,108 @@ namespace PEAS.Migrations
                     b.Navigation("RefreshTokens");
                 });
 
+            modelBuilder.Entity("PEAS.Entities.Booking.Order", b =>
+                {
+                    b.HasOne("PEAS.Entities.Site.Business", "Business")
+                        .WithMany()
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PEAS.Entities.Booking.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("PEAS.Entities.Site.Block", "Block", b1 =>
+                        {
+                            b1.Property<Guid>("OrderId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("BlockType")
+                                .HasColumnType("int");
+
+                            b1.Property<DateTime?>("Deleted")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("Description")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<int>("Duration")
+                                .HasColumnType("int");
+
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Image")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<int>("Price")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Title")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("OrderId");
+
+                            b1.ToTable("Orders");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrderId");
+                        });
+
+                    b.OwnsMany("PEAS.Entities.Booking.Payment", "Payments", b1 =>
+                        {
+                            b1.Property<Guid>("OrderId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<int>("Base")
+                                .HasColumnType("int");
+
+                            b1.Property<DateTime>("Created")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<int>("Currency")
+                                .HasColumnType("int");
+
+                            b1.Property<int>("Fee")
+                                .HasColumnType("int");
+
+                            b1.Property<int>("Tip")
+                                .HasColumnType("int");
+
+                            b1.Property<int>("Total")
+                                .HasColumnType("int");
+
+                            b1.HasKey("OrderId", "Id");
+
+                            b1.ToTable("Payment");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrderId");
+                        });
+
+                    b.Navigation("Block")
+                        .IsRequired();
+
+                    b.Navigation("Business");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Payments");
+                });
+
             modelBuilder.Entity("PEAS.Entities.Site.Business", b =>
                 {
                     b.HasOne("PEAS.Entities.Authentication.Account", "Account")
@@ -271,6 +471,34 @@ namespace PEAS.Migrations
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.OwnsMany("PEAS.Entities.Booking.Schedule", "Schedules", b1 =>
+                        {
+                            b1.Property<Guid>("BusinessId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("DayOfWeek")
+                                .HasColumnType("int");
+
+                            b1.Property<DateTime>("EndTime")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<DateTime>("StartTime")
+                                .HasColumnType("datetime2");
+
+                            b1.HasKey("BusinessId", "Id");
+
+                            b1.ToTable("Schedule");
+
+                            b1.WithOwner("Business")
+                                .HasForeignKey("BusinessId");
+
+                            b1.Navigation("Business");
+                        });
 
                     b.OwnsMany("PEAS.Entities.Site.Block", "Blocks", b1 =>
                         {
@@ -299,8 +527,8 @@ namespace PEAS.Migrations
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
-                            b1.Property<double>("Price")
-                                .HasColumnType("float");
+                            b1.Property<int>("Price")
+                                .HasColumnType("int");
 
                             b1.Property<string>("Title")
                                 .IsRequired()
@@ -308,7 +536,7 @@ namespace PEAS.Migrations
 
                             b1.HasKey("BusinessId", "Id");
 
-                            b1.ToTable("Block");
+                            b1.ToTable("Businesses_Blocks");
 
                             b1.WithOwner()
                                 .HasForeignKey("BusinessId");
@@ -317,6 +545,8 @@ namespace PEAS.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("Blocks");
+
+                    b.Navigation("Schedules");
                 });
 
             modelBuilder.Entity("PEAS.Entities.Site.Template", b =>

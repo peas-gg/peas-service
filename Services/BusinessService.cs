@@ -3,9 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PEAS.Entities;
 using PEAS.Entities.Authentication;
+using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
+using PEAS.Helpers.Utilities;
 using PEAS.Models.Business;
+using PEAS.Models.Business.Order;
+using PEAS.Models.Business.Schedule;
 
 namespace PEAS.Services
 {
@@ -18,6 +22,10 @@ namespace PEAS.Services
         BusinessResponse AddBlock(Account account, Guid businessId, Block model);
         BusinessResponse UpdateBlock(Account account, Guid businessId, UpdateBlock model);
         BusinessResponse DeleteBlock(Account account, Guid businessId, Guid blockId);
+        BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleRequest> model);
+        List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date);
+        OrderResponse CreateOrder(Guid businessId, OrderRequest model);
+        OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model);
         TemplateResponse AddTemplate(CreateTemplate model);
         void DeleteTemplate(Guid id);
         List<TemplateResponse> GetTemplates();
@@ -49,8 +57,9 @@ namespace PEAS.Services
 
                 if (business != null)
                 {
-                    return ConstructBusinessResponse(business, null);
-                } else
+                    return constructBusinessResponse(business, null);
+                }
+                else
                 {
                     throw new AppException("Could not find the business you are looking for");
                 }
@@ -58,7 +67,7 @@ namespace PEAS.Services
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -71,7 +80,7 @@ namespace PEAS.Services
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -83,7 +92,7 @@ namespace PEAS.Services
                 validateName(model.Name);
                 validateBlocks(model.Blocks);
 
-                if (_context.Businesses.Any(x => x.Account == account && x.IsActive))
+                if (_context.Businesses.Any(x => x.Account == account && x.IsActive) && account.Role != Role.Admin)
                 {
                     throw new AppException("You already have an existing business please login");
                 }
@@ -94,9 +103,10 @@ namespace PEAS.Services
                 var business = new Business
                 {
                     Account = account,
-                    Sign = model.Sign,
+                    Sign = model.Sign.Trim(),
                     Name = model.Name,
                     Category = model.Category,
+                    Currency = Currency.CAD,
                     Color = model.Color,
                     Description = model.Description,
                     ProfilePhoto = model.ProfilePhoto,
@@ -109,18 +119,19 @@ namespace PEAS.Services
                     Longitude = model.Longitude,
                     IsActive = true,
                     Created = DateTime.UtcNow,
-                    Blocks = model.Blocks
+                    Blocks = model.Blocks,
+                    Schedules = null
                 };
 
                 _context.Businesses.Add(business);
                 _context.SaveChanges();
 
-                return ConstructBusinessResponse(business, account);
+                return constructBusinessResponse(business, account);
             }
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -188,15 +199,16 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                return ConstructBusinessResponse(business, account);
+                return constructBusinessResponse(business, account);
             }
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
+        //Block
         public BusinessResponse AddBlock(Account account, Guid businessId, Block model)
         {
             try
@@ -212,12 +224,12 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                return ConstructBusinessResponse(business, account);
+                return constructBusinessResponse(business, account);
             }
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -240,7 +252,7 @@ namespace PEAS.Services
 
                 if (model.Price != null)
                 {
-                    block.Price = (double)model.Price;
+                    block.Price = (int)model.Price;
                 }
 
                 if (model.Duration != null)
@@ -263,7 +275,7 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                var response = ConstructBusinessResponse(business, account);
+                var response = constructBusinessResponse(business, account);
 
                 return response;
 
@@ -271,7 +283,7 @@ namespace PEAS.Services
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -285,15 +297,214 @@ namespace PEAS.Services
                 throw new AppException("Invalid Block Id");
             }
 
-            business.Blocks.Remove(block);
+            block.Deleted = DateTime.Now;
 
             validateBlocks(business.Blocks);
 
             _context.Businesses.Update(business);
             _context.SaveChanges();
-            return ConstructBusinessResponse(business, account);
+            return constructBusinessResponse(business, account);
         }
 
+        //Schedule
+        public BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleRequest> model)
+        {
+            try
+            {
+                Business business = getBusiness(account, businessId);
+                List<Schedule> schedules = new List<Schedule>();
+                foreach (var schedule in model)
+                {
+                    schedules
+                        .Add(
+                            new Schedule
+                            {
+                                Business = business,
+                                DayOfWeek = schedule.DayOfWeek,
+                                StartTime = schedule.StartTime,
+                                EndTime = schedule.EndTime
+                            }
+                        );
+                }
+
+                business.Schedules = schedules;
+                _context.Businesses.Update(business);
+                _context.SaveChanges();
+                return constructBusinessResponse(business, account);
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        public List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date)
+        {
+            try
+            {
+                //Get business
+                Business? business = _context.Businesses
+                    .AsNoTracking()
+                    .Include(x => x.Blocks)
+                    .Include(x => x.Schedules)
+                    .Where(x => x.Id == businessId)
+                    .FirstOrDefault();
+
+                if (business == null)
+                {
+                    throw new AppException("Invalid Business Id");
+                }
+
+                Block block = getBlock(business, blockId);
+
+                //Get availability for the day
+                Schedule? schedule = business.Schedules?.Where(x => x.DayOfWeek == date.DayOfWeek).FirstOrDefault();
+
+                if (schedule == null)
+                {
+                    return new List<DateRange>();
+                }
+                else
+                {
+                    //Get availability
+                    List<Order>? ordersInTheDay = _context.Orders
+                        .AsNoTracking()
+                        .Where(x => x.OrderStatus != Order.Status.Declined && x.StartTime.Day == date.Day)
+                        .ToList();
+                    //Get existing orders for the selected date
+                    List<DateRange> ordersDateRanges = ordersInTheDay.Select(x => new DateRange(x.StartTime, x.EndTime)).ToList() ?? new List<DateRange>();
+                    return DateRange.GetAvailability(new DateRange(schedule.StartTime, schedule.EndTime), new TimeSpan(0, 0, block.Duration), ordersDateRanges);
+                }
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        //Orders
+        public OrderResponse CreateOrder(Guid businessId, OrderRequest model)
+        {
+            try
+            {
+                //Get business
+                Business? business = _context.Businesses
+                    .Include(x => x.Blocks)
+                    .Where(x => x.Id == businessId)
+                    .FirstOrDefault();
+
+                if (business == null)
+                {
+                    throw new AppException("Invalid Business Id");
+                }
+
+                Block block = getBlock(business, model.BlockId);
+
+                //Get Availability
+                List<DateRange> availabilityDates = GetAvailablity(businessId, model.BlockId, model.DateRange.Start);
+
+                if (!availabilityDates.Contains(model.DateRange))
+                {
+                    throw new AppException("The selected time is unavilable. Please select a different time.");
+                }
+                else
+                {
+                    //Create Customer
+                    Customer? customer = _context.Customers.Where(x => x.Email == model.Email).FirstOrDefault();
+                    if (customer == null)
+                    {
+                        Customer newCustomer = new Customer
+                        {
+                            FirstName = model.FirstName,
+                            LastName = model.Lastname,
+                            Email = model.Email,
+                            Phone = model.Phone
+                        };
+                        _context.Customers.Add(newCustomer);
+                        customer = newCustomer;
+                    }
+                    else
+                    {
+                        customer.FirstName = model.Email;
+                        customer.LastName = model.Lastname;
+                        customer.Phone = model.Phone;
+                        _context.Customers.Update(customer);
+                    }
+
+                    //Create Order
+                    DateTime dateNow = DateTime.UtcNow;
+                    Order order = new Order
+                    {
+                        Business = business,
+                        Block = block,
+                        Customer = customer,
+                        Currency = business.Currency,
+                        Price = block.Price,
+                        Title = block.Title,
+                        Description = block.Description,
+                        Image = block.Image,
+                        Note = model.Note,
+                        StartTime = model.DateRange.Start,
+                        EndTime = model.DateRange.End,
+                        OrderStatus = Order.Status.Pending,
+                        Payments = null,
+                        Created = dateNow,
+                        LastUpdated = dateNow
+                    };
+
+                    _context.Orders.Add(order);
+                    _context.SaveChanges();
+
+                    return _mapper.Map<OrderResponse>(order);
+                }
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        public OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model)
+        {
+            try
+            {
+                Business? business = _context.Businesses
+                    .Where(x => x.Account == account && x.Id == businessId)
+                    .FirstOrDefault();
+
+                if (business == null)
+                {
+                    throw new AppException("Invalid business Id");
+                }
+
+                Order? order = _context.Orders
+                    .Where(x => x.Business.Id == businessId && x.Id == model.OrderId)
+                    .FirstOrDefault();
+
+                if (order == null)
+                {
+                    throw new AppException("Invalid Order Id");
+                }
+
+                order.OrderStatus = model.OrderStatus;
+                order.LastUpdated = DateTime.UtcNow;
+
+                _context.Orders.Update(order);
+                _context.SaveChanges();
+
+                return _mapper.Map<OrderResponse>(order);
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        //Templates
         public List<TemplateResponse> GetTemplates()
         {
             try
@@ -301,12 +512,13 @@ namespace PEAS.Services
                 var templates = _context.Templates
                     .Include(x => x.Business)
                     .AsNoTracking()
-                    .Select(x => new TemplateResponse {
+                    .Select(x => new TemplateResponse
+                    {
                         Id = x.Id,
                         Category = x.Category,
                         Details = x.Details,
                         Photo = x.Photo,
-                        Business = ConstructBusinessResponse(x.Business, null)
+                        Business = constructBusinessResponse(x.Business, null)
                     })
                     .ToList();
 
@@ -315,7 +527,7 @@ namespace PEAS.Services
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -349,13 +561,13 @@ namespace PEAS.Services
                     Category = template.Category,
                     Details = template.Details,
                     Photo = template.Photo,
-                    Business = ConstructBusinessResponse(template.Business, null)
+                    Business = constructBusinessResponse(template.Business, null)
                 };
             }
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -376,7 +588,7 @@ namespace PEAS.Services
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
-                throw new AppException(e.Message);
+                throw AppException.ConstructException(e);
             }
         }
 
@@ -389,14 +601,14 @@ namespace PEAS.Services
                 using var textReader = new JsonTextReader(streamReader);
                 return serializer.Deserialize<Dictionary<string, string>>(textReader)!;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
                 throw new AppException("Error loading business colors");
             }
         }
 
-        private static BusinessResponse ConstructBusinessResponse(Business business, Account? account)
+        private static BusinessResponse constructBusinessResponse(Business business, Account? account)
         {
             var businessResponse = new BusinessResponse
             {
@@ -427,7 +639,7 @@ namespace PEAS.Services
 
         private Business getBusiness(Account account, Guid businessId)
         {
-            var business = _context.Businesses.Include(x => x.Blocks).SingleOrDefault(x => x.Id == businessId);
+            var business = _context.Businesses.Include(x => x.Blocks.Where(y => !y.IsDeleted)).SingleOrDefault(x => x.Id == businessId);
 
             if (business == null || business.Account != account)
             {
@@ -435,6 +647,18 @@ namespace PEAS.Services
             }
 
             return business;
+        }
+
+        private Block getBlock(Business business, Guid blockId)
+        {
+            Block? block = business.Blocks.Where(x => x.Id == blockId && !x.IsDeleted).FirstOrDefault();
+
+            if (block == null)
+            {
+                throw new AppException("Invalid Block Id");
+            }
+
+            return block;
         }
 
         private void validateBlocks(List<Block> blocks)
@@ -449,7 +673,7 @@ namespace PEAS.Services
                 throw new AppException("You are only allowed to have 5 blocks at this moment");
             }
 
-            foreach(Block block in blocks)
+            foreach (Block block in blocks)
             {
                 validateBlock(block);
             }
@@ -457,7 +681,9 @@ namespace PEAS.Services
 
         private void validateBlock(Block block)
         {
-            double maxPrice = 5000.00;
+            int freePrice = Price.FreePrice;
+            int minPrice = Price.MinPrice;
+            int maxPrice = Price.MaxPrice;
 
             if (!Enum.IsDefined(typeof(Block.Type), block.BlockType))
             {
@@ -466,12 +692,17 @@ namespace PEAS.Services
 
             if (block.Price > maxPrice)
             {
-                throw new AppException($"Please type a price below {maxPrice}");
+                throw new AppException($"Please enter a price below {maxPrice}");
             }
 
-            if (block.Price < 0.00)
+            if (block.Price < freePrice)
             {
                 throw new AppException($"Enter a valid number for the price");
+            }
+
+            if (block.Price > freePrice && block.Price < minPrice)
+            {
+                throw new AppException($"The minimum price is {minPrice}");
             }
 
             if (string.IsNullOrEmpty(block.Title))
@@ -497,9 +728,14 @@ namespace PEAS.Services
                 throw new AppException("Invalid PEAS Sign: Your PEAS sign needs to be a maximum of 16 characters");
             }
 
-            if (_context.Businesses.AsNoTracking().Any(x => x.Sign == sign))
+            if (sign.Any(char.IsWhiteSpace))
             {
-                throw new AppException("PEAS Sign taken. Please choose another sign");
+                throw new AppException("Invalid PEAS Sign: Your PEAS sign cannot contain white spaces");
+            }
+
+            if (_context.Businesses.AsNoTracking().Any(x => x.Sign == sign.Trim()))
+            {
+                throw new AppException($"PEAS Sign \"{sign}\" taken. Please choose another sign");
             }
         }
 

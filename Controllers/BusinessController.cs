@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PEAS.Entities.Authentication;
 using PEAS.Entities.Site;
+using PEAS.Helpers.Utilities;
 using PEAS.Models.Business;
+using PEAS.Models.Business.Order;
+using PEAS.Models.Business.Schedule;
 using PEAS.Services;
 
 namespace PEAS.Controllers
@@ -71,6 +75,36 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [Authorize]
+        [HttpPost("schedule")]
+        public ActionResult<BusinessResponse> SetSchedule(Guid businessId, [FromBody] List<ScheduleRequest> model)
+        {
+            var response = _businessService.SetSchedule(Account!, businessId, model);
+            return Ok(response);
+        }
+
+        [HttpPost("order")]
+        public ActionResult<OrderResponse> CreateOrder(Guid businessId, [FromBody] OrderRequest model)
+        {
+            var response = _businessService.CreateOrder(businessId, model);
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPatch("order")]
+        public ActionResult<OrderResponse> UpdateOrder(Guid businessId, [FromBody] UpdateOrderRequest model)
+        {
+            var response = _businessService.UpdateOrder(Account!, businessId, model);
+            return Ok(response);
+        }
+
+        [HttpGet("availability")]
+        public ActionResult<List<DateRange>> GetAvailability(Guid businessId, Guid blockId, DateTime date)
+        {
+            var response = _businessService.GetAvailablity(businessId, blockId, date);
+            return Ok(response);
+        }
+
         [HttpGet("templates")]
         public ActionResult<List<TemplateResponse>> GetTemplates()
         {
@@ -78,6 +112,7 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [Helpers.Authorize(Role.Admin)]
         [HttpPost("template")]
         public ActionResult<TemplateResponse> AddTemplate([FromBody] CreateTemplate model)
         {
@@ -85,6 +120,7 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [Helpers.Authorize(Role.Admin)]
         [HttpDelete("template")]
         public ActionResult DeleteTemplate(Guid id)
         {

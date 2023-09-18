@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PEAS.Entities.Authentication;
+using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 
 namespace PEAS.Entities
@@ -10,7 +11,15 @@ namespace PEAS.Entities
 
         public DbSet<Business> Businesses { get; set; }
 
+        //public DbSet<Wallet> Wallet { get; set; }
+
         public DbSet<Template> Templates { get; set; }
+
+        public DbSet<Customer> Customers { get; set; }
+
+        public DbSet<Order> Orders { get; set; }
+
+        //public DbSet<Transaction> Transactions { get; set; }
 
         private readonly IConfiguration Configuration;
 
@@ -21,7 +30,7 @@ namespace PEAS.Entities
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            // connect to SqlServer database
+            //Connect to SqlServer database
             options.UseSqlServer(Configuration.GetConnectionString("Database"));
         }
 
@@ -39,6 +48,10 @@ namespace PEAS.Entities
                 .HasIndex(x => new { x.Sign })
                 .IsUnique();
 
+            builder.Entity<Customer>()
+              .HasIndex(x => new { x.Email })
+              .IsUnique();
+
             builder.Entity<Account>()
                 .Property(x => x.Role)
                 .HasConversion<string>();
@@ -54,6 +67,14 @@ namespace PEAS.Entities
                 a.Property(b => b.BlockType)
                 .HasConversion<string>();
             });
+
+            builder.Entity<Business>()
+                .Property(x => x.Category)
+                .HasConversion<string>();
+
+            builder.Entity<Template>()
+               .Property(x => x.Category)
+               .HasConversion<string>();
         }
     }
 }
