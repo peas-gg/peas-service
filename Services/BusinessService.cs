@@ -730,7 +730,7 @@ namespace PEAS.Services
 
             if (_context.Businesses.AsNoTracking().Any(x => x.Sign == sign))
             {
-                throw new AppException("PEAS Sign taken. Please choose another sign");
+                throw new AppException($"PEAS Sign \"{sign}\" taken. Please choose another sign");
             }
         }
 
