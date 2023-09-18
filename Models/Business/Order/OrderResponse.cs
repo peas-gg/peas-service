@@ -14,7 +14,7 @@ namespace PEAS.Models.Business.Order
 
         public required Entities.Booking.Order.Status OrderStatus { get; set; }
 
-        public required decimal Price { get; set; }
+        public required long Price { get; set; }
 
         public required string Title { get; set; }
 

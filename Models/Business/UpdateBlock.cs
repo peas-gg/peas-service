@@ -6,7 +6,7 @@
 
         public Uri? Image { get; set; }
 
-        public decimal? Price { get; set; }
+        public long? Price { get; set; }
 
         public int? Duration { get; set; }
 

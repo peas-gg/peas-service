@@ -252,7 +252,7 @@ namespace PEAS.Services
 
                 if (model.Price != null)
                 {
-                    block.Price = (decimal)model.Price;
+                    block.Price = (long)model.Price;
                 }
 
                 if (model.Duration != null)
@@ -681,9 +681,9 @@ namespace PEAS.Services
 
         private void validateBlock(Block block)
         {
-            decimal freePrice = 0M;
-            decimal minPrice = 10M;
-            decimal maxPrice = 5000M;
+            long freePrice = Price.FreePrice;
+            long minPrice = Price.MinPrice;
+            long maxPrice = Price.MaxPrice;
 
             if (!Enum.IsDefined(typeof(Block.Type), block.BlockType))
             {
