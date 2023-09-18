@@ -11,7 +11,7 @@ namespace PEAS.Entities
 
         public DbSet<Business> Businesses { get; set; }
 
-        public DbSet<Wallet> Wallet { get; set; }
+        //public DbSet<Wallet> Wallet { get; set; }
 
         public DbSet<Template> Templates { get; set; }
 
@@ -19,7 +19,7 @@ namespace PEAS.Entities
 
         public DbSet<Order> Orders { get; set; }
 
-        public DbSet<Transaction> Transactions { get; set; }
+        //public DbSet<Transaction> Transactions { get; set; }
 
         private readonly IConfiguration Configuration;
 
@@ -30,7 +30,7 @@ namespace PEAS.Entities
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            // connect to SqlServer database
+            //Connect to SqlServer database
             options.UseSqlServer(Configuration.GetConnectionString("Database"));
         }
 
