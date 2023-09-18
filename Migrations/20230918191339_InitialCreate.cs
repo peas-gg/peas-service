@@ -180,6 +180,15 @@ namespace PEAS.Migrations
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     OrderStatus = table.Column<int>(type: "int", nullable: false),
+                    Payment_Id = table.Column<int>(type: "int", nullable: true),
+                    Payment_Currency = table.Column<int>(type: "int", nullable: true),
+                    Payment_Base = table.Column<int>(type: "int", nullable: true),
+                    Payment_Deposit = table.Column<int>(type: "int", nullable: true),
+                    Payment_Tip = table.Column<int>(type: "int", nullable: true),
+                    Payment_Fee = table.Column<int>(type: "int", nullable: true),
+                    Payment_Total = table.Column<int>(type: "int", nullable: true),
+                    Payment_Created = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DidRequestPayment = table.Column<bool>(type: "bit", nullable: false),
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Version = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
@@ -243,31 +252,6 @@ namespace PEAS.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Payment",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Currency = table.Column<int>(type: "int", nullable: false),
-                    Base = table.Column<int>(type: "int", nullable: false),
-                    Tip = table.Column<int>(type: "int", nullable: false),
-                    Fee = table.Column<int>(type: "int", nullable: false),
-                    Total = table.Column<int>(type: "int", nullable: false),
-                    Created = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Payment", x => new { x.OrderId, x.Id });
-                    table.ForeignKey(
-                        name: "FK_Payment_Orders_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_Email",
                 table: "Accounts",
@@ -323,7 +307,7 @@ namespace PEAS.Migrations
                 name: "Device");
 
             migrationBuilder.DropTable(
-                name: "Payment");
+                name: "Orders");
 
             migrationBuilder.DropTable(
                 name: "RefreshToken");
@@ -335,13 +319,10 @@ namespace PEAS.Migrations
                 name: "Templates");
 
             migrationBuilder.DropTable(
-                name: "Orders");
+                name: "Customers");
 
             migrationBuilder.DropTable(
                 name: "Businesses");
-
-            migrationBuilder.DropTable(
-                name: "Customers");
 
             migrationBuilder.DropTable(
                 name: "Accounts");

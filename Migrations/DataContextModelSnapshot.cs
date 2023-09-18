@@ -135,6 +135,9 @@ namespace PEAS.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("DidRequestPayment")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
@@ -417,16 +420,10 @@ namespace PEAS.Migrations
                                 .HasForeignKey("OrderId");
                         });
 
-                    b.OwnsMany("PEAS.Entities.Booking.Payment", "Payments", b1 =>
+                    b.OwnsOne("PEAS.Entities.Booking.Payment", "Payment", b1 =>
                         {
                             b1.Property<Guid>("OrderId")
                                 .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
 
                             b1.Property<int>("Base")
                                 .HasColumnType("int");
@@ -437,7 +434,13 @@ namespace PEAS.Migrations
                             b1.Property<int>("Currency")
                                 .HasColumnType("int");
 
+                            b1.Property<int>("Deposit")
+                                .HasColumnType("int");
+
                             b1.Property<int>("Fee")
+                                .HasColumnType("int");
+
+                            b1.Property<int>("Id")
                                 .HasColumnType("int");
 
                             b1.Property<int>("Tip")
@@ -446,9 +449,9 @@ namespace PEAS.Migrations
                             b1.Property<int>("Total")
                                 .HasColumnType("int");
 
-                            b1.HasKey("OrderId", "Id");
+                            b1.HasKey("OrderId");
 
-                            b1.ToTable("Payment");
+                            b1.ToTable("Orders");
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderId");
@@ -461,7 +464,7 @@ namespace PEAS.Migrations
 
                     b.Navigation("Customer");
 
-                    b.Navigation("Payments");
+                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("PEAS.Entities.Site.Business", b =>

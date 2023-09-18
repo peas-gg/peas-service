@@ -449,7 +449,7 @@ namespace PEAS.Services
                         StartTime = model.DateRange.Start,
                         EndTime = model.DateRange.End,
                         OrderStatus = Order.Status.Pending,
-                        Payments = null,
+                        Payment = null,
                         Created = dateNow,
                         LastUpdated = dateNow
                     };
