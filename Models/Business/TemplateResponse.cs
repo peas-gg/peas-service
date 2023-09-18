@@ -1,10 +1,12 @@
-﻿namespace PEAS.Models.Business
+﻿using PEAS.Entities.Site;
+
+namespace PEAS.Models.Business
 {
     public class TemplateResponse
     {
         public Guid Id { get; set; }
 
-        public required string Category { get; set; }
+        public required Category Category { get; set; }
 
         public string? Details { get; set; }
 

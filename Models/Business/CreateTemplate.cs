@@ -1,9 +1,10 @@
-﻿using System;
+﻿using PEAS.Entities.Site;
+
 namespace PEAS.Models.Business
 {
     public class CreateTemplate
     {
-        public required string Category { get; set; }
+        public required Category Category { get; set; }
 
         public string? Details { get; set; }
 

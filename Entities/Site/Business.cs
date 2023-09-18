@@ -18,7 +18,7 @@ namespace PEAS.Entities.Site
         [StringLength(30)]
         public required string Name { get; set; }
 
-        public string? Category { get; set; }
+        public Category? Category { get; set; }
 
         public required Currency Currency { get; set; }
 
