@@ -32,7 +32,7 @@ namespace PEAS.Entities.Booking
 
         public required string Title { get; set; }
 
-        public required decimal Amount { get; set; }
+        public required int Amount { get; set; }
 
         public required DateTime Created { get; set; }
     }

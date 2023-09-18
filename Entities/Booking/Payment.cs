@@ -11,13 +11,13 @@ namespace PEAS.Entities.Booking
 
         public Currency Currency { get; set; }
 
-        public required decimal Base { get; set; }
+        public required int Base { get; set; }
 
-        public required decimal Tip { get; set; }
+        public required int Tip { get; set; }
 
-        public required decimal Fee { get; set; }
+        public required int Fee { get; set; }
 
-        public required decimal Total { get; set; }
+        public required int Total { get; set; }
 
         public required DateTime Created { get; set; }
     }

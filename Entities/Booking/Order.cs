@@ -27,7 +27,7 @@ namespace PEAS.Entities.Booking
 
         public required Currency Currency { get; set; }
 
-        public required long Price { get; set; }
+        public required int Price { get; set; }
 
         public required string Title { get; set; }
 

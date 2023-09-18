@@ -22,7 +22,7 @@ namespace PEAS.Entities.Site
 
         public required Currency Currency { get; set; }
 
-        public required long Price { get; set; }
+        public required int Price { get; set; }
 
         //In Seconds
         public required int Duration { get; set; }

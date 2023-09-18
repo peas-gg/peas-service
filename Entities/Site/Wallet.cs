@@ -6,11 +6,11 @@ namespace PEAS.Entities.Site
     {
         public required Business Business { get; set; }
 
-        public required decimal Balance { get; set; }
+        public required int Balance { get; set; }
 
-        public required decimal PendingDeposit { get; set; }
+        public required int PendingDeposit { get; set; }
 
-        public required decimal PendingWithdrawal { get; set; }
+        public required int PendingWithdrawal { get; set; }
 
         [Timestamp]
         public required byte[] Version { get; set; }
