@@ -20,8 +20,6 @@ namespace PEAS.Entities.Site
 
         public required Uri Image { get; set; }
 
-        public required Currency Currency { get; set; }
-
         public required int Price { get; set; }
 
         //In Seconds
