@@ -71,6 +71,10 @@ namespace PEAS.Entities
             builder.Entity<Business>()
                 .Property(x => x.Category)
                 .HasConversion<string>();
+
+            builder.Entity<Template>()
+               .Property(x => x.Category)
+               .HasConversion<string>();
         }
     }
 }

@@ -92,7 +92,7 @@ namespace PEAS.Services
                 validateName(model.Name);
                 validateBlocks(model.Blocks);
 
-                if (_context.Businesses.Any(x => x.Account == account && x.IsActive))
+                if (_context.Businesses.Any(x => x.Account == account && x.IsActive) && account.Role != Role.Admin)
                 {
                     throw new AppException("You already have an existing business please login");
                 }
