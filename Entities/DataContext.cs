@@ -48,6 +48,10 @@ namespace PEAS.Entities
                 .HasIndex(x => new { x.Sign })
                 .IsUnique();
 
+            builder.Entity<Customer>()
+              .HasIndex(x => new { x.Email })
+              .IsUnique();
+
             builder.Entity<Account>()
                 .Property(x => x.Role)
                 .HasConversion<string>();
