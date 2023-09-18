@@ -41,7 +41,7 @@ namespace PEAS.Entities.Booking
 
         public required DateTime EndTime { get; set; }
 
-        public required Status OrderStatus  { get; set; }
+        public required Status OrderStatus { get; set; }
 
         public List<Payment>? Payments { get; set; }
 
