@@ -227,7 +227,7 @@ namespace PEAS.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Category = table.Column<int>(type: "int", nullable: false),
                     Details = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Photo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     BusinessId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)

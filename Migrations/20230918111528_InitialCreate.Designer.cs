@@ -12,7 +12,7 @@ using PEAS.Entities;
 namespace PEAS.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230918100852_InitialCreate")]
+    [Migration("20230918111528_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -267,9 +267,8 @@ namespace PEAS.Migrations
                     b.Property<Guid>("BusinessId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
 
                     b.Property<string>("Details")
                         .HasColumnType("nvarchar(max)");
