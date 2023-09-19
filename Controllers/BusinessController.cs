@@ -28,6 +28,14 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [Authorize]
+        [HttpGet("account")]
+        public ActionResult<BusinessResponse> GetBusinessAccount()
+        {
+            var response = _businessService.GetBusiness(Account!);
+            return Ok(response);
+        }
+
         [HttpGet("location")]
         public ActionResult<string> GetLocation(double latitude, double longitude)
         {

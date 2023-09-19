@@ -16,6 +16,7 @@ namespace PEAS.Services
     public interface IBusinessService
     {
         BusinessResponse GetBusiness(string sign);
+        BusinessResponse GetBusiness(Account account);
         string GetLocation(double latitude, double longitude);
         BusinessResponse AddBusiness(Account account, CreateBusiness model);
         BusinessResponse UpdateBusiness(Account account, UpdateBusiness model);
@@ -53,7 +54,7 @@ namespace PEAS.Services
             {
                 var business = _context.Businesses
                     .AsNoTracking()
-                    .Include(x => x.Blocks).SingleOrDefault(x => x.Sign == sign);
+                    .Include(x => x.Blocks).SingleOrDefault(x => x.Sign == sign && x.IsActive);
 
                 if (business != null)
                 {
@@ -62,6 +63,31 @@ namespace PEAS.Services
                 else
                 {
                     throw new AppException("Could not find the business you are looking for");
+                }
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        public BusinessResponse GetBusiness(Account account)
+        {
+            try
+            {
+                var business = _context.Businesses
+                    .AsNoTracking()
+                    .Include(x => x.Blocks)
+                    .FirstOrDefault(x => x.Account == account && x.IsActive);
+
+                if (business != null)
+                {
+                    return constructBusinessResponse(business, account);
+                }
+                else
+                {
+                    throw new AppException("No business found. Please create a business");
                 }
             }
             catch (Exception e)
