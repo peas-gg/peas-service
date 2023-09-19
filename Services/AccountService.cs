@@ -373,13 +373,13 @@ namespace PEAS.Services
 
         private string generateJwtToken(Account account)
         {
-            int expiryMinutes = _configuration.GetSection("Environment").Value == "Development" ? 1 : 10;
+            int expiryMinutes = _configuration.GetSection("Environment").Value == "Development" ? 30 : 10;
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_configuration.GetSection("Secret").Value!);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] { new Claim("id", account.Id.ToString()) }),
-                Expires = DateTime.UtcNow.AddMinutes(expiryMinutes),
+                Expires = DateTime.UtcNow.AddSeconds(20),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
