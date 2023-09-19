@@ -51,6 +51,14 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [HttpPost("refresh")]
+        public ActionResult<AuthenticateResponse> RefreshToken()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            var response = _accountService.RefreshToken(refreshToken!, ipAddress());
+            return Ok(response);
+        }
+
         [HttpGet("password/reset")]
         public ActionResult<EmptyResponse> RequestPasswordReset(string email)
         {

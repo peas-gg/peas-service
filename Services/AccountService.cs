@@ -18,6 +18,7 @@ namespace PEAS.Services
     {
         AuthenticateResponse? Authenticate(AuthenticateRequest model, string ipAddress);
         AuthenticateResponse Register(RegisterRequest model, string ipAddress);
+        AuthenticateResponse RefreshToken(string token, string ipAddress);
         string? ValidatePhoneNumber(string phoneNumber);
         EmptyResponse RequestVerificationCode(string phoneNumber);
         EmptyResponse RequestPasswordReset(string email);
@@ -180,6 +181,32 @@ namespace PEAS.Services
             }
         }
 
+        public AuthenticateResponse RefreshToken(string token, string ipAddress)
+        {
+            var (refreshToken, account) = getRefreshToken(token);
+
+            // replace old refresh token with a new one and save
+            var newRefreshToken = generateRefreshToken(account, ipAddress);
+            refreshToken.Revoked = DateTime.UtcNow;
+            refreshToken.RevokedByIp = ipAddress;
+            refreshToken.ReplacedByToken = newRefreshToken.Token;
+
+            removeOldRefreshTokens(account);
+
+            account.RefreshTokens?.Add(newRefreshToken);
+
+            _context.Update(account);
+            _context.SaveChanges();
+
+            // generate new jwt
+            var jwtToken = generateJwtToken(account);
+
+            var response = _mapper.Map<AuthenticateResponse>(account);
+            response.JwtToken = jwtToken;
+            response.RefreshToken = newRefreshToken.Token;
+            return response;
+        }
+
         public EmptyResponse RequestPasswordReset(string email)
         {
             try
@@ -259,6 +286,15 @@ namespace PEAS.Services
         public string? ValidatePhoneNumber(string phoneNumber)
         {
             return _twilioService.ValidatePhoneNumber(phoneNumber);
+        }
+
+        private (RefreshToken, Account) getRefreshToken(string token)
+        {
+            var account = _context.Accounts.SingleOrDefault(x => x.RefreshTokens!.Any(y => y.Token == token));
+            if (account == null) throw new AppException("Invalid token");
+            var refreshToken = account.RefreshTokens!.Single(x => x.Token == token);
+            if (!refreshToken.IsActive) throw new AppException("Invalid token");
+            return (refreshToken, account);
         }
 
         private void validateRegisterModel(RegisterRequest model)
