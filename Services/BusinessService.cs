@@ -651,7 +651,7 @@ namespace PEAS.Services
                 Location = business.Location,
                 TimeZone = business.TimeZone,
                 IsActive = business.IsActive,
-                Blocks = business.Blocks
+                Blocks = business.Blocks.Where(x => x.Deleted == null).ToList()
             };
 
             if ((account != null) && (business.Account == account))
