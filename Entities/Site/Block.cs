@@ -31,6 +31,6 @@ namespace PEAS.Entities.Site
 
         public DateTime? Deleted { get; set; }
 
-        public bool IsDeleted => Deleted != null;
+        public bool IsDeleted { get => Deleted != null; set => _ = value; }
     }
 }
