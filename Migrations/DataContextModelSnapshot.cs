@@ -379,47 +379,6 @@ namespace PEAS.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("PEAS.Entities.Site.Block", "Block", b1 =>
-                        {
-                            b1.Property<Guid>("OrderId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("BlockType")
-                                .HasColumnType("int");
-
-                            b1.Property<DateTime?>("Deleted")
-                                .HasColumnType("datetime2");
-
-                            b1.Property<string>("Description")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<int>("Duration")
-                                .HasColumnType("int");
-
-                            b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("Image")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<int>("Price")
-                                .HasColumnType("int");
-
-                            b1.Property<string>("Title")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("OrderId");
-
-                            b1.ToTable("Orders");
-
-                            b1.WithOwner()
-                                .HasForeignKey("OrderId");
-                        });
-
                     b.OwnsOne("PEAS.Entities.Booking.Payment", "Payment", b1 =>
                         {
                             b1.Property<Guid>("OrderId")
@@ -456,9 +415,6 @@ namespace PEAS.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("OrderId");
                         });
-
-                    b.Navigation("Block")
-                        .IsRequired();
 
                     b.Navigation("Business");
 
@@ -516,9 +472,6 @@ namespace PEAS.Migrations
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
-                            b1.Property<DateTime?>("Deleted")
-                                .HasColumnType("datetime2");
-
                             b1.Property<string>("Description")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
@@ -539,7 +492,7 @@ namespace PEAS.Migrations
 
                             b1.HasKey("BusinessId", "Id");
 
-                            b1.ToTable("Businesses_Blocks");
+                            b1.ToTable("Block");
 
                             b1.WithOwner()
                                 .HasForeignKey("BusinessId");

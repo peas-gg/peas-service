@@ -21,8 +21,6 @@ namespace PEAS.Entities.Booking
 
         public required Business Business { get; set; }
 
-        public required Block Block { get; set; }
-
         public required Customer Customer { get; set; }
 
         public required Currency Currency { get; set; }

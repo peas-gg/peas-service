@@ -322,7 +322,7 @@ namespace PEAS.Services
                 throw new AppException("Invalid Block Id");
             }
 
-            block.Deleted = DateTime.Now;
+            business.Blocks.Remove(block);
 
             validateBlocks(business.Blocks);
 
@@ -463,7 +463,6 @@ namespace PEAS.Services
                     Order order = new Order
                     {
                         Business = business,
-                        Block = block,
                         Customer = customer,
                         Currency = business.Currency,
                         Price = block.Price,
@@ -650,7 +649,7 @@ namespace PEAS.Services
                 Location = business.Location,
                 TimeZone = business.TimeZone,
                 IsActive = business.IsActive,
-                Blocks = business.Blocks.Where(x => x.Deleted == null).ToList(),
+                Blocks = business.Blocks,
                 Schedules = null
             };
 
@@ -666,7 +665,7 @@ namespace PEAS.Services
 
         private Business getBusiness(Account account, Guid businessId)
         {
-            var business = _context.Businesses.Include(x => x.Blocks.Where(y => y.Deleted == null)).SingleOrDefault(x => x.Id == businessId);
+            var business = _context.Businesses.Include(x => x.Blocks).SingleOrDefault(x => x.Id == businessId);
 
             if (business == null || business.Account != account)
             {
@@ -678,7 +677,7 @@ namespace PEAS.Services
 
         private Block getBlock(Business business, Guid blockId)
         {
-            Block? block = business.Blocks.Where(x => x.Id == blockId && x.Deleted == null).FirstOrDefault();
+            Block? block = business.Blocks.Where(x => x.Id == blockId).FirstOrDefault();
 
             if (block == null)
             {

@@ -132,7 +132,7 @@ namespace PEAS.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Businesses_Blocks",
+                name: "Block",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -142,14 +142,13 @@ namespace PEAS.Migrations
                     Price = table.Column<int>(type: "int", nullable: false),
                     Duration = table.Column<int>(type: "int", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Deleted = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Businesses_Blocks", x => new { x.BusinessId, x.Id });
+                    table.PrimaryKey("PK_Block", x => new { x.BusinessId, x.Id });
                     table.ForeignKey(
-                        name: "FK_Businesses_Blocks_Businesses_BusinessId",
+                        name: "FK_Block_Businesses_BusinessId",
                         column: x => x.BusinessId,
                         principalTable: "Businesses",
                         principalColumn: "Id",
@@ -162,14 +161,6 @@ namespace PEAS.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BusinessId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Block_Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Block_BlockType = table.Column<int>(type: "int", nullable: false),
-                    Block_Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Block_Price = table.Column<int>(type: "int", nullable: false),
-                    Block_Duration = table.Column<int>(type: "int", nullable: false),
-                    Block_Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Block_Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Block_Deleted = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CustomerId = table.Column<int>(type: "int", nullable: false),
                     Currency = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<int>(type: "int", nullable: false),
@@ -301,7 +292,7 @@ namespace PEAS.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Businesses_Blocks");
+                name: "Block");
 
             migrationBuilder.DropTable(
                 name: "Device");
