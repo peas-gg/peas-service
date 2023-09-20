@@ -19,7 +19,6 @@
     <None Remove="Models\Business\" />
     <None Remove="Models\Maps\" />
     <None Remove="Entities\Booking\" />
-    <None Remove="Models\Business\Schedule\" />
     <None Remove="Helpers\Utilities\" />
     <None Remove="Models\Business\Order\" />
     <None Remove="Migrations\" />
@@ -37,7 +36,6 @@
     <Folder Include="Models\Business\" />
     <Folder Include="Models\Maps\" />
     <Folder Include="Entities\Booking\" />
-    <Folder Include="Models\Business\Schedule\" />
     <Folder Include="Helpers\Utilities\" />
     <Folder Include="Models\Business\Order\" />
     <Folder Include="Migrations\" />

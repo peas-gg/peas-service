@@ -23,7 +23,7 @@ namespace PEAS.Services
         BusinessResponse AddBlock(Account account, Guid businessId, Block model);
         BusinessResponse UpdateBlock(Account account, Guid businessId, UpdateBlock model);
         BusinessResponse DeleteBlock(Account account, Guid businessId, Guid blockId);
-        BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleRequest> model);
+        BusinessResponse SetSchedule(Account account, Guid businessId, List<Schedule> model);
         List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date);
         OrderResponse CreateOrder(Guid businessId, OrderRequest model);
         OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model);
@@ -333,7 +333,7 @@ namespace PEAS.Services
         }
 
         //Schedule
-        public BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleRequest> model)
+        public BusinessResponse SetSchedule(Account account, Guid businessId, List<Schedule> model)
         {
             try
             {
