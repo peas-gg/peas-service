@@ -651,13 +651,15 @@ namespace PEAS.Services
                 Location = business.Location,
                 TimeZone = business.TimeZone,
                 IsActive = business.IsActive,
-                Blocks = business.Blocks.Where(x => x.Deleted == null).ToList()
+                Blocks = business.Blocks.Where(x => x.Deleted == null).ToList(),
+                Schedules = null
             };
 
             if ((account != null) && (business.Account == account))
             {
                 businessResponse.Latitude = business.Latitude;
                 businessResponse.Longitude = business.Longitude;
+                businessResponse.Schedules = business.Schedules;
             }
 
             return businessResponse;

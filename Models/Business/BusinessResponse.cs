@@ -35,5 +35,7 @@ namespace PEAS.Models.Business
         public required bool IsActive { get; set; }
 
         public required List<Block> Blocks { get; set; }
+
+        public required List<Entities.Booking.Schedule>? Schedules { get; set; }
     }
 }
