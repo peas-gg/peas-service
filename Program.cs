@@ -22,6 +22,7 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IBusinessService, BusinessService>();
 builder.Services.AddScoped<ITwilioService, TwilioService>();
 builder.Services.AddScoped<IMapService, MapService>();
+builder.Services.AddScoped<IMediaService, MediaService>();
 
 builder.Services.AddDbContext<DataContext>();
 

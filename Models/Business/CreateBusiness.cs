@@ -1,5 +1,4 @@
-﻿using System;
-using PEAS.Entities.Site;
+﻿using PEAS.Entities.Site;
 
 namespace PEAS.Models.Business
 {
