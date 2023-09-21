@@ -340,6 +340,10 @@ namespace PEAS.Services
                 List<Schedule> schedules = new List<Schedule>();
                 foreach (var schedule in model)
                 {
+                    if (schedule.StartTime > schedule.EndTime)
+                    {
+                        throw new AppException("Invalid Schedule: The start time for each day must be less that the end time.");
+                    }
                     schedules
                         .Add(
                             new Schedule
