@@ -392,6 +392,13 @@ namespace PEAS.Services
                 }
                 else
                 {
+                    //Get the schedule for the date the user wants
+                    DateTime startDate = date.ResetTimeToStartOfDay();
+                    DateTime endDate = date.ResetTimeToStartOfDay();
+                    startDate.Add(new TimeSpan(schedule.StartTime.Hour, schedule.StartTime.Minute, 0));
+                    endDate.Add(new TimeSpan(schedule.EndTime.Hour, schedule.EndTime.Minute, 0));
+                    DateRange scheduleForTheDate = new DateRange(startDate, endDate);
+
                     //Get availability
                     List<Order>? ordersInTheDay = _context.Orders
                         .AsNoTracking()
@@ -399,7 +406,7 @@ namespace PEAS.Services
                         .ToList();
                     //Get existing orders for the selected date
                     List<DateRange> ordersDateRanges = ordersInTheDay.Select(x => new DateRange(x.StartTime, x.EndTime)).ToList() ?? new List<DateRange>();
-                    return DateRange.GetAvailability(new DateRange(schedule.StartTime, schedule.EndTime), new TimeSpan(0, 0, block.Duration), ordersDateRanges);
+                    return DateRange.GetAvailability(scheduleForTheDate, new TimeSpan(0, 0, block.Duration), ordersDateRanges);
                 }
             }
             catch (Exception e)
