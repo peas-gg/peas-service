@@ -401,10 +401,8 @@ namespace PEAS.Services
                 else
                 {
                     //Get the schedule for the date the user wants
-                    DateTime startDate = date.ResetTimeToStartOfDay();
-                    DateTime endDate = date.ResetTimeToStartOfDay();
-                    startDate.Add(new TimeSpan(schedule.StartTime.Hour, schedule.StartTime.Minute, 0));
-                    endDate.Add(new TimeSpan(schedule.EndTime.Hour, schedule.EndTime.Minute, 0));
+                    DateTime startDate = date.ResetTimeToStartOfDay().Add(new TimeSpan(schedule.StartTime.Hour, schedule.StartTime.Minute, 0));
+                    DateTime endDate = startDate + (schedule.EndTime - schedule.StartTime);
                     DateRange scheduleForTheDate = new DateRange(startDate, endDate);
 
                     //Get availability
@@ -412,6 +410,7 @@ namespace PEAS.Services
                         .AsNoTracking()
                         .Where(x => x.OrderStatus != Order.Status.Declined && x.StartTime.Day == date.Day)
                         .ToList();
+
                     //Get existing orders for the selected date
                     List<DateRange> ordersDateRanges = ordersInTheDay.Select(x => new DateRange(x.StartTime, x.EndTime)).ToList() ?? new List<DateRange>();
                     return DateRange.GetAvailability(scheduleForTheDate, new TimeSpan(0, 0, block.Duration), ordersDateRanges);
