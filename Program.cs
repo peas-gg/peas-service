@@ -17,7 +17,6 @@ builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
     {
-        options.SerializerSettings.Converters.Add(new StringEnumConverter());
         options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
     });
 

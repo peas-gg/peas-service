@@ -1,8 +1,9 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace PEAS.Entities.Site
 {
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum Category
     {
         Hair,

@@ -1,16 +1,19 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using PEAS.Entities.Site;
 
 namespace PEAS.Entities.Booking
 {
     public class Transaction
     {
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum Type
         {
             Deposit,
             Withdrawal
         }
 
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum Status
         {
             Processing,

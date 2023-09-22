@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using PEAS.Entities.Site;
 
 namespace PEAS.Entities.Booking
 {
     public class Order
     {
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum Status
         {
             Pending,

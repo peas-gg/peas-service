@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace PEAS.Entities.Site
 {
     [Owned]
     public class Block
     {
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum Type
         {
             Genesis
