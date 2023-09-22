@@ -53,6 +53,7 @@ namespace PEAS.Services
             {
                 var business = _context.Businesses
                     .AsNoTracking()
+                    .Include(x => x.Account)
                     .Include(x => x.Blocks).SingleOrDefault(x => x.Sign == sign && x.IsActive);
 
                 if (business != null)
@@ -77,6 +78,7 @@ namespace PEAS.Services
             {
                 var business = _context.Businesses
                     .AsNoTracking()
+                    .Include(x => x.Account)
                     .Include(x => x.Blocks)
                     .FirstOrDefault(x => x.Account == account && x.IsActive);
 
@@ -164,7 +166,7 @@ namespace PEAS.Services
         {
             try
             {
-                var business = _context.Businesses.SingleOrDefault(x => x.Id == model.Id);
+                var business = _context.Businesses.Include(x => x.Account).SingleOrDefault(x => x.Id == model.Id);
 
                 if (business == null || business.Account != account)
                 {
@@ -666,7 +668,7 @@ namespace PEAS.Services
                 Schedules = null
             };
 
-            if ((account != null) && (business.Account == account))
+            if ((account != null) && (business.Account.Id == account.Id))
             {
                 businessResponse.Latitude = business.Latitude;
                 businessResponse.Longitude = business.Longitude;
@@ -696,7 +698,10 @@ namespace PEAS.Services
 
         private Business getBusiness(Account account, Guid businessId)
         {
-            var business = _context.Businesses.Include(x => x.Blocks).SingleOrDefault(x => x.Id == businessId);
+            var business = _context.Businesses
+                .Include(x => x.Account)
+                .Include(x => x.Blocks)
+                .SingleOrDefault(x => x.Id == businessId);
 
             if (business == null || business.Account != account)
             {
