@@ -355,7 +355,9 @@ namespace PEAS.Services
                         );
                 }
 
+                business.Schedules?.Clear();
                 business.Schedules = schedules;
+
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
                 return constructBusinessResponse(business, account);
