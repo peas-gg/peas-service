@@ -341,12 +341,10 @@ namespace PEAS.Services
                 List<Schedule> schedules = new List<Schedule>();
                 foreach (var schedule in model)
                 {
-                    if (schedule.StartTime.Hour > schedule.EndTime.Hour)
+                    if (schedule.StartTime > schedule.EndTime)
                     {
                         throw new AppException("Invalid Schedule: The start time for each day must be less that the end time.");
                     }
-
-                    DateTime date = DateTime.UtcNow.ResetTimeToStartOfDay();
                     
                     schedules
                         .Add(
@@ -354,8 +352,8 @@ namespace PEAS.Services
                             {
                                 Business = business,
                                 DayOfWeek = schedule.DayOfWeek,
-                                StartTime = date.Add(new TimeSpan(schedule.StartTime.Hour, schedule.StartTime.Minute, 0)),
-                                EndTime = date.Add(new TimeSpan(schedule.EndTime.Hour, schedule.EndTime.Minute, 0))
+                                StartTime = schedule.StartTime,
+                                EndTime = schedule.EndTime
                             }
                         );
                 }
