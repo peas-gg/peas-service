@@ -684,6 +684,7 @@ namespace PEAS.Services
                 response.Add(
                     new ScheduleModel
                     {
+                        Id = schedule.Id,
                         DayOfWeek = schedule.DayOfWeek,
                         StartTime = schedule.StartTime,
                         EndTime = schedule.EndTime
