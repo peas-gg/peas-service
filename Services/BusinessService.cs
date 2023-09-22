@@ -683,13 +683,14 @@ namespace PEAS.Services
             List<ScheduleModel> response = new List<ScheduleModel>();
             foreach (var schedule in schedules)
             {
+                DateTime date = DateTime.Now.ResetTimeToStartOfDay();
                 response.Add(
                     new ScheduleModel
                     {
                         Id = schedule.Id,
                         DayOfWeek = schedule.DayOfWeek,
-                        StartTime = schedule.StartTime,
-                        EndTime = schedule.EndTime
+                        StartTime = date.Add(new TimeSpan(schedule.StartTime.Hour, schedule.StartTime.Second, 0)),
+                        EndTime = date.Add(new TimeSpan(schedule.EndTime.Hour, schedule.EndTime.Second, 0))
                     }
                 );
             }
