@@ -22,7 +22,7 @@ namespace PEAS.Services
         BusinessResponse AddBlock(Account account, Guid businessId, Block model);
         BusinessResponse UpdateBlock(Account account, Guid businessId, UpdateBlock model);
         BusinessResponse DeleteBlock(Account account, Guid businessId, Guid blockId);
-        BusinessResponse SetSchedule(Account account, Guid businessId, List<Schedule> model);
+        BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleModel> model);
         List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date);
         OrderResponse CreateOrder(Guid businessId, OrderRequest model);
         OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model);
@@ -303,7 +303,6 @@ namespace PEAS.Services
                 var response = constructBusinessResponse(business, account);
 
                 return response;
-
             }
             catch (Exception e)
             {
@@ -332,7 +331,7 @@ namespace PEAS.Services
         }
 
         //Schedule
-        public BusinessResponse SetSchedule(Account account, Guid businessId, List<Schedule> model)
+        public BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleModel> model)
         {
             try
             {
@@ -579,6 +578,7 @@ namespace PEAS.Services
                 {
                     throw new AppException("Invalid Business Id");
                 }
+
                 Template template = new Template
                 {
                     Category = model.Category,
@@ -668,10 +668,27 @@ namespace PEAS.Services
             {
                 businessResponse.Latitude = business.Latitude;
                 businessResponse.Longitude = business.Longitude;
-                businessResponse.Schedules = business.Schedules;
+                businessResponse.Schedules = business.Schedules == null ? null : mapScheduleModel(business.Schedules);
             }
 
             return businessResponse;
+        }
+
+        private static List<ScheduleModel> mapScheduleModel(List<Schedule> schedules)
+        {
+            List<ScheduleModel> response = new List<ScheduleModel>();
+            foreach (var schedule in schedules)
+            {
+                response.Add(
+                    new ScheduleModel
+                    {
+                        DayOfWeek = schedule.DayOfWeek,
+                        StartTime = schedule.StartTime,
+                        EndTime = schedule.EndTime
+                    }
+                );
+            }
+            return response;
         }
 
         private Business getBusiness(Account account, Guid businessId)

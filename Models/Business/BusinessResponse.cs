@@ -36,6 +36,6 @@ namespace PEAS.Models.Business
 
         public required List<Block> Blocks { get; set; }
 
-        public required List<Entities.Booking.Schedule>? Schedules { get; set; }
+        public required List<ScheduleModel>? Schedules { get; set; }
     }
 }

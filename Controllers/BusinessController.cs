@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PEAS.Entities.Authentication;
-using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers.Utilities;
 using PEAS.Models.Business;
@@ -85,7 +84,7 @@ namespace PEAS.Controllers
 
         [Authorize]
         [HttpPost("schedule")]
-        public ActionResult<BusinessResponse> SetSchedule(Guid businessId, [FromBody] List<Schedule> model)
+        public ActionResult<BusinessResponse> SetSchedule(Guid businessId, [FromBody] List<ScheduleModel> model)
         {
             var response = _businessService.SetSchedule(Account!, businessId, model);
             return Ok(response);
