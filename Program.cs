@@ -6,13 +6,18 @@ using Microsoft.IdentityModel.Tokens;
 using PEAS.Entities;
 using PEAS.Middleware;
 using PEAS.Services;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddApplicationInsightsTelemetry();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -341,18 +341,21 @@ namespace PEAS.Services
                 List<Schedule> schedules = new List<Schedule>();
                 foreach (var schedule in model)
                 {
-                    if (schedule.StartTime > schedule.EndTime)
+                    if (schedule.StartTime.Hour > schedule.EndTime.Hour)
                     {
                         throw new AppException("Invalid Schedule: The start time for each day must be less that the end time.");
                     }
+
+                    DateTime date = DateTime.UtcNow.ResetTimeToStartOfDay();
+                    
                     schedules
                         .Add(
                             new Schedule
                             {
                                 Business = business,
                                 DayOfWeek = schedule.DayOfWeek,
-                                StartTime = schedule.StartTime,
-                                EndTime = schedule.EndTime
+                                StartTime = date.Add(new TimeSpan(schedule.StartTime.Hour, schedule.StartTime.Minute, 0)),
+                                EndTime = date.Add(new TimeSpan(schedule.EndTime.Hour, schedule.EndTime.Minute, 0))
                             }
                         );
                 }
@@ -683,14 +686,13 @@ namespace PEAS.Services
             List<ScheduleModel> response = new List<ScheduleModel>();
             foreach (var schedule in schedules)
             {
-                DateTime date = DateTime.Now.ResetTimeToStartOfDay();
                 response.Add(
                     new ScheduleModel
                     {
                         Id = schedule.Id,
                         DayOfWeek = schedule.DayOfWeek,
-                        StartTime = date.Add(new TimeSpan(schedule.StartTime.Hour, schedule.StartTime.Second, 0)),
-                        EndTime = date.Add(new TimeSpan(schedule.EndTime.Hour, schedule.EndTime.Second, 0))
+                        StartTime = schedule.StartTime,
+                        EndTime = schedule.EndTime
                     }
                 );
             }
