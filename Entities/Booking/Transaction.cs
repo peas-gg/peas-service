@@ -5,14 +5,12 @@ namespace PEAS.Entities.Booking
 {
     public class Transaction
     {
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum Type
         {
             Deposit,
             Withdrawal
         }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum Status
         {
             Processing,

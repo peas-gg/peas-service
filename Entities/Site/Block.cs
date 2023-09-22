@@ -7,7 +7,6 @@ namespace PEAS.Entities.Site
     [Owned]
     public class Block
     {
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum Type
         {
             Genesis

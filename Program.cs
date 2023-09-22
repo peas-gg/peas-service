@@ -7,6 +7,7 @@ using PEAS.Entities;
 using PEAS.Middleware;
 using PEAS.Services;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
     {
+        options.SerializerSettings.Converters.Add(new StringEnumConverter());
         options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
     });
 

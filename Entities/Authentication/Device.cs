@@ -8,7 +8,6 @@ namespace PEAS.Entities.Authentication
     [Owned]
     public class Device
     {
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum Type
         {
             apple,

@@ -7,7 +7,6 @@ namespace PEAS.Entities.Booking
 {
     public class Order
     {
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum Status
         {
             Pending,
