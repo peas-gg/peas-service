@@ -24,6 +24,7 @@ namespace PEAS.Services
         BusinessResponse DeleteBlock(Account account, Guid businessId, Guid blockId);
         BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleModel> model);
         List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date);
+        List<Customer> GetCustomers(Account account, Guid businessId);
         OrderResponse CreateOrder(Guid businessId, OrderRequest model);
         OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model);
         TemplateResponse AddTemplate(CreateTemplate model);
@@ -415,6 +416,37 @@ namespace PEAS.Services
                     List<DateRange> ordersDateRanges = ordersInTheDay.Select(x => new DateRange(x.StartTime, x.EndTime)).ToList() ?? new List<DateRange>();
                     return DateRange.GetAvailability(scheduleForTheDate, new TimeSpan(0, 0, block.Duration), ordersDateRanges);
                 }
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        public List<Customer> GetCustomers(Account account, Guid businessId)
+        {
+            try
+            {
+                Business? business = _context.Businesses
+                    .AsNoTracking()
+                    .Where(x => x.Id == businessId && x.Account.Id == account.Id)
+                    .FirstOrDefault();
+
+                if (business == null)
+                {
+                    throw new AppException("Invalid Business Id: Could not retrieve customers");
+                }
+
+                //Get customers from orders
+                List<Customer> customers = _context.Orders
+                    .AsNoTracking()
+                    .Include(x => x.Customer)
+                    .Where(x => x.Business.Id == businessId)
+                    .Select(x => x.Customer)
+                    .ToList();
+
+                return customers;
             }
             catch (Exception e)
             {

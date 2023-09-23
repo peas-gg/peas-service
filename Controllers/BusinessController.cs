@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PEAS.Entities.Authentication;
+using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers.Utilities;
 using PEAS.Models.Business;
@@ -109,6 +110,14 @@ namespace PEAS.Controllers
         public ActionResult<List<DateRange>> GetAvailability(Guid businessId, Guid blockId, DateTime date)
         {
             var response = _businessService.GetAvailablity(businessId, blockId, date);
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("customers")]
+        public ActionResult<List<Customer>> GetCustomers(Guid businessId)
+        {
+            var response = _businessService.GetCustomers(Account!, businessId);
             return Ok(response);
         }
 
