@@ -334,7 +334,7 @@ namespace PEAS.Services
         {
             try
             {
-                if (email == testEmail)
+                if (email.ToUpper() == testEmail.ToUpper())
                 {
                     return new EmptyResponse();
                 }
