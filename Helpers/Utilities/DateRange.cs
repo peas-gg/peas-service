@@ -52,7 +52,7 @@ namespace PEAS.Helpers.Utilities
             {
                 currentDate += orderDuration;
                 var timeSlot = new DateRange(prevDate, currentDate);
-                if (!existingOrders.Any(x => x.WithInRange(timeSlot)) && timeSlot.End <= schedule.End && timeSlot.End > DateTime.UtcNow)
+                if (!existingOrders.Any(x => x.WithInRange(timeSlot)) && timeSlot.End <= schedule.End && timeSlot.Start > DateTime.UtcNow && timeSlot.End > DateTime.UtcNow)
                 {
                     availability.Add(timeSlot);
                 }
