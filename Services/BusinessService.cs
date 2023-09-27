@@ -472,7 +472,9 @@ namespace PEAS.Services
                 {
                     throw new AppException("Invalid buinessId");
                 }
-                var orders = _context.Orders.Where(x => x.Business.Id == business.Id).ToList();
+                var orders = _context.Orders
+                    .Include(x => x.Customer)
+                    .Where(x => x.Business.Id == business.Id).ToList();
 
                 return _mapper.Map<List<OrderResponse>>(orders);
             }
