@@ -42,6 +42,8 @@ namespace PEAS.Services
         private readonly IMapper _mapper;
         private readonly ILogger<BusinessService> _logger;
 
+        private readonly int priceFactor = 100;
+
         public BusinessService(DataContext context, IMapService mapService, IEmailService emailService, IMapper mapper, ILogger<BusinessService> logger)
         {
             _context = context;
@@ -545,33 +547,16 @@ namespace PEAS.Services
         {
             try
             {
-                Business? business = _context.Businesses
-                    .Where(x => x.Account.Id == account.Id && x.Id == businessId)
-                    .FirstOrDefault();
-
-                if (business == null)
-                {
-                    throw new AppException("Invalid business Id");
-                }
-
-                Order? order = _context.Orders
-                    .Where(x => x.Business.Id == businessId && x.Id == model.OrderId)
-                    .FirstOrDefault();
-
-                if (order == null)
-                {
-                    throw new AppException("Invalid Order Id");
-                }
-
+                (Business business, Order order) = getOrder(account, businessId, model.OrderId);
                 if (order.OrderStatus == Order.Status.Declined)
                 {
-                    throw new AppException("Cannot update an order that has been declined");
+                    throw new AppException("Cannot update a service that has been declined");
                 }
 
                 switch (model.OrderStatus)
                 {
                     case Order.Status.Pending:
-                        throw new AppException("Cannot set an order to pending");
+                        throw new AppException("Cannot set a service to pending");
                     case Order.Status.Approved:
                         order.OrderStatus = Order.Status.Approved;
                         //Send email to the customer
@@ -579,7 +564,7 @@ namespace PEAS.Services
                     case Order.Status.Declined:
                         if (order.Payment != null)
                         {
-                            throw new AppException("You cannot decline an order that has been paid for. Please reach out for help @ hello@peas.gg");
+                            throw new AppException("You cannot decline a service that has been paid for. Please reach out for help @ hello@peas.gg");
                         }
                         order.OrderStatus = Order.Status.Declined;
                         //Send email to the customer
@@ -587,12 +572,47 @@ namespace PEAS.Services
                     case Order.Status.Completed:
                         if (order.OrderStatus != Order.Status.Approved)
                         {
-                            throw new AppException("You cannot complete an order you did not approve");
+                            throw new AppException("You cannot complete a service you did not approve");
                         }
                         order.OrderStatus = Order.Status.Completed;
                         break;
                 }
 
+                order.LastUpdated = DateTime.UtcNow;
+
+                _context.Orders.Update(order);
+                _context.SaveChanges();
+
+                return _mapper.Map<OrderResponse>(order);
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        public OrderResponse RequestPayment(Account account, Guid businessId, PaymentRequest model)
+        {
+            try
+            {
+                (Business business, Order order) = getOrder(account, businessId, model.OrderId);
+
+                if (order.OrderStatus != Order.Status.Approved)
+                {
+                    throw new AppException("Cannot request payment for a service that is not approved");
+                }
+
+                if (model.Price > Price.MaxPrice)
+                {
+                    throw new AppException($"Price cannot be more than {Price.MaxPrice / priceFactor}");
+                }
+
+                order.Price = model.Price;
+
+                //Send email to customer
+
+                order.DidRequestPayment = true;
                 order.LastUpdated = DateTime.UtcNow;
 
                 _context.Orders.Update(order);
@@ -766,6 +786,28 @@ namespace PEAS.Services
             return response;
         }
 
+        private (Business, Order) getOrder(Account account, Guid businessId, Guid orderId)
+        {
+            Business? business = _context.Businesses
+                    .Where(x => x.Account.Id == account.Id && x.Id == businessId)
+                    .FirstOrDefault();
+
+            if (business == null)
+            {
+                throw new AppException("Invalid business Id");
+            }
+
+            Order? order = _context.Orders
+                .Where(x => x.Business.Id == businessId && x.Id == orderId)
+                .FirstOrDefault();
+
+            if (order == null)
+            {
+                throw new AppException("Invalid Order Id");
+            }
+            return (business, order);
+        }
+
         private Business getBusiness(Account account, Guid businessId)
         {
             var business = _context.Businesses
@@ -816,7 +858,6 @@ namespace PEAS.Services
             int freePrice = Price.FreePrice;
             int minPrice = Price.MinPrice;
             int maxPrice = Price.MaxPrice;
-            int priceFactor = 100;
 
             if (!Enum.IsDefined(typeof(Block.Type), block.BlockType))
             {
