@@ -346,7 +346,7 @@ namespace PEAS.Services
                     {
                         throw new AppException("Invalid Schedule: The start time for each day must be less that the end time.");
                     }
-                    
+
                     schedules
                         .Add(
                             new Schedule
@@ -498,7 +498,7 @@ namespace PEAS.Services
                     }
                     else
                     {
-                        customer.FirstName = model.Email;
+                        customer.FirstName = model.FirstName;
                         customer.LastName = model.Lastname;
                         customer.Phone = model.Phone;
                         _context.Customers.Update(customer);
@@ -527,6 +527,7 @@ namespace PEAS.Services
                     _context.Orders.Add(order);
                     _context.SaveChanges();
 
+                    //Send Email to user stating the reservation has been requested
                     return _mapper.Map<OrderResponse>(order);
                 }
             }
@@ -542,7 +543,7 @@ namespace PEAS.Services
             try
             {
                 Business? business = _context.Businesses
-                    .Where(x => x.Account == account && x.Id == businessId)
+                    .Where(x => x.Account.Id == account.Id && x.Id == businessId)
                     .FirstOrDefault();
 
                 if (business == null)
@@ -559,7 +560,30 @@ namespace PEAS.Services
                     throw new AppException("Invalid Order Id");
                 }
 
-                order.OrderStatus = model.OrderStatus;
+                if (order.Payment != null)
+                {
+                    throw new AppException("You cannot cancel an order that has been paid for. Please reach out to support @ hello@peas.gg");
+                }
+
+                switch (model.OrderStatus)
+                {
+                    case Order.Status.Pending:
+                        throw new AppException("Cannot set an order to pending");
+                    case Order.Status.Approved:
+                        //Mark Order as approved
+                        //Send email to the customer
+                        break;
+                    case Order.Status.Declined:
+                        //Decline Order
+                        //Send email to the customer
+                        break;
+                    case Order.Status.Completed:
+                        //Mark Order as completed
+                        order.OrderStatus = Order.Status.Completed;
+                        break;
+
+                }
+
                 order.LastUpdated = DateTime.UtcNow;
 
                 _context.Orders.Update(order);
@@ -787,7 +811,7 @@ namespace PEAS.Services
 
             if (block.Price > maxPrice)
             {
-                throw new AppException($"Please enter a price below ${maxPrice/priceFactor}");
+                throw new AppException($"Please enter a price below ${maxPrice / priceFactor}");
             }
 
             if (block.Price < freePrice)
@@ -797,7 +821,7 @@ namespace PEAS.Services
 
             if (block.Price > freePrice && block.Price < minPrice)
             {
-                throw new AppException($"The minimum price is ${minPrice/priceFactor}");
+                throw new AppException($"The minimum price is ${minPrice / priceFactor}");
             }
 
             if (string.IsNullOrEmpty(block.Title))
