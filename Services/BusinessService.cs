@@ -778,6 +778,7 @@ namespace PEAS.Services
             int freePrice = Price.FreePrice;
             int minPrice = Price.MinPrice;
             int maxPrice = Price.MaxPrice;
+            int priceFactor = 100;
 
             if (!Enum.IsDefined(typeof(Block.Type), block.BlockType))
             {
@@ -786,7 +787,7 @@ namespace PEAS.Services
 
             if (block.Price > maxPrice)
             {
-                throw new AppException($"Please enter a price below {maxPrice}");
+                throw new AppException($"Please enter a price below ${maxPrice/priceFactor}");
             }
 
             if (block.Price < freePrice)
@@ -796,7 +797,7 @@ namespace PEAS.Services
 
             if (block.Price > freePrice && block.Price < minPrice)
             {
-                throw new AppException($"The minimum price is {minPrice}");
+                throw new AppException($"The minimum price is ${minPrice/priceFactor}");
             }
 
             if (string.IsNullOrEmpty(block.Title))
