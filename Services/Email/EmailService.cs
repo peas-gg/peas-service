@@ -1,4 +1,5 @@
 ﻿using System;
+using PEAS.Entities.Booking;
 using PEAS.Helpers;
 using SendGrid;
 using SendGrid.Helpers.Mail;
@@ -7,7 +8,7 @@ namespace PEAS.Services.Email
 {
     public interface IEmailService
     {
-        void SendOrderEmail(string recipientEmail);
+        void SendOrderEmail(Order order);
     }
 
     public class EmailService : IEmailService
@@ -26,7 +27,7 @@ namespace PEAS.Services.Email
             _logger = logger;
         }
 
-        public async void SendOrderEmail(string recipientEmail)
+        public async void SendOrderEmail(Order order)
         {
             try
             {
@@ -39,7 +40,7 @@ namespace PEAS.Services.Email
                 var client = new SendGridClient(_apiKey);
                 var from = new EmailAddress(senderEmailAddress, sender);
                 var subject = "Reservation Request";
-                var to = new EmailAddress(recipientEmail);
+                var to = new EmailAddress(order.Customer.Email);
                 var plainTextContent = "and easy to do anywhere, even with C#";
                 var htmlContent = htmlString;
                 var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);

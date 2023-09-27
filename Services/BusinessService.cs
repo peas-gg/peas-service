@@ -9,6 +9,7 @@ using PEAS.Helpers;
 using PEAS.Helpers.Utilities;
 using PEAS.Models.Business;
 using PEAS.Models.Business.Order;
+using PEAS.Services.Email;
 
 namespace PEAS.Services
 {
@@ -37,13 +38,15 @@ namespace PEAS.Services
     {
         private readonly DataContext _context;
         private readonly IMapService _mapService;
+        private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
         private readonly ILogger<BusinessService> _logger;
 
-        public BusinessService(DataContext context, IMapService mapService, IMapper mapper, ILogger<BusinessService> logger)
+        public BusinessService(DataContext context, IMapService mapService, IEmailService emailService, IMapper mapper, ILogger<BusinessService> logger)
         {
             _context = context;
             _mapService = mapService;
+            _emailService = emailService;
             _mapper = mapper;
             _logger = logger;
         }
@@ -701,6 +704,11 @@ namespace PEAS.Services
                 AppLogger.Log(_logger, e);
                 throw new AppException("Error loading business colors");
             }
+        }
+
+        public void SendEmail(Order order)
+        {
+            _emailService.SendOrderEmail(order);
         }
 
         private static BusinessResponse constructBusinessResponse(Business business, Account? account)
