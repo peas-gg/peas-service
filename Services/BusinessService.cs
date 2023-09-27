@@ -563,9 +563,9 @@ namespace PEAS.Services
                     throw new AppException("Invalid Order Id");
                 }
 
-                if (order.Payment != null)
+                if (order.OrderStatus == Order.Status.Declined)
                 {
-                    throw new AppException("You cannot cancel an order that has been paid for. Please reach out to support @ hello@peas.gg");
+                    throw new AppException("Cannot update an order that has been declined");
                 }
 
                 switch (model.OrderStatus)
@@ -573,18 +573,24 @@ namespace PEAS.Services
                     case Order.Status.Pending:
                         throw new AppException("Cannot set an order to pending");
                     case Order.Status.Approved:
-                        //Mark Order as approved
+                        order.OrderStatus = Order.Status.Approved;
                         //Send email to the customer
                         break;
                     case Order.Status.Declined:
-                        //Decline Order
+                        if (order.Payment != null)
+                        {
+                            throw new AppException("You cannot decline an order that has been paid for. Please reach out for help @ hello@peas.gg");
+                        }
+                        order.OrderStatus = Order.Status.Declined;
                         //Send email to the customer
                         break;
                     case Order.Status.Completed:
-                        //Mark Order as completed
+                        if (order.OrderStatus != Order.Status.Approved)
+                        {
+                            throw new AppException("You cannot complete an order you did not approve");
+                        }
                         order.OrderStatus = Order.Status.Completed;
                         break;
-
                 }
 
                 order.LastUpdated = DateTime.UtcNow;
