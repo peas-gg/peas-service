@@ -8,6 +8,7 @@ using PEAS.Middleware;
 using PEAS.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using PEAS.Services.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,7 @@ builder.Services.AddScoped<IBusinessService, BusinessService>();
 builder.Services.AddScoped<ITwilioService, TwilioService>();
 builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddDbContext<DataContext>();
 

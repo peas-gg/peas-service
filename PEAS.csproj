@@ -63,4 +63,9 @@
   <ItemGroup>
     <Content Remove="Entities\Site\Colors.json" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="Services\Email\OrderEmailTemplate.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

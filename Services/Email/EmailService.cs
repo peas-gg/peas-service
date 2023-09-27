@@ -30,12 +30,18 @@ namespace PEAS.Services.Email
         {
             try
             {
+                //Set HTML Content
+                string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Services/Email/OrderEmailTemplate.html");
+                var htmlString = File
+                    .ReadAllText(templatePath)
+                    .Replace("#Title#", "This is a very serious email");
+
                 var client = new SendGridClient(_apiKey);
                 var from = new EmailAddress(senderEmailAddress, sender);
                 var subject = "Reservation Request";
                 var to = new EmailAddress(recipientEmail);
                 var plainTextContent = "and easy to do anywhere, even with C#";
-                var htmlContent = "<strong>and easy to do anywhere, even with C#</strong>";
+                var htmlContent = htmlString;
                 var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
                 _ = await client.SendEmailAsync(msg);
             }
