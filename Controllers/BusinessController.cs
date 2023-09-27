@@ -91,6 +91,14 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [Authorize]
+        [HttpGet("order")]
+        public ActionResult<List<OrderResponse>> GetOrders(Guid businessId)
+        {
+            var response = _businessService.GetOrders(Account!, businessId);
+            return Ok(response);
+        }
+
         [HttpPost("order")]
         public ActionResult<OrderResponse> CreateOrder(Guid businessId, [FromBody] OrderRequest model)
         {
@@ -103,6 +111,14 @@ namespace PEAS.Controllers
         public ActionResult<OrderResponse> UpdateOrder(Guid businessId, [FromBody] UpdateOrderRequest model)
         {
             var response = _businessService.UpdateOrder(Account!, businessId, model);
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPost("payment")]
+        public ActionResult<OrderResponse> RequestPayment(Guid businessId, [FromBody] PaymentRequest model)
+        {
+            var response = _businessService.RequestPayment(Account!, businessId, model);
             return Ok(response);
         }
 

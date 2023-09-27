@@ -26,7 +26,9 @@ namespace PEAS.Services
         BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleModel> model);
         List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date);
         List<Customer> GetCustomers(Account account, Guid businessId);
+        List<OrderResponse> GetOrders(Account account, Guid businessId);
         OrderResponse CreateOrder(Guid businessId, OrderRequest model);
+        OrderResponse RequestPayment(Account account, Guid businessId, PaymentRequest model);
         OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model);
         TemplateResponse AddTemplate(CreateTemplate model);
         void DeleteTemplate(Guid id);
@@ -461,6 +463,26 @@ namespace PEAS.Services
         }
 
         //Orders
+        public List<OrderResponse> GetOrders(Account account, Guid businessId)
+        {
+            try
+            {
+                Business? business = _context.Businesses.First(x => x.Id == businessId);
+                if (business == null)
+                {
+                    throw new AppException("Invalid buinessId");
+                }
+                var orders = _context.Orders.Where(x => x.Business.Id == business.Id).ToList();
+
+                return _mapper.Map<List<OrderResponse>>(orders);
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
         public OrderResponse CreateOrder(Guid businessId, OrderRequest model)
         {
             try
