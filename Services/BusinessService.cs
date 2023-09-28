@@ -825,6 +825,7 @@ namespace PEAS.Services
             }
 
             Order? order = _context.Orders
+                .Include(x => x.Customer)
                 .Where(x => x.Business.Id == businessId && x.Id == orderId)
                 .FirstOrDefault();
 
