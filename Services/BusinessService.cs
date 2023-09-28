@@ -451,6 +451,7 @@ namespace PEAS.Services
                     .Include(x => x.Customer)
                     .Where(x => x.Business.Id == businessId)
                     .Select(x => x.Customer)
+                    .ToHashSet()
                     .ToList();
 
                 return customers;
