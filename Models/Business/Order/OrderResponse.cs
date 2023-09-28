@@ -31,5 +31,7 @@ namespace PEAS.Models.Business.Order
         public required DateTime StartTime { get; set; }
 
         public required DateTime EndTime { get; set; }
+
+        public required DateTime Created { get; set; }
     }
 }
