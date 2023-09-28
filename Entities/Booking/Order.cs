@@ -44,7 +44,7 @@ namespace PEAS.Entities.Booking
 
         public Payment? Payment { get; set; }
 
-        public bool DidRequestPayment { get; set; }
+        public required bool DidRequestPayment { get; set; }
 
         public required DateTime Created { get; set; }
 

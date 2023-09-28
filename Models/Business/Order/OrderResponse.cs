@@ -24,7 +24,9 @@ namespace PEAS.Models.Business.Order
 
         public string? Note { get; set; }
 
-        public List<Payment>? Payments { get; set; }
+        public bool DidRequestPayment { get; set; }
+
+        public Payment? Payment { get; set; }
 
         public required DateTime StartTime { get; set; }
 

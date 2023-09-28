@@ -503,9 +503,9 @@ namespace PEAS.Services
                 Block block = getBlock(business, model.BlockId);
 
                 //Get Availability
-                List<DateRange> availabilityDates = GetAvailablity(businessId, model.BlockId, model.DateRange.Start);
+                List<DateRange> availabilityDates = GetAvailablity(businessId, model.BlockId, model.Date);
 
-                if (!availabilityDates.Contains(model.DateRange))
+                if (!availabilityDates.Any(x => x.Start == model.DateRange.Start))
                 {
                     throw new AppException("The selected time is unavilable. Please select a different time.");
                 }
@@ -549,6 +549,7 @@ namespace PEAS.Services
                         EndTime = model.DateRange.End,
                         OrderStatus = Order.Status.Pending,
                         Payment = null,
+                        DidRequestPayment = false,
                         Created = dateNow,
                         LastUpdated = dateNow
                     };
