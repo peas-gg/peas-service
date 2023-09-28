@@ -19,6 +19,7 @@ builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
     {
         options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+        options.SerializerSettings.DateFormatString = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     });
 
 builder.Services.AddEndpointsApiExplorer();
