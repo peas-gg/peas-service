@@ -416,7 +416,7 @@ namespace PEAS.Services
                     //Get availability
                     List<Order>? ordersInTheDay = _context.Orders
                         .AsNoTracking()
-                        .Where(x => x.OrderStatus != Order.Status.Declined && x.StartTime.Day == date.Day)
+                        .Where(x => x.Business.Id == businessId && x.OrderStatus != Order.Status.Declined && x.StartTime > DateTime.UtcNow)
                         .ToList();
 
                     //Get existing orders for the selected date
