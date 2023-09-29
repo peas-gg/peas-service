@@ -1,6 +1,4 @@
-﻿using System;
-using PEAS.Helpers;
-using System.Configuration;
+﻿using PEAS.Helpers;
 using Azure.Storage.Blobs;
 
 namespace PEAS.Services

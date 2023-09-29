@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using PEAS.Entities.Booking;
+using PEAS.Entities.Site;
 using PEAS.Helpers;
+using PEAS.Helpers.Utilities;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
@@ -8,7 +10,7 @@ namespace PEAS.Services.Email
 {
     public interface IEmailService
     {
-        void SendOrderEmail(Order order);
+        void SendOrderEmail(Order order, Business business);
     }
 
     public class EmailService : IEmailService
@@ -27,16 +29,50 @@ namespace PEAS.Services.Email
             _logger = logger;
         }
 
-        public void SendOrderEmail(Order order)
+        public void SendOrderEmail(Order order, Business business)
         {
             try
             {
                 //Set HTML Content
                 string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Services/Email/OrderEmailTemplate.html");
+                string title = order.OrderStatus.ToString().ToUpper();
+                string recipientName = order.Customer.FirstName + " " + order.Customer.LastName;
+                string colour = "";
+                string subtitle = "";
+                string businessName = $"\"{business.Name}\"";
+                Uri image = order.Image;
+                string time = order.StartTime.ToString("h:mm tt");
+                string day = $"{order.StartTime:ddd}, {order.StartTime:MMM} {order.StartTime.Day}";
+                switch (order.OrderStatus)
+                {
+                    case Order.Status.Pending:
+                        colour = "#FFF7AD";
+                        subtitle = $"You requested a reservation with {businessName}. You will receive an email when your reservation is approved";
+                        break;
+                    case Order.Status.Approved:
+                        colour = "#C4FFBC";
+                        subtitle = $"Your reservation with {businessName} has been approved";
+                        break;
+                    case Order.Status.Declined:
+                        colour = "#FF7A7A";
+                        subtitle = $"Your reservation with {businessName} was declined. Please feel free to make another reservation.";
+                        break;
+                    case Order.Status.Completed:
+                        throw new AppException("Cannot send emails for completed order status");
+                }
                 var htmlString = File
                     .ReadAllText(templatePath)
-                    .Replace("#Title#", "This is a very serious email");
-                sendEmail("Reservation Request", order.Customer.Email, htmlString);
+                    .Replace("#Title#", title)
+                    .Replace("#RecipientName#", recipientName)
+                    .Replace("#Color#", colour)
+                    .Replace("#Image#", image.ToString())
+                    .Replace("#SubTitle#", subtitle)
+                    .Replace("#OrderTitle#", order.Title)
+                    .Replace("#Price#", $"${Price.Format(order.Price)}")
+                    .Replace("#Time#", time)
+                    .Replace("#Day#", day);
+
+                sendEmail($"Reservation With {order.Business.Name}", order.Customer.Email, htmlString);
             }
             catch (Exception e)
             {
