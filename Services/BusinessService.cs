@@ -561,6 +561,7 @@ namespace PEAS.Services
                     _context.SaveChanges();
 
                     //Send Email to user stating the reservation has been requested
+                    _emailService.SendOrderEmail(order, business);
                     return _mapper.Map<OrderResponse>(order);
                 }
             }
@@ -587,7 +588,8 @@ namespace PEAS.Services
                         throw new AppException("Cannot set a service to pending");
                     case Order.Status.Approved:
                         order.OrderStatus = Order.Status.Approved;
-                        //Send email to the customer
+                        //Send email to customer
+                        _emailService.SendOrderEmail(order, business);
                         break;
                     case Order.Status.Declined:
                         if (order.Payment != null)
@@ -596,6 +598,7 @@ namespace PEAS.Services
                         }
                         order.OrderStatus = Order.Status.Declined;
                         //Send email to the customer
+                        _emailService.SendOrderEmail(order, business);
                         break;
                     case Order.Status.Completed:
                         if (order.OrderStatus != Order.Status.Approved)
@@ -758,11 +761,6 @@ namespace PEAS.Services
                 AppLogger.Log(_logger, e);
                 throw new AppException("Error loading business colors");
             }
-        }
-
-        public void SendEmail(Order order)
-        {
-            _emailService.SendOrderEmail(order);
         }
 
         private static BusinessResponse constructBusinessResponse(Business business, Account? account)

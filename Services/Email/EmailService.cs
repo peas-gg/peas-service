@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using PEAS.Entities.Booking;
+using PEAS.Entities.Site;
 using PEAS.Helpers;
 using SendGrid;
 using SendGrid.Helpers.Mail;
@@ -8,7 +9,7 @@ namespace PEAS.Services.Email
 {
     public interface IEmailService
     {
-        void SendOrderEmail(Order order);
+        void SendOrderEmail(Order order, Business business);
     }
 
     public class EmailService : IEmailService
@@ -27,7 +28,7 @@ namespace PEAS.Services.Email
             _logger = logger;
         }
 
-        public void SendOrderEmail(Order order)
+        public void SendOrderEmail(Order order, Business business)
         {
             try
             {
@@ -42,15 +43,15 @@ namespace PEAS.Services.Email
                 {
                     case Order.Status.Pending:
                         colour = "#FFF7AD";
-                        subtitle = $"You requested a reservation with {order.Business.Name}. You will receive an email when your reservation is approved";
+                        subtitle = $"You requested a reservation with {business.Name}. You will receive an email when your reservation is approved";
                         break;
                     case Order.Status.Approved:
                         colour = "#C4FFBC";
-                        subtitle = $"Your reservation with {order.Business.Name} has been approved";
+                        subtitle = $"Your reservation with {business.Name} has been approved";
                         break;
                     case Order.Status.Declined:
                         colour = "#FF7A7A";
-                        subtitle = $"Your reservation with {order.Business.Name} was declined. Please feel free to make another reservation.";
+                        subtitle = $"Your reservation with {business.Name} was declined. Please feel free to make another reservation.";
                         break;
                     case Order.Status.Completed:
                         throw new AppException("Cannot send emails for completed order status");
@@ -61,6 +62,7 @@ namespace PEAS.Services.Email
                     .Replace("#RecipientName#", recipientName)
                     .Replace("#Color#", colour)
                     .Replace("#SubTitle#", subtitle);
+
                 sendEmail($"Reservation With {order.Business.Name}", order.Customer.Email, htmlString);
             }
             catch (Exception e)
