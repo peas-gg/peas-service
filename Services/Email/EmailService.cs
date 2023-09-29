@@ -33,10 +33,35 @@ namespace PEAS.Services.Email
             {
                 //Set HTML Content
                 string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Services/Email/OrderEmailTemplate.html");
+                string title = order.OrderStatus.ToString().ToUpper();
+                string recipientName = order.Customer.FirstName + " " + order.Customer.LastName;
+                string colour = "";
+                string subtitle = "";
+                Uri image = order.Image;
+                switch (order.OrderStatus)
+                {
+                    case Order.Status.Pending:
+                        colour = "#FFF7AD";
+                        subtitle = $"You requested a reservation with {order.Business.Name}. You will receive an email when your reservation is approved";
+                        break;
+                    case Order.Status.Approved:
+                        colour = "#C4FFBC";
+                        subtitle = $"Your reservation with {order.Business.Name} has been approved";
+                        break;
+                    case Order.Status.Declined:
+                        colour = "#FF7A7A";
+                        subtitle = $"Your reservation with {order.Business.Name} was declined. Please feel free to make another reservation.";
+                        break;
+                    case Order.Status.Completed:
+                        throw new AppException("Cannot send emails for completed order status");
+                }
                 var htmlString = File
                     .ReadAllText(templatePath)
-                    .Replace("#Title#", "This is a very serious email");
-                sendEmail("Reservation Request", order.Customer.Email, htmlString);
+                    .Replace("#Title#", title)
+                    .Replace("#RecipientName#", recipientName)
+                    .Replace("#Color#", colour)
+                    .Replace("#SubTitle#", subtitle);
+                sendEmail($"Reservation With {order.Business.Name}", order.Customer.Email, htmlString);
             }
             catch (Exception e)
             {
