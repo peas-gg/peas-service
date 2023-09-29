@@ -6,5 +6,11 @@ namespace PEAS.Helpers.Utilities
         public const int FreePrice = 0;
         public const int MinPrice = 10_00;
         public const int MaxPrice = 5000_00;
+
+        public static string Format(int value)
+        {
+            double valueToDouble = value * 0.01;
+            return String.Format("{0:0.00}", valueToDouble);
+        }
     }
 }

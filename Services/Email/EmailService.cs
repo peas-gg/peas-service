@@ -2,6 +2,7 @@
 using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
+using PEAS.Helpers.Utilities;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
@@ -38,20 +39,23 @@ namespace PEAS.Services.Email
                 string recipientName = order.Customer.FirstName + " " + order.Customer.LastName;
                 string colour = "";
                 string subtitle = "";
+                string businessName = $"\"{business.Name}\"";
                 Uri image = order.Image;
+                string time = order.StartTime.ToString("h:mm tt");
+                string day = $"{order.StartTime:ddd}, {order.StartTime:MMM} {order.StartTime.Day}";
                 switch (order.OrderStatus)
                 {
                     case Order.Status.Pending:
                         colour = "#FFF7AD";
-                        subtitle = $"You requested a reservation with {business.Name}. You will receive an email when your reservation is approved";
+                        subtitle = $"You requested a reservation with {businessName}. You will receive an email when your reservation is approved";
                         break;
                     case Order.Status.Approved:
                         colour = "#C4FFBC";
-                        subtitle = $"Your reservation with {business.Name} has been approved";
+                        subtitle = $"Your reservation with {businessName} has been approved";
                         break;
                     case Order.Status.Declined:
                         colour = "#FF7A7A";
-                        subtitle = $"Your reservation with {business.Name} was declined. Please feel free to make another reservation.";
+                        subtitle = $"Your reservation with {businessName} was declined. Please feel free to make another reservation.";
                         break;
                     case Order.Status.Completed:
                         throw new AppException("Cannot send emails for completed order status");
@@ -61,7 +65,12 @@ namespace PEAS.Services.Email
                     .Replace("#Title#", title)
                     .Replace("#RecipientName#", recipientName)
                     .Replace("#Color#", colour)
-                    .Replace("#SubTitle#", subtitle);
+                    .Replace("#Image#", image.ToString())
+                    .Replace("#SubTitle#", subtitle)
+                    .Replace("#OrderTitle#", order.Title)
+                    .Replace("#Price#", $"${Price.Format(order.Price)}")
+                    .Replace("#Time#", time)
+                    .Replace("#Day#", day);
 
                 sendEmail($"Reservation With {order.Business.Name}", order.Customer.Email, htmlString);
             }
