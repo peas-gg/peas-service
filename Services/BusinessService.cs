@@ -642,6 +642,7 @@ namespace PEAS.Services
                 order.Price = model.Price;
 
                 //Send email to customer
+                _emailService.SendPaymentEmail(order, business);
 
                 order.DidRequestPayment = true;
                 order.LastUpdated = DateTime.UtcNow;

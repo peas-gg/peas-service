@@ -11,6 +11,7 @@ namespace PEAS.Services.Email
     public interface IEmailService
     {
         void SendOrderEmail(Order order, Business business);
+        void SendPaymentEmail(Order order, Business business);
     }
 
     public class EmailService : IEmailService
@@ -112,7 +113,7 @@ namespace PEAS.Services.Email
             var client = new SendGridClient(_apiKey);
             var from = new EmailAddress(senderEmailAddress, sender);
             var to = new EmailAddress(recipient);
-            var plainTextContent = "PEAS";
+            var plainTextContent = "and easy to do anywhere, even with C#";
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
             _ = await client.SendEmailAsync(msg);
         }
