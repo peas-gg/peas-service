@@ -100,7 +100,7 @@ namespace PEAS.Services.Email
                     .Replace("#Price#", $"${Price.Format(order.Price)}")
                     .Replace("#Time#", time);
 
-                sendEmail($"Payment request for #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, htmlString);
+                sendEmail($"Payment request from {business.Name} #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, htmlString);
             }
             catch (Exception e)
             {
