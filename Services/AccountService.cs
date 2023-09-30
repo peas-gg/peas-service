@@ -309,6 +309,7 @@ namespace PEAS.Services
 
                 accountToUpdate.InteracEmail = email;
                 _context.Accounts.Update(accountToUpdate);
+                _context.SaveChanges();
                 return email;
             }
             catch (Exception e)
