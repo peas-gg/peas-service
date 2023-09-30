@@ -34,7 +34,7 @@ namespace PEAS.Services.Email
             try
             {
                 //Set HTML Content
-                string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Services/Email/OrderEmailTemplate.html");
+                string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Services/Email/OrderRequest.html");
                 string title = order.OrderStatus.ToString().ToUpper();
                 string recipientName = order.Customer.FirstName + " " + order.Customer.LastName;
                 string colour = "";
@@ -80,16 +80,26 @@ namespace PEAS.Services.Email
             }
         }
 
-        public void SendPaymentEmail(Order order)
+        public void SendPaymentEmail(Order order, Business business)
         {
             try
             {
                 //Set HTML Content
-                string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Services/Email/OrderEmailTemplate.html");
+                string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Services/Email/PaymentRequest.html");
+
+                string subtitle = $"{business.Name} is requesting payment";
+                Uri image = order.Image;
+                string time = $"{order.StartTime:h:mm tt} @ {order.StartTime:ddd}, {order.StartTime:MMM} {order.StartTime.Day}";
+
                 var htmlString = File
                     .ReadAllText(templatePath)
-                    .Replace("#Title#", "This is a very serious email");
-                sendEmail("Payment Request", order.Customer.Email, htmlString);
+                    .Replace("#Image#", image.ToString())
+                    .Replace("#SubTitle#", subtitle)
+                    .Replace("#OrderTitle#", order.Title)
+                    .Replace("#Price#", $"${Price.Format(order.Price)}")
+                    .Replace("#Time#", time);
+
+                sendEmail($"Payment request for #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, htmlString);
             }
             catch (Exception e)
             {
@@ -102,7 +112,7 @@ namespace PEAS.Services.Email
             var client = new SendGridClient(_apiKey);
             var from = new EmailAddress(senderEmailAddress, sender);
             var to = new EmailAddress(recipient);
-            var plainTextContent = "and easy to do anywhere, even with C#";
+            var plainTextContent = "PEAS";
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
             _ = await client.SendEmailAsync(msg);
         }

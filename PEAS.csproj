@@ -64,7 +64,10 @@
     <Content Remove="Entities\Site\Colors.json" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="Services\Email\OrderEmailTemplate.html">
+    <None Update="Services\Email\OrderStatus.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Services\Email\PaymentRequest.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
