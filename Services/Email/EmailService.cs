@@ -35,7 +35,7 @@ namespace PEAS.Services.Email
             try
             {
                 //Set HTML Content
-                string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Services/Email/OrderRequest.html");
+                string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Services/Email/OrderStatus.html");
                 string title = order.OrderStatus.ToString().ToUpper();
                 string recipientName = order.Customer.FirstName + " " + order.Customer.LastName;
                 string colour = "";
