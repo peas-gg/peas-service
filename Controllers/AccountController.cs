@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using PEAS.Helpers;
 using PEAS.Models;
 using PEAS.Models.Account;
 using PEAS.Services;
@@ -70,6 +71,14 @@ namespace PEAS.Controllers
         public ActionResult<EmptyResponse> RequestPasswordReset([FromBody] ResetPasswordRequest model)
         {
             var response = _accountService.ResetPassword(model);
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPatch("interacEmail")]
+        public ActionResult<string> SetInteracEmail(string email)
+        {
+            var response = _accountService.SetInteracEmail(Account!, email);
             return Ok(response);
         }
 

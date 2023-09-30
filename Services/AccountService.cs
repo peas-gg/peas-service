@@ -23,6 +23,7 @@ namespace PEAS.Services
         EmptyResponse RequestVerificationCode(string phoneNumber);
         EmptyResponse RequestPasswordReset(string email);
         EmptyResponse ResetPassword(ResetPasswordRequest model);
+        string SetInteracEmail(Account account, string email);
     }
 
     public class AccountService : IAccountService
@@ -288,6 +289,33 @@ namespace PEAS.Services
         public string? ValidatePhoneNumber(string phoneNumber)
         {
             return _twilioService.ValidatePhoneNumber(phoneNumber);
+        }
+
+        public string SetInteracEmail(Account account, string email)
+        {
+            try
+            {
+                if (!isValidEmail(email))
+                {
+                    throw new AppException("Invalid Email");
+                }
+
+                Account? accountToUpdate = _context.Accounts.Find(account.Id);
+
+                if (accountToUpdate == null)
+                {
+                    throw new AppException("Invalid Account");
+                }
+
+                accountToUpdate.InteracEmail = email;
+                _context.Accounts.Update(accountToUpdate);
+                return email;
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
         }
 
         private (RefreshToken, Account) getRefreshToken(string token)
