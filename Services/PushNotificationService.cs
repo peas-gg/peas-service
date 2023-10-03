@@ -13,22 +13,28 @@ namespace PEAS.Services
 
     public class PushNotificationService : IPushNotificationService
     {
-        public struct ApsPayload
+        public struct AppleNotification
         {
-            public struct AlertBody
+            public struct Payload
             {
-                public string Title { get; set; }
-                public string Body { get; set; }
+                public struct AlertBody
+                {
+                    public string Title { get; set; }
+                    public string Body { get; set; }
+                }
+
+                public AlertBody Alert { get; set; }
+
+                public string Sound { get; set; }
+
+                [JsonProperty("mutable-content")]
+                public int MutableContent { get; set; }
+
+                [JsonProperty("content-available")]
+                public int ContentAvailable { get; set; }
             }
 
-            public AlertBody Alert { get; set; }
-            public string Sound { get; set; }
-
-            [JsonProperty("mutable-content")]
-            public int MutableContent { get; set; }
-
-            [JsonProperty("content-available")]
-            public int ContentAvailable { get; set; }
+            public Payload Aps { get; set; }
         }
 
         struct ApplePushSettings
@@ -65,20 +71,24 @@ namespace PEAS.Services
                 Device? device = account.Devices?.FirstOrDefault();
                 if (device != null)
                 {
-                    string title = "Reservation request";
+                    string title = "New Request";
                     string body = $"{order.Customer.FirstName} {order.Customer.LastName} is requesting a reservation for {order.Title}";
-                    ApsPayload apsPayload = new ApsPayload
+
+                    AppleNotification appleNotification = new AppleNotification
                     {
-                        Alert = new ApsPayload.AlertBody
+                        Aps = new AppleNotification.Payload
                         {
-                            Title = title,
-                            Body = body
-                        },
-                        Sound = "",
-                        MutableContent = 0,
-                        ContentAvailable = 0
+                            Alert = new AppleNotification.Payload.AlertBody
+                            {
+                                Title = title,
+                                Body = body
+                            },
+                            Sound = "",
+                            MutableContent = 0,
+                            ContentAvailable = 0
+                        }
                     };
-                    SendApplePush(device.DeviceToken, apsPayload);
+                    sendApplePush(device.DeviceToken, appleNotification);
                 }
             }
             catch (Exception e)
@@ -87,7 +97,7 @@ namespace PEAS.Services
             }
         }
 
-        private async void SendApplePush(string deviceToken, ApsPayload apsPayload)
+        private async void sendApplePush(string deviceToken, AppleNotification apsPayload)
         {
             try
             {
@@ -101,7 +111,7 @@ namespace PEAS.Services
                 };
 
                 var apn = new ApnSender(settings, _client);
-                await apn.SendAsync(apsPayload, deviceToken);
+                var response = await apn.SendAsync(apsPayload, deviceToken);
                 return;
             }
             catch (Exception e)
