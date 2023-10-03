@@ -41,16 +41,25 @@ namespace PEAS.Services
         private readonly DataContext _context;
         private readonly IMapService _mapService;
         private readonly IEmailService _emailService;
+        private readonly IPushNotificationService _pushNotificationService;
         private readonly IMapper _mapper;
         private readonly ILogger<BusinessService> _logger;
 
         private readonly int priceFactor = 100;
 
-        public BusinessService(DataContext context, IMapService mapService, IEmailService emailService, IMapper mapper, ILogger<BusinessService> logger)
+        public BusinessService(
+                DataContext context,
+                IMapService mapService,
+                IEmailService emailService,
+                IPushNotificationService pushNotificationService,
+                IMapper mapper,
+                ILogger<BusinessService> logger
+            )
         {
             _context = context;
             _mapService = mapService;
             _emailService = emailService;
+            _pushNotificationService = pushNotificationService;
             _mapper = mapper;
             _logger = logger;
         }
@@ -494,6 +503,8 @@ namespace PEAS.Services
                 //Get business
                 Business? business = _context.Businesses
                     .Include(x => x.Blocks)
+                    .Include(x => x.Account)
+                    .ThenInclude(x => x.Devices)
                     .Where(x => x.Id == businessId)
                     .FirstOrDefault();
 
@@ -562,6 +573,10 @@ namespace PEAS.Services
 
                     //Send Email to user stating the reservation has been requested
                     _emailService.SendOrderEmail(order, business);
+
+                    //Send Push Notification to the business owner
+                    _pushNotificationService.SendNewOrderPush(business.Account, order);
+
                     return _mapper.Map<OrderResponse>(order);
                 }
             }
