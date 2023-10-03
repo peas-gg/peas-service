@@ -24,6 +24,7 @@ namespace PEAS.Services
         EmptyResponse RequestPasswordReset(string email);
         EmptyResponse ResetPassword(ResetPasswordRequest model);
         string SetInteracEmail(Account account, string email);
+        EmptyResponse UpdateDeviceToken(Account account, Device.Type deviceType, string token);
     }
 
     public class AccountService : IAccountService
@@ -311,6 +312,40 @@ namespace PEAS.Services
                 _context.Accounts.Update(accountToUpdate);
                 _context.SaveChanges();
                 return email;
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        public EmptyResponse UpdateDeviceToken(Account account, Device.Type deviceType, string token)
+        {
+            try
+            {
+                var user = _context.Accounts.Find(account.Id);
+
+                if (user == null)
+                {
+                    throw new AppException("Account not found");
+                }
+
+                user.Devices = new List<Device>
+                {
+                    new Device
+                    {
+                        Account = account,
+                        DeviceType = deviceType,
+                        Description = "",
+                        DeviceToken = token
+                    }
+                };
+
+                _context.Update(user);
+                _context.SaveChanges();
+
+                return new EmptyResponse();
             }
             catch (Exception e)
             {

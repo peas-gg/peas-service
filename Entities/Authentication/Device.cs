@@ -11,8 +11,8 @@ namespace PEAS.Entities.Authentication
         [JsonConverter(typeof(StringEnumConverter))]
         public enum Type
         {
-            apple,
-            android
+            Apple,
+            Android
         }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

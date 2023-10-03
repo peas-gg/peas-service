@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using PEAS.Entities.Authentication;
 using PEAS.Helpers;
 using PEAS.Models;
 using PEAS.Models.Account;
@@ -79,6 +80,14 @@ namespace PEAS.Controllers
         public ActionResult<string> SetInteracEmail(string email)
         {
             var response = _accountService.SetInteracEmail(Account!, email);
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPost("device")]
+        public ActionResult<EmptyResponse> DeviceToken(string token, Device.Type deviceType)
+        {
+            var response = _accountService.UpdateDeviceToken(Account!,deviceType, token);
             return Ok(response);
         }
 
