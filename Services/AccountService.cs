@@ -24,7 +24,7 @@ namespace PEAS.Services
         EmptyResponse RequestPasswordReset(string email);
         EmptyResponse ResetPassword(ResetPasswordRequest model);
         string SetInteracEmail(Account account, string email);
-        EmptyResponse UpdateDeviceToken(Account account, Device.Type deviceType, string token);
+        EmptyResponse AddDevice(Account account, Device.Type deviceType, string token);
     }
 
     public class AccountService : IAccountService
@@ -320,7 +320,7 @@ namespace PEAS.Services
             }
         }
 
-        public EmptyResponse UpdateDeviceToken(Account account, Device.Type deviceType, string token)
+        public EmptyResponse AddDevice(Account account, Device.Type deviceType, string token)
         {
             try
             {

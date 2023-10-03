@@ -85,9 +85,9 @@ namespace PEAS.Controllers
 
         [Authorize]
         [HttpPost("device")]
-        public ActionResult<EmptyResponse> DeviceToken(string token, Device.Type deviceType)
+        public ActionResult<EmptyResponse> AddDevice(string token, Device.Type deviceType)
         {
-            var response = _accountService.UpdateDeviceToken(Account!,deviceType, token);
+            var response = _accountService.AddDevice(Account!,deviceType, token);
             return Ok(response);
         }
 
