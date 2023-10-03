@@ -84,7 +84,7 @@ namespace PEAS.Services
                                 Body = body
                             },
                             Sound = "",
-                            MutableContent = 0,
+                            MutableContent = 1,
                             ContentAvailable = 0
                         }
                     };
