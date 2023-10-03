@@ -32,6 +32,7 @@ builder.Services.AddScoped<ITwilioService, TwilioService>();
 builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
 
 builder.Services.AddDbContext<DataContext>();
 
