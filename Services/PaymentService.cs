@@ -20,7 +20,8 @@ namespace PEAS.Services
         private readonly IPushNotificationService _pushNotificationService;
         private readonly ILogger<PaymentService> _logger;
 
-        private readonly string tipMetadata = "tip";
+        private readonly string tipMetadataKey = "tip";
+        private readonly decimal platformFeeRate = 0.08M;
 
         public PaymentService(IConfiguration configuration, DataContext context, IPushNotificationService pushNotificationService, ILogger<PaymentService> logger)
         {
@@ -62,7 +63,7 @@ namespace PEAS.Services
                         Amount = getPaymentIntentAmount(order, tip),
                         Metadata = new Dictionary<string, string>
                         {
-                            {tipMetadata, $"{tip}"},
+                            {tipMetadataKey, $"{tip}"},
                         },
                     };
 
@@ -79,7 +80,7 @@ namespace PEAS.Services
                         Metadata = new Dictionary<string, string>
                         {
                             {"orderId", $"{order.Id}"},
-                            {tipMetadata, $"{tip}"}
+                            {tipMetadataKey, $"{tip}"}
                         },
                         AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
                         {
@@ -140,6 +141,19 @@ namespace PEAS.Services
                         throw new AppException("Payment could not be confirmed. Please try that again.");
                     case "succeeded":
                         //Update the order
+                        int receviedAmount = (int)paymentIntent.AmountReceived;
+                        string? tipString = paymentIntent.Metadata.GetValueOrDefault(tipMetadataKey);
+                        int tipAmount = int.Parse(tipString!);
+                        int baseAmount = receviedAmount - tipAmount;
+                        int platformFee = (int)Math.Ceiling(baseAmount * platformFeeRate);
+
+                        order.Payment.Base = baseAmount;
+                        order.Payment.Tip = tipAmount;
+                        order.Payment.Fee = platformFee;
+                        order.Payment.Total = baseAmount - platformFee + tipAmount;
+
+                        _context.Update(order);
+                        _context.SaveChanges();
                         return new EmptyResponse();
                 }
             }
