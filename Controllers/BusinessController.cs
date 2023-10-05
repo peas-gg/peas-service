@@ -92,7 +92,7 @@ namespace PEAS.Controllers
         }
 
         [HttpGet("order")]
-        public ActionResult<OrderResponse> GetOrder(Guid orderId)
+        public ActionResult<OrderResponseLite> GetOrder(Guid orderId)
         {
             var response = _businessService.GetOrder(orderId);
             return Ok(response);

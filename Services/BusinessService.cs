@@ -26,7 +26,7 @@ namespace PEAS.Services
         BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleModel> model);
         List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date);
         List<Customer> GetCustomers(Account account, Guid businessId);
-        OrderResponse GetOrder(Guid orderId);
+        OrderResponseLite GetOrder(Guid orderId);
         List<OrderResponse> GetOrders(Account account, Guid businessId);
         OrderResponse CreateOrder(Guid businessId, OrderRequest model);
         OrderResponse RequestPayment(Account account, Guid businessId, PaymentRequest model);
@@ -473,17 +473,25 @@ namespace PEAS.Services
         }
 
         //Orders
-        public OrderResponse GetOrder(Guid orderId)
+        public OrderResponseLite GetOrder(Guid orderId)
         {
             try
             {
-                Order? order = _context.Orders.AsNoTracking().First(x => x.Id == orderId);
+                Order? order = _context.Orders.AsNoTracking().Include(x => x.Business).First(x => x.Id == orderId);
                 if (order == null)
                 {
                     throw new AppException("Invalid orderId");
                 }
 
-                return _mapper.Map<OrderResponse>(order);
+                return new OrderResponseLite {
+                    BusinessSign = order.Business.Sign,
+                    Currency = order.Currency,
+                    Price = order.Price,
+                    Title = order.Title,
+                    Description = order.Description,
+                    Image = order.Image,
+                    StartTime = order.StartTime
+                };
             }
             catch (Exception e)
             {
