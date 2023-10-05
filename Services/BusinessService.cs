@@ -45,8 +45,6 @@ namespace PEAS.Services
         private readonly IMapper _mapper;
         private readonly ILogger<BusinessService> _logger;
 
-        private readonly int priceFactor = 100;
-
         public BusinessService(
                 DataContext context,
                 IMapService mapService,
@@ -651,7 +649,7 @@ namespace PEAS.Services
 
                 if (model.Price > Price.MaxPrice)
                 {
-                    throw new AppException($"Price cannot be more than {Price.MaxPrice / priceFactor}");
+                    throw new AppException($"Price cannot be more than {Price.Format(Price.MaxPrice)}");
                 }
 
                 order.Price = model.Price;
@@ -909,7 +907,7 @@ namespace PEAS.Services
 
             if (block.Price > maxPrice)
             {
-                throw new AppException($"Please enter a price below ${maxPrice / priceFactor}");
+                throw new AppException($"Please enter a price below ${Price.Format(maxPrice)}");
             }
 
             if (block.Price < freePrice)
@@ -919,7 +917,7 @@ namespace PEAS.Services
 
             if (block.Price > freePrice && block.Price < minPrice)
             {
-                throw new AppException($"The minimum price is ${minPrice / priceFactor}");
+                throw new AppException($"The minimum price is ${Price.Format(minPrice)}");
             }
 
             if (string.IsNullOrEmpty(block.Title))
