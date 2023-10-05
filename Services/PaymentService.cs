@@ -35,7 +35,7 @@ namespace PEAS.Services
             {
                 Order? order = _context.Orders.Include(x => x.Payment).First(x => x.Id == orderId);
 
-                if (order == null)
+                if (order == null || order.OrderStatus == Order.Status.Declined)
                 {
                     throw new AppException("Invalid OrderId");
                 }
