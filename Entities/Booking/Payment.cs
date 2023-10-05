@@ -10,8 +10,6 @@ namespace PEAS.Entities.Booking
 
         public required string PaymentIntentId { get; set; }
 
-        public Currency Currency { get; set; }
-
         public required int Base { get; set; }
 
         public required int Deposit { get; set; }
