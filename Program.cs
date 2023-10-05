@@ -28,6 +28,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IBusinessService, BusinessService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ITwilioService, TwilioService>();
 builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
