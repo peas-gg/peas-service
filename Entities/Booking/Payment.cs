@@ -8,6 +8,8 @@ namespace PEAS.Entities.Booking
     {
         public int Id { get; set; }
 
+        public required string PaymentIntentId { get; set; }
+
         public Currency Currency { get; set; }
 
         public required int Base { get; set; }
