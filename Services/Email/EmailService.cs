@@ -20,6 +20,7 @@ namespace PEAS.Services.Email
         private readonly string _apiKey;
         private readonly string sender = "PEAS";
         private readonly string senderEmailAddress = "hello@peas.gg";
+        private readonly string siteUrl;
 
         private readonly ILogger<EmailService> _logger;
 
@@ -28,6 +29,7 @@ namespace PEAS.Services.Email
             _configuration = configuration;
             _apiKey = _configuration.GetSection("SendGrid").Value ?? "";
             _logger = logger;
+            siteUrl = (configuration.GetSection("Environment").Value ?? "") == "Production" ? "https://peas.gg/" : "https://dev.peas.gg/";
         }
 
         public void SendOrderEmail(Order order, Business business)
@@ -97,7 +99,8 @@ namespace PEAS.Services.Email
                     .Replace("#Image#", image.ToString())
                     .Replace("#SubTitle#", subtitle)
                     .Replace("#OrderTitle#", order.Title)
-                    .Replace("#Price#", $"${Price.Format(order.Price)}")
+                    .Replace("#PaymentLink#", $"{siteUrl}")
+                    .Replace("#Price#", $"${Price.Format(order.Price)}pay/{order.Id}")
                     .Replace("#Time#", time);
 
                 sendEmail($"Payment request from {business.Name} #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, htmlString);
