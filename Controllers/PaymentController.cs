@@ -16,9 +16,9 @@ namespace PEAS.Controllers
         }
 
         [HttpPost]
-        public ActionResult<string> RequestPayment(Guid orderId)
+        public ActionResult<string> StartPayment(Guid orderId, int tip)
         {
-            var response = _paymentService.RequestPayment(orderId);
+            var response = _paymentService.StartPayment(orderId, tip);
             return Ok(response);
         }
     }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PEAS.Entities.Site;
 
 namespace PEAS.Entities.Booking
 {
