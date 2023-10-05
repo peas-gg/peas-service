@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using PEAS.Entities.Site;
+using PEAS.Entities.Booking;
 
-namespace PEAS.Entities.Booking
+namespace PEAS.Entities.Site
 {
     public class Transaction
     {

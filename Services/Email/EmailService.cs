@@ -99,8 +99,8 @@ namespace PEAS.Services.Email
                     .Replace("#Image#", image.ToString())
                     .Replace("#SubTitle#", subtitle)
                     .Replace("#OrderTitle#", order.Title)
-                    .Replace("#PaymentLink#", $"{siteUrl}")
-                    .Replace("#Price#", $"${Price.Format(order.Price)}pay/{order.Id}")
+                    .Replace("#PaymentLink#", $"{siteUrl}pay/{order.Id}")
+                    .Replace("#Price#", $"${Price.Format(order.Price)}")
                     .Replace("#Time#", time);
 
                 sendEmail($"Payment request from {business.Name} #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, htmlString);
