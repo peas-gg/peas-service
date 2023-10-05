@@ -91,6 +91,13 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [HttpGet("order")]
+        public ActionResult<OrderResponse> GetOrder(Guid orderId)
+        {
+            var response = _businessService.GetOrder(orderId);
+            return Ok(response);
+        }
+
         [Authorize]
         [HttpGet("orders")]
         public ActionResult<List<OrderResponse>> GetOrders(Guid businessId)
