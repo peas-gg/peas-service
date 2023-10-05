@@ -18,6 +18,8 @@ namespace PEAS.Services
         private readonly IPushNotificationService _pushNotificationService;
         private readonly ILogger<PaymentService> _logger;
 
+        private readonly string tipMetadata = "tip";
+
         public PaymentService(IConfiguration configuration, DataContext context, IPushNotificationService pushNotificationService, ILogger<PaymentService> logger)
         {
             _context = context;
@@ -58,7 +60,7 @@ namespace PEAS.Services
                         Amount = getPaymentIntentAmount(order, tip),
                         Metadata = new Dictionary<string, string>
                         {
-                            { "tip", $"{tip}" },
+                            {tipMetadata, $"{tip}"},
                         },
                     };
 
@@ -72,10 +74,10 @@ namespace PEAS.Services
                     {
                         Amount = getPaymentIntentAmount(order, tip),
                         Currency = Currency.CAD.ToString().ToLower(),
-                        Metadata =
+                        Metadata = new Dictionary<string, string>
                         {
                             {"orderId", $"{order.Id}"},
-                            {"tip", $"{tip}"}
+                            {tipMetadata, $"{tip}"}
                         },
                         AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
                         {
