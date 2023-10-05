@@ -3,6 +3,7 @@ using PEAS.Entities;
 using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
+using PEAS.Models;
 using Stripe;
 
 namespace PEAS.Services
@@ -10,6 +11,7 @@ namespace PEAS.Services
     public interface IPaymentService
     {
         string StartPayment(Guid orderId, int tip);
+        EmptyResponse CompletePayment(Guid orderId);
     }
 
     public class PaymentService : IPaymentService
@@ -45,7 +47,7 @@ namespace PEAS.Services
                     throw new AppException("Payment has not been requested for this order");
                 }
                 
-                var paymentIntentService = new PaymentIntentService();
+                PaymentIntentService paymentIntentService = new PaymentIntentService();
 
                 if (order.Payment != null)
                 {
@@ -103,6 +105,42 @@ namespace PEAS.Services
                     _context.SaveChanges();
 
                     return paymentIntent.ClientSecret;
+                }
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        public EmptyResponse CompletePayment(Guid orderId)
+        {
+            try
+            {
+                Order? order = _context.Orders.Include(x => x.Payment).First(x => x.Id == orderId);
+
+                if (order == null || order.Payment == null)
+                {
+                    throw new AppException("Invalid OrderId");
+                }
+
+                PaymentIntentService paymentIntentService = new PaymentIntentService();
+
+                PaymentIntent paymentIntent = paymentIntentService.Get(order.Payment.PaymentIntentId);
+                switch (paymentIntent.Status)
+                {
+                    case "requires_payment_method":
+                    case "requires_confirmation":
+                    case "requires_action":
+                    case "processing":
+                    case "requires_capture":
+                    case "canceled":
+                    default:
+                        throw new AppException("Payment could not be confirmed. Please try that again.");
+                    case "succeeded":
+                        //Update the order
+                        return new EmptyResponse();
                 }
             }
             catch (Exception e)

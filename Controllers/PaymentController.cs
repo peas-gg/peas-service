@@ -21,5 +21,12 @@ namespace PEAS.Controllers
             var response = _paymentService.StartPayment(orderId, tip);
             return Ok(response);
         }
+
+        [HttpPost("complete")]
+        public ActionResult<string> CompletePayment(Guid orderId)
+        {
+            var response = _paymentService.CompletePayment(orderId);
+            return Ok(response);
+        }
     }
 }
