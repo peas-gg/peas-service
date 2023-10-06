@@ -83,7 +83,7 @@ namespace PEAS.Services
                                 Title = title,
                                 Body = body
                             },
-                            Sound = "",
+                            Sound = "order.mp3",
                             MutableContent = 1,
                             ContentAvailable = 0
                         }
