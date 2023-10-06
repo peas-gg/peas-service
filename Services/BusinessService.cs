@@ -504,8 +504,8 @@ namespace PEAS.Services
         {
             try
             {
-                Business? business = _context.Businesses.First(x => x.Id == businessId);
-                if (business == null)
+                Business? business = _context.Businesses.Include(x => x.Account).First(x => x.Id == businessId);
+                if (business == null || business.Account != account)
                 {
                     throw new AppException("Invalid buinessId");
                 }
