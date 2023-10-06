@@ -155,6 +155,7 @@ namespace PEAS.Services
                         order.Payment.Tip = tipAmount;
                         order.Payment.Fee = platformFee;
                         order.Payment.Total = baseAmount - platformFee + tipAmount;
+                        order.Payment.Completed = DateTime.UtcNow;
 
                         _context.Update(order);
                         _context.SaveChanges();

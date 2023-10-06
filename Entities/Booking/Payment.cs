@@ -20,5 +20,7 @@ namespace PEAS.Entities.Booking
         public required int Total { get; set; }
 
         public required DateTime Created { get; set; }
+
+        public DateTime? Completed { get; set; }
     }
 }
