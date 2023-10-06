@@ -11,15 +11,13 @@ namespace PEAS.Entities
 
         public DbSet<Business> Businesses { get; set; }
 
-        //public DbSet<Wallet> Wallet { get; set; }
-
         public DbSet<Template> Templates { get; set; }
 
         public DbSet<Customer> Customers { get; set; }
 
         public DbSet<Order> Orders { get; set; }
 
-        //public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Withdrawal> Withdrawals { get; set; }
 
         private readonly IConfiguration Configuration;
 
