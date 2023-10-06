@@ -3,12 +3,14 @@ using PEAS.Entities.Authentication;
 using PEAS.Entities.Booking;
 using CorePush.Apple;
 using PEAS.Helpers;
+using PEAS.Helpers.Utilities;
 
 namespace PEAS.Services
 {
     public interface IPushNotificationService
     {
         void SendNewOrderPush(Account account, Order order);
+        void SendPaymentReceivedPush(Account account, Order order);
     }
 
     public class PushNotificationService : IPushNotificationService
@@ -71,28 +73,49 @@ namespace PEAS.Services
                 {
                     string title = "New Request";
                     string body = $"{order.Customer.FirstName} {order.Customer.LastName} is requesting a reservation for {order.Title}";
-
-                    AppleNotification appleNotification = new AppleNotification
-                    {
-                        Aps = new AppleNotification.Payload
-                        {
-                            Alert = new AppleNotification.Payload.AlertBody
-                            {
-                                Title = title,
-                                Body = body
-                            },
-                            Sound = "order.mp3",
-                            MutableContent = 1,
-                            ContentAvailable = 0
-                        }
-                    };
-                    sendApplePush(device.DeviceToken, appleNotification);
+                    sendApplePush(device.DeviceToken, constructAppleNotification(title, body, "order.mp3"));
                 }
             }
             catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
             }
+        }
+
+        public void SendPaymentReceivedPush(Account account, Order order)
+        {
+            try
+            {
+                Device? device = account.Devices?.FirstOrDefault();
+                if (device != null)
+                {
+                    string title = "Payment Received";
+                    string body = $"You received ${Price.Format(order.Payment?.Total ?? 0)} from {order.Customer.FirstName} {order.Customer.LastName} for {order.Title}";
+                    sendApplePush(device.DeviceToken, constructAppleNotification(title, body, "cash.mp3"));
+                }
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+            }
+        }
+
+        private AppleNotification constructAppleNotification(string title, string body, string sound)
+        {
+            return new AppleNotification
+            {
+                Aps = new AppleNotification.Payload
+                {
+                    Alert = new AppleNotification.Payload.AlertBody
+                    {
+                        Title = title,
+                        Body = body
+                    },
+                    Sound = sound,
+                    MutableContent = 1,
+                    ContentAvailable = 0
+                }
+            };
         }
 
         private async void sendApplePush(string deviceToken, AppleNotification apsPayload)

@@ -119,7 +119,11 @@ namespace PEAS.Services
         {
             try
             {
-                Order? order = _context.Orders.Include(x => x.Payment).First(x => x.Id == orderId);
+                Order? order = _context.Orders
+                    .Include(x => x.Payment)
+                    .Include(x => x.Business)
+                    .ThenInclude(x => x.Account)
+                    .First(x => x.Id == orderId);
 
                 if (order == null || order.Payment == null)
                 {
@@ -154,6 +158,8 @@ namespace PEAS.Services
 
                         _context.Update(order);
                         _context.SaveChanges();
+
+                        _pushNotificationService.SendPaymentReceivedPush(order.Business.Account, order);
                         return new EmptyResponse();
                 }
             }
