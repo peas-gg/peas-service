@@ -16,6 +16,7 @@ namespace PEAS.Helpers
             CreateMap<RegisterRequest, Account>();
             CreateMap<Business, BusinessResponse>();
             CreateMap<Order, OrderResponse>();
+            CreateMap<Withdrawal, WithdrawalResponse>();
         }
     }
 }

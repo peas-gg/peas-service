@@ -26,7 +26,7 @@ namespace PEAS.Entities.Site
 
         public required DateTime Created { get; set; }
 
-        public required DateTime? Completed { get; set; }
+        public DateTime? Completed { get; set; }
         
         [Timestamp]
         public required byte[] Version { get; set; }
