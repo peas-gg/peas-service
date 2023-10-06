@@ -43,7 +43,6 @@ namespace PEAS.Services
             public string P8KeyId { get; set; }
             public string TeamId { get; set; }
             public string AppIdentifier { get; set; }
-            public string Environment { get; set; }
         }
 
         private readonly HttpClient _client;
@@ -60,7 +59,6 @@ namespace PEAS.Services
                 P8KeyId = configuration.GetSection("PushNotification:Apple:P8KeyId").Value ?? "",
                 TeamId = configuration.GetSection("PushNotification:Apple:TeamId").Value ?? "",
                 AppIdentifier = configuration.GetSection("PushNotification:Apple:AppIdentifier").Value ?? "",
-                Environment = configuration.GetSection("Environment").Value ?? ""
             };
         }
 
@@ -107,7 +105,7 @@ namespace PEAS.Services
                     P8PrivateKey = _applePushSettings.P8Key,
                     P8PrivateKeyId = _applePushSettings.P8KeyId,
                     TeamId = _applePushSettings.TeamId,
-                    ServerType = _applePushSettings.Environment == "Production" ? ApnServerType.Production : ApnServerType.Development
+                    ServerType = ApnServerType.Production
                 };
 
                 var apn = new ApnSender(settings, _client);
