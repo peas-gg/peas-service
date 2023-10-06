@@ -31,6 +31,7 @@ namespace PEAS.Services
         OrderResponse CreateOrder(Guid businessId, OrderRequest model);
         OrderResponse RequestPayment(Account account, Guid businessId, PaymentRequest model);
         OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model);
+        WalletResponse GetWallet(Account account, Guid businessId);
         TemplateResponse AddTemplate(CreateTemplate model);
         void DeleteTemplate(Guid id);
         List<TemplateResponse> GetTemplates();
@@ -184,7 +185,7 @@ namespace PEAS.Services
             {
                 var business = _context.Businesses.Include(x => x.Account).SingleOrDefault(x => x.Id == model.Id);
 
-                if (business == null || business.Account != account)
+                if (business == null || business.Account.Id != account.Id)
                 {
                     throw new AppException("Invalid Business Id");
                 }
@@ -505,7 +506,7 @@ namespace PEAS.Services
             try
             {
                 Business? business = _context.Businesses.Include(x => x.Account).First(x => x.Id == businessId);
-                if (business == null || business.Account != account)
+                if (business == null || business.Account.Id != account.Id)
                 {
                     throw new AppException("Invalid buinessId");
                 }
@@ -700,6 +701,77 @@ namespace PEAS.Services
             }
         }
 
+        //Wallet
+        public WalletResponse GetWallet(Account account, Guid businessId)
+        {
+            try
+            {
+                Business? business = _context.Businesses.Include(x => x.Account).First(x => x.Id == businessId);
+
+                if (business == null || business.Account.Id != account.Id)
+                {
+                    throw new AppException("Invalid buinessId");
+                }
+
+                IEnumerable<Order> orders = _context.Orders.Where(x => x.Business.Id == business.Id && x.Payment != null);
+                IEnumerable<Withdrawal> withdrawals = _context.Withdrawals.Where(x => x.Business.Id == business.Id);
+
+                long earnings = 0;
+                long cashOuts = 0;
+                long holdBalance = 0;
+                DateTime maxCashOutDate = DateTime.UtcNow.AddDays(-2);
+
+                WalletResponse walletResponse = new WalletResponse {
+                    Balance = 0,
+                    HoldBalance = 0,
+                    Transactions = new List<WalletResponse.Transaction>()
+                };
+
+                foreach (Order order in orders)
+                {
+                    if (order.Payment != null && order.Payment.Completed != null)
+                    {
+                        earnings += order.Payment.Total;
+                        if (order.Payment.Completed > maxCashOutDate) {
+                            holdBalance += order.Payment.Total;
+                        }
+                    }
+                    walletResponse.Transactions.Add(
+                        new WalletResponse.Transaction
+                        {
+                            TransationType = WalletResponse.Transaction.Type.Order,
+                            Order = _mapper.Map<OrderResponse>(order)
+                        }
+                    );
+                }
+
+                foreach (Withdrawal withdrawal in withdrawals)
+                {
+                    if (withdrawal.WithdrawalStatus != Withdrawal.Status.Failed)
+                    {
+                        cashOuts += withdrawal.Amount;
+                    }
+                    walletResponse.Transactions.Add(
+                       new WalletResponse.Transaction
+                       {
+                           TransationType = WalletResponse.Transaction.Type.Withdrawal,
+                           Withdrawal = _mapper.Map<WithdrawalResponse>(withdrawal)
+                       }
+                   );
+                }
+
+                walletResponse.Balance = earnings - cashOuts;
+                walletResponse.HoldBalance = holdBalance;
+
+                return walletResponse;
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
         //Templates
         public List<TemplateResponse> GetTemplates()
         {
@@ -884,7 +956,7 @@ namespace PEAS.Services
                 .Include(x => x.Blocks)
                 .SingleOrDefault(x => x.Id == businessId);
 
-            if (business == null || business.Account != account)
+            if (business == null || business.Account.Id != account.Id)
             {
                 throw new AppException("Invalid Business Id");
             }
