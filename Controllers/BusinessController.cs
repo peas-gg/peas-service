@@ -144,6 +144,14 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [Authorize]
+        [HttpGet("wallet")]
+        public ActionResult<WalletResponse> GetWallet(Guid businessId)
+        {
+            var response = _businessService.GetWallet(Account!, businessId);
+            return Ok(response);
+        }
+
         [HttpGet("templates")]
         public ActionResult<List<TemplateResponse>> GetTemplates()
         {
