@@ -7,6 +7,7 @@ using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
 using PEAS.Helpers.Utilities;
+using PEAS.Models;
 using PEAS.Models.Business;
 using PEAS.Models.Business.Order;
 using PEAS.Services.Email;
@@ -32,7 +33,8 @@ namespace PEAS.Services
         OrderResponse RequestPayment(Account account, Guid businessId, PaymentRequest model);
         OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model);
         WalletResponse GetWallet(Account account, Guid businessId);
-        WalletResponse CashOut(Account account, Guid businessId);
+        WalletResponse Withdraw(Account account, Guid businessId);
+        EmptyResponse CompleteWithdraw(Guid withdrawalId);
         TemplateResponse AddTemplate(CreateTemplate model);
         void DeleteTemplate(Guid id);
         List<TemplateResponse> GetTemplates();
@@ -718,10 +720,10 @@ namespace PEAS.Services
                 IEnumerable<Withdrawal> withdrawals = _context.Withdrawals.AsNoTracking().Where(x => x.Business.Id == business.Id);
 
                 long earnings = 0;
-                long cashOuts = 0;
+                long earningsWithdrawed = 0;
                 long holdBalance = 0;
 
-                DateTime maxCashOutDate = DateTime.UtcNow.AddDays(-2);
+                DateTime maxWithdrawlDateDate = DateTime.UtcNow.AddDays(-2);
 
                 WalletResponse walletResponse = new WalletResponse
                 {
@@ -735,7 +737,7 @@ namespace PEAS.Services
                     if (order.Payment != null && order.Payment.Completed != null)
                     {
                         earnings += order.Payment.Total;
-                        if (order.Payment.Completed > maxCashOutDate)
+                        if (order.Payment.Completed > maxWithdrawlDateDate)
                         {
                             holdBalance += order.Payment.Total;
                         }
@@ -753,7 +755,7 @@ namespace PEAS.Services
                 {
                     if (withdrawal.WithdrawalStatus != Withdrawal.Status.Failed)
                     {
-                        cashOuts += withdrawal.Amount;
+                        earningsWithdrawed += withdrawal.Amount;
                     }
                     walletResponse.Transactions.Add(
                        new WalletResponse.Transaction
@@ -764,7 +766,7 @@ namespace PEAS.Services
                    );
                 }
 
-                walletResponse.Balance = earnings - cashOuts;
+                walletResponse.Balance = earnings - earningsWithdrawed;
                 walletResponse.HoldBalance = holdBalance;
 
                 return walletResponse;
@@ -776,7 +778,7 @@ namespace PEAS.Services
             }
         }
 
-        public WalletResponse CashOut(Account account, Guid businessId)
+        public WalletResponse Withdraw(Account account, Guid businessId)
         {
             try
             {
@@ -800,6 +802,37 @@ namespace PEAS.Services
                 _context.SaveChanges();
 
                 return GetWallet(account, businessId);
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        public EmptyResponse CompleteWithdraw(Guid withdrawalId)
+        {
+            try
+            {
+                Withdrawal? withdrawal = _context.Withdrawals.Find(withdrawalId);
+
+                if (withdrawal == null)
+                {
+                    throw new AppException("Invalid withdrawalId");
+                }
+
+                if (withdrawal.WithdrawalStatus == Withdrawal.Status.Succeeded)
+                {
+                    throw new AppException("Withdrawal has already been completed");
+                }
+
+                withdrawal.WithdrawalStatus = Withdrawal.Status.Succeeded;
+                withdrawal.Completed = DateTime.UtcNow;
+
+                _context.Withdrawals.Update(withdrawal);
+                _context.SaveChanges();
+
+                return new EmptyResponse();
             }
             catch (Exception e)
             {

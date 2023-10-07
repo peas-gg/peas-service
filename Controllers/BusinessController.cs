@@ -4,6 +4,7 @@ using PEAS.Entities.Authentication;
 using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers.Utilities;
+using PEAS.Models;
 using PEAS.Models.Business;
 using PEAS.Models.Business.Order;
 using PEAS.Services;
@@ -153,10 +154,18 @@ namespace PEAS.Controllers
         }
 
         [Authorize]
-        [HttpPost("cashOut")]
-        public ActionResult<WalletResponse> CashOut(Guid businessId)
+        [HttpPost("withdraw")]
+        public ActionResult<WalletResponse> Withdraw(Guid businessId)
         {
-            var response = _businessService.CashOut(Account!, businessId);
+            var response = _businessService.Withdraw(Account!, businessId);
+            return Ok(response);
+        }
+
+        [Helpers.Authorize(Role.Admin)]
+        [HttpPost("withdraw/complete")]
+        public ActionResult<EmptyResponse> CompleteWithdraw(Guid withdrawalId)
+        {
+            var response = _businessService.CompleteWithdraw(withdrawalId);
             return Ok(response);
         }
 
