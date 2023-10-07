@@ -790,20 +790,30 @@ namespace PEAS.Services
                 }
 
                 WalletResponse walletResponse = GetWallet(account, businessId);
-                Withdrawal withdrawal = new Withdrawal
+
+                long amountToWithdraw = (walletResponse.Balance - walletResponse.HoldBalance);
+
+                if (amountToWithdraw > 0)
                 {
-                    Business = business,
-                    Amount = (walletResponse.Balance - walletResponse.HoldBalance),
-                    WithdrawalStatus = Withdrawal.Status.Pending,
-                    Created = DateTime.UtcNow,
-                };
+                    Withdrawal withdrawal = new Withdrawal
+                    {
+                        Business = business,
+                        Amount = amountToWithdraw,
+                        WithdrawalStatus = Withdrawal.Status.Pending,
+                        Created = DateTime.UtcNow,
+                    };
 
-                _context.Withdrawals.Add(withdrawal);
-                _context.SaveChanges();
+                    _context.Withdrawals.Add(withdrawal);
+                    _context.SaveChanges();
 
-                _emailService.SendWithdrawEmailToAdmin(account, withdrawal);
+                    _emailService.SendWithdrawEmailToAdmin(account, withdrawal);
 
-                return GetWallet(account, businessId);
+                    return GetWallet(account, businessId);
+                }
+                else
+                {
+                    throw new AppException($"Cannot withdraw an invalid amount {amountToWithdraw}");
+                }
             }
             catch (Exception e)
             {
