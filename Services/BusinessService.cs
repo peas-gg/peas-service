@@ -716,7 +716,7 @@ namespace PEAS.Services
                     throw new AppException("Invalid buinessId");
                 }
 
-                IEnumerable<Order> orders = _context.Orders.AsNoTracking().Where(x => x.Business.Id == business.Id && x.Payment != null && x.Payment.Completed != null);
+                IEnumerable<Order> orders = _context.Orders.AsNoTracking().Include(x => x.Payment).Where(x => x.Business.Id == business.Id && x.Payment != null && x.Payment.Completed != null);
                 IEnumerable<Withdrawal> withdrawals = _context.Withdrawals.AsNoTracking().Where(x => x.Business.Id == business.Id);
 
                 long earnings = 0;
@@ -729,7 +729,7 @@ namespace PEAS.Services
                 {
                     Balance = 0,
                     HoldBalance = 0,
-                    Transactions = new List<WalletResponse.Transaction>()
+                    Transactions = new List<WalletResponse.TransactionResponse>()
                 };
 
                 foreach (Order order in orders)
@@ -743,13 +743,24 @@ namespace PEAS.Services
                         }
                     }
                     walletResponse.Transactions.Add(
-                        new WalletResponse.Transaction
+                        new WalletResponse.TransactionResponse
                         {
-                            TransationType = WalletResponse.Transaction.Type.Order,
-                            Order = _mapper.Map<OrderResponse>(order)
+                            TransactionType = WalletResponse.TransactionResponse.Type.Earning,
+                            Earning = new EarningResponse
+                            {
+                                OrderId = order.Id,
+                                Title = order.Title,
+                                Base = order.Payment!.Base,
+                                Deposit = order.Payment!.Deposit,
+                                Tip = order.Payment!.Tip,
+                                Fee = order.Payment!.Fee,
+                                Total = order.Payment!.Total,
+                                Created = order.Payment!.Created,
+                                Completed = order.Payment!.Completed
+                            }
                         }
                     );
-                }
+                } 
 
                 foreach (Withdrawal withdrawal in withdrawals)
                 {
@@ -758,9 +769,9 @@ namespace PEAS.Services
                         earningsWithdrawed += withdrawal.Amount;
                     }
                     walletResponse.Transactions.Add(
-                       new WalletResponse.Transaction
+                       new WalletResponse.TransactionResponse
                        {
-                           TransationType = WalletResponse.Transaction.Type.Withdrawal,
+                           TransactionType = WalletResponse.TransactionResponse.Type.Withdrawal,
                            Withdrawal = _mapper.Map<WithdrawalResponse>(withdrawal)
                        }
                    );

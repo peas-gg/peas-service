@@ -6,18 +6,18 @@ namespace PEAS.Models.Business
 {
     public class WalletResponse
     {
-        public class Transaction
+        public class TransactionResponse
         {
             [JsonConverter(typeof(StringEnumConverter))]
             public enum Type
             {
-                Order,
+                Earning,
                 Withdrawal
             }
 
-            public Type TransationType { get; set; }
+            public Type TransactionType { get; set; }
 
-            public OrderResponse? Order { get; set; }
+            public EarningResponse? Earning { get; set; }
 
             public WithdrawalResponse? Withdrawal { get; set; }
         }
@@ -26,6 +26,6 @@ namespace PEAS.Models.Business
 
         public long HoldBalance { get; set; }
 
-        public required List<Transaction> Transactions { get; set; }
+        public required List<TransactionResponse> Transactions { get; set; }
     }
 }
