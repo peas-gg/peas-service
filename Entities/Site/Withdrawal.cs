@@ -20,7 +20,7 @@ namespace PEAS.Entities.Site
 
         public required Business Business { get; set; }
 
-        public required int Amount { get; set; }
+        public required long Amount { get; set; }
 
         public required Status WithdrawalStatus { get; set; }
 
