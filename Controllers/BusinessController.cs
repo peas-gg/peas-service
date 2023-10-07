@@ -154,7 +154,7 @@ namespace PEAS.Controllers
         }
 
         [Authorize]
-        [HttpPost("withdraw")]
+        [HttpPost("wallet/withdraw")]
         public ActionResult<WalletResponse> Withdraw(Guid businessId)
         {
             var response = _businessService.Withdraw(Account!, businessId);
