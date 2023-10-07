@@ -632,6 +632,10 @@ namespace PEAS.Services
                     case Order.Status.Pending:
                         throw new AppException("Cannot set a service to pending");
                     case Order.Status.Approved:
+                        if (order.StartTime < DateTime.UtcNow)
+                        {
+                            throw new AppException("This service cannot be approved because it's start time is in the past");
+                        }
                         order.OrderStatus = Order.Status.Approved;
                         //Send email to customer
                         _emailService.SendOrderEmail(order, business);
