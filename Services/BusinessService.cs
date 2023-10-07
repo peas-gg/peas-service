@@ -32,6 +32,7 @@ namespace PEAS.Services
         OrderResponse RequestPayment(Account account, Guid businessId, PaymentRequest model);
         OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model);
         WalletResponse GetWallet(Account account, Guid businessId);
+        WalletResponse CashOut(Account account, Guid businessId);
         TemplateResponse AddTemplate(CreateTemplate model);
         void DeleteTemplate(Guid id);
         List<TemplateResponse> GetTemplates();
@@ -706,22 +707,24 @@ namespace PEAS.Services
         {
             try
             {
-                Business? business = _context.Businesses.Include(x => x.Account).First(x => x.Id == businessId);
+                Business? business = _context.Businesses.AsNoTracking().Include(x => x.Account).Where(x => x.Id == businessId).FirstOrDefault();
 
                 if (business == null || business.Account.Id != account.Id)
                 {
                     throw new AppException("Invalid buinessId");
                 }
 
-                IEnumerable<Order> orders = _context.Orders.Where(x => x.Business.Id == business.Id && x.Payment != null);
-                IEnumerable<Withdrawal> withdrawals = _context.Withdrawals.Where(x => x.Business.Id == business.Id);
+                IEnumerable<Order> orders = _context.Orders.AsNoTracking().Where(x => x.Business.Id == business.Id && x.Payment != null && x.Payment.Completed != null);
+                IEnumerable<Withdrawal> withdrawals = _context.Withdrawals.AsNoTracking().Where(x => x.Business.Id == business.Id);
 
                 long earnings = 0;
                 long cashOuts = 0;
                 long holdBalance = 0;
+
                 DateTime maxCashOutDate = DateTime.UtcNow.AddDays(-2);
 
-                WalletResponse walletResponse = new WalletResponse {
+                WalletResponse walletResponse = new WalletResponse
+                {
                     Balance = 0,
                     HoldBalance = 0,
                     Transactions = new List<WalletResponse.Transaction>()
@@ -732,7 +735,8 @@ namespace PEAS.Services
                     if (order.Payment != null && order.Payment.Completed != null)
                     {
                         earnings += order.Payment.Total;
-                        if (order.Payment.Completed > maxCashOutDate) {
+                        if (order.Payment.Completed > maxCashOutDate)
+                        {
                             holdBalance += order.Payment.Total;
                         }
                     }
@@ -764,6 +768,38 @@ namespace PEAS.Services
                 walletResponse.HoldBalance = holdBalance;
 
                 return walletResponse;
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        public WalletResponse CashOut(Account account, Guid businessId)
+        {
+            try
+            {
+                Business? business = _context.Businesses.AsNoTracking().Include(x => x.Account).Where(x => x.Id == businessId).FirstOrDefault();
+
+                if (business == null || business.Account.Id != account.Id)
+                {
+                    throw new AppException("Invalid buinessId");
+                }
+
+                WalletResponse walletResponse = GetWallet(account, businessId);
+                Withdrawal withdrawal = new Withdrawal
+                {
+                    Business = business,
+                    Amount = (walletResponse.Balance - walletResponse.HoldBalance),
+                    WithdrawalStatus = Withdrawal.Status.Pending,
+                    Created = DateTime.UtcNow,
+                };
+
+                _context.Withdrawals.Add(withdrawal);
+                _context.SaveChanges();
+
+                return GetWallet(account, businessId);
             }
             catch (Exception e)
             {

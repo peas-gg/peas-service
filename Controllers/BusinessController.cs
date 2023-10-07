@@ -152,6 +152,14 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [Authorize]
+        [HttpPost("cashOut")]
+        public ActionResult<WalletResponse> CashOut(Guid businessId)
+        {
+            var response = _businessService.CashOut(Account!, businessId);
+            return Ok(response);
+        }
+
         [HttpGet("templates")]
         public ActionResult<List<TemplateResponse>> GetTemplates()
         {
