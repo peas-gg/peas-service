@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using PEAS.Entities.Authentication;
 using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
@@ -12,6 +13,7 @@ namespace PEAS.Services.Email
     {
         void SendOrderEmail(Order order, Business business);
         void SendPaymentEmail(Order order, Business business);
+        void SendWithdrawEmailToAdmin(Account account, Withdrawal withdrawal);
     }
 
     public class EmailService : IEmailService
@@ -75,7 +77,7 @@ namespace PEAS.Services.Email
                     .Replace("#Time#", time)
                     .Replace("#Day#", day);
 
-                sendEmail($"{title} - Reservation With {order.Business.Name}  #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, htmlString);
+                sendEmail($"{title} - Reservation With {order.Business.Name}  #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, "", htmlString);
             }
             catch (Exception e)
             {
@@ -103,7 +105,7 @@ namespace PEAS.Services.Email
                     .Replace("#Price#", $"${Price.Format(order.Price)}")
                     .Replace("#Time#", time);
 
-                sendEmail($"Payment request from {business.Name} #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, htmlString);
+                sendEmail($"Payment request from {business.Name} #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, "", htmlString);
             }
             catch (Exception e)
             {
@@ -111,12 +113,23 @@ namespace PEAS.Services.Email
             }
         }
 
-        private async void sendEmail(string subject, string recipient, string htmlContent)
+        public void SendWithdrawEmailToAdmin(Account account, Withdrawal withdrawal)
+        {
+            try
+            {
+                sendEmail($"New withdrawal request # {withdrawal.Id.ToString()[..5].ToUpper()}", "Kingsley@peas.gg", $"{account.FirstName} {account.LastName} is requesting a withdrawal of ${withdrawal.Amount}", "");
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+            }
+        }
+
+        private async void sendEmail(string subject, string recipient, string plainTextContent, string htmlContent)
         {
             var client = new SendGridClient(_apiKey);
             var from = new EmailAddress(senderEmailAddress, sender);
             var to = new EmailAddress(recipient);
-            var plainTextContent = "and easy to do anywhere, even with C#";
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
             _ = await client.SendEmailAsync(msg);
         }

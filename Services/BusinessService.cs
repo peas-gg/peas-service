@@ -801,6 +801,8 @@ namespace PEAS.Services
                 _context.Withdrawals.Add(withdrawal);
                 _context.SaveChanges();
 
+                _emailService.SendWithdrawEmailToAdmin(account, withdrawal);
+
                 return GetWallet(account, businessId);
             }
             catch (Exception e)
