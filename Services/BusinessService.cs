@@ -1084,9 +1084,10 @@ namespace PEAS.Services
                 throw new AppException("You are only allowed to have 5 blocks at this moment");
             }
 
-            foreach (Block block in blocks)
+            for(int i = 0; i < blocks.Count; i++)
             {
-                validateBlock(block);
+                blocks[i].Index = i;
+                validateBlock(blocks[i]);
             }
         }
 

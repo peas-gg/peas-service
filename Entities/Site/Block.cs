@@ -17,6 +17,8 @@ namespace PEAS.Entities.Site
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
+        public required int Index { get; set; }
+
         public Type BlockType { get; set; }
 
         public required Uri Image { get; set; }
@@ -31,7 +33,5 @@ namespace PEAS.Entities.Site
         public required string Description { get; set; }
 
         public required bool IsActive { get; set; }
-
-        public required DateTime Created { get; set; }
     }
 }
