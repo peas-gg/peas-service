@@ -78,7 +78,7 @@ namespace PEAS.Services
 
                 if (business != null)
                 {
-                    return constructBusinessResponse(business, null);
+                    return constructBusinessResponse(business, null, getCompletedOrderCount(business.Id));
                 }
                 else
                 {
@@ -104,7 +104,7 @@ namespace PEAS.Services
 
                 if (business != null)
                 {
-                    return constructBusinessResponse(business, account);
+                    return constructBusinessResponse(business, account, getCompletedOrderCount(business.Id));
                 }
                 else
                 {
@@ -173,7 +173,7 @@ namespace PEAS.Services
                 _context.Businesses.Add(business);
                 _context.SaveChanges();
 
-                return constructBusinessResponse(business, account);
+                return constructBusinessResponse(business, account, 0);
             }
             catch (Exception e)
             {
@@ -246,7 +246,7 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                return constructBusinessResponse(business, account);
+                return constructBusinessResponse(business, account, getCompletedOrderCount(model.Id));
             }
             catch (Exception e)
             {
@@ -271,7 +271,7 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                return constructBusinessResponse(business, account);
+                return constructBusinessResponse(business, account, getCompletedOrderCount(businessId));
             }
             catch (Exception e)
             {
@@ -322,7 +322,7 @@ namespace PEAS.Services
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
 
-                var response = constructBusinessResponse(business, account);
+                var response = constructBusinessResponse(business, account, getCompletedOrderCount(businessId));
 
                 return response;
             }
@@ -349,7 +349,7 @@ namespace PEAS.Services
 
             _context.Businesses.Update(business);
             _context.SaveChanges();
-            return constructBusinessResponse(business, account);
+            return constructBusinessResponse(business, account, getCompletedOrderCount(businessId));
         }
 
         //Schedule
@@ -383,7 +383,7 @@ namespace PEAS.Services
 
                 _context.Businesses.Update(business);
                 _context.SaveChanges();
-                return constructBusinessResponse(business, account);
+                return constructBusinessResponse(business, account, getCompletedOrderCount(businessId));
             }
             catch (Exception e)
             {
@@ -882,7 +882,7 @@ namespace PEAS.Services
                         Category = x.Category,
                         Details = x.Details,
                         Photo = x.Photo,
-                        Business = constructBusinessResponse(x.Business, null)
+                        Business = constructBusinessResponse(x.Business, null, 0)
                     })
                     .ToList();
 
@@ -926,7 +926,7 @@ namespace PEAS.Services
                     Category = template.Category,
                     Details = template.Details,
                     Photo = template.Photo,
-                    Business = constructBusinessResponse(template.Business, null)
+                    Business = constructBusinessResponse(template.Business, null, 0)
                 };
             }
             catch (Exception e)
@@ -973,7 +973,12 @@ namespace PEAS.Services
             }
         }
 
-        private static BusinessResponse constructBusinessResponse(Business business, Account? account)
+        private int getCompletedOrderCount(Guid businessId)
+        {
+            return _context.Orders.AsNoTracking().Where(x => x.Business.Id == businessId && x.OrderStatus == Order.Status.Completed).Count();
+        }
+
+        private static BusinessResponse constructBusinessResponse(Business business, Account? account, int orderCount)
         {
             var businessResponse = new BusinessResponse
             {
@@ -984,6 +989,7 @@ namespace PEAS.Services
                 Color = business.Color,
                 Description = business.Description,
                 ProfilePhoto = business.ProfilePhoto,
+                OrderCount = orderCount,
                 Twitter = business.Twitter,
                 Instagram = business.Instagram,
                 Tiktok = business.Tiktok,
@@ -1084,6 +1090,7 @@ namespace PEAS.Services
                 throw new AppException("You are only allowed to have 5 blocks at this moment");
             }
 
+            blocks.Sort((x, y) => x.Index.CompareTo(y.Index));
             for(int i = 0; i < blocks.Count; i++)
             {
                 blocks[i].Index = i;

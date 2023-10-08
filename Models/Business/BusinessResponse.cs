@@ -18,6 +18,8 @@ namespace PEAS.Models.Business
 
         public required Uri ProfilePhoto { get; set; }
 
+        public required int OrderCount { get; set; }
+
         public string? Twitter { get; set; }
 
         public string? Instagram { get; set; }
