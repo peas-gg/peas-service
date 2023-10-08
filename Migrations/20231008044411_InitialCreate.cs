@@ -137,12 +137,14 @@ namespace PEAS.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BusinessId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Index = table.Column<int>(type: "int", nullable: false),
                     BlockType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<int>(type: "int", nullable: false),
                     Duration = table.Column<int>(type: "int", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -172,13 +174,14 @@ namespace PEAS.Migrations
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     OrderStatus = table.Column<int>(type: "int", nullable: false),
                     Payment_Id = table.Column<int>(type: "int", nullable: true),
-                    Payment_Currency = table.Column<int>(type: "int", nullable: true),
+                    Payment_PaymentIntentId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Payment_Base = table.Column<int>(type: "int", nullable: true),
                     Payment_Deposit = table.Column<int>(type: "int", nullable: true),
                     Payment_Tip = table.Column<int>(type: "int", nullable: true),
                     Payment_Fee = table.Column<int>(type: "int", nullable: true),
                     Payment_Total = table.Column<int>(type: "int", nullable: true),
                     Payment_Created = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Payment_Completed = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DidRequestPayment = table.Column<bool>(type: "bit", nullable: false),
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -243,6 +246,29 @@ namespace PEAS.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Withdrawals",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BusinessId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Amount = table.Column<long>(type: "bigint", nullable: false),
+                    WithdrawalStatus = table.Column<int>(type: "int", nullable: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Completed = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Version = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Withdrawals", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Withdrawals_Businesses_BusinessId",
+                        column: x => x.BusinessId,
+                        principalTable: "Businesses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_Email",
                 table: "Accounts",
@@ -286,6 +312,11 @@ namespace PEAS.Migrations
                 name: "IX_Templates_BusinessId",
                 table: "Templates",
                 column: "BusinessId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Withdrawals_BusinessId",
+                table: "Withdrawals",
+                column: "BusinessId");
         }
 
         /// <inheritdoc />
@@ -308,6 +339,9 @@ namespace PEAS.Migrations
 
             migrationBuilder.DropTable(
                 name: "Templates");
+
+            migrationBuilder.DropTable(
+                name: "Withdrawals");
 
             migrationBuilder.DropTable(
                 name: "Customers");

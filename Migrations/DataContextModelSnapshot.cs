@@ -291,8 +291,8 @@ namespace PEAS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
+                    b.Property<long>("Amount")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("BusinessId")
                         .HasColumnType("uniqueidentifier");
@@ -520,6 +520,12 @@ namespace PEAS.Migrations
                             b1.Property<string>("Image")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
+
+                            b1.Property<int>("Index")
+                                .HasColumnType("int");
+
+                            b1.Property<bool>("IsActive")
+                                .HasColumnType("bit");
 
                             b1.Property<int>("Price")
                                 .HasColumnType("int");

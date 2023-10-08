@@ -12,8 +12,8 @@ using PEAS.Entities;
 namespace PEAS.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231006230054_Withdrawals")]
-    partial class Withdrawals
+    [Migration("20231008044411_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -294,8 +294,8 @@ namespace PEAS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
+                    b.Property<long>("Amount")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("BusinessId")
                         .HasColumnType("uniqueidentifier");
@@ -523,6 +523,12 @@ namespace PEAS.Migrations
                             b1.Property<string>("Image")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
+
+                            b1.Property<int>("Index")
+                                .HasColumnType("int");
+
+                            b1.Property<bool>("IsActive")
+                                .HasColumnType("bit");
 
                             b1.Property<int>("Price")
                                 .HasColumnType("int");
