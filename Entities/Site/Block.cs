@@ -29,5 +29,9 @@ namespace PEAS.Entities.Site
         public required string Title { get; set; }
 
         public required string Description { get; set; }
+
+        public required bool IsActive { get; set; }
+
+        public required DateTime Created { get; set; }
     }
 }
