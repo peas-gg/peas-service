@@ -21,7 +21,6 @@
     <None Remove="Entities\Booking\" />
     <None Remove="Helpers\Utilities\" />
     <None Remove="Models\Business\Order\" />
-    <None Remove="Migrations\" />
     <None Remove="Services\Email\" />
   </ItemGroup>
   <ItemGroup>
@@ -39,7 +38,6 @@
     <Folder Include="Entities\Booking\" />
     <Folder Include="Helpers\Utilities\" />
     <Folder Include="Models\Business\Order\" />
-    <Folder Include="Migrations\" />
     <Folder Include="Services\Email\" />
   </ItemGroup>
   <ItemGroup>
