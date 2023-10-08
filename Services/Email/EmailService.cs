@@ -1,5 +1,4 @@
-﻿using System.IO;
-using PEAS.Entities.Authentication;
+﻿using PEAS.Entities.Authentication;
 using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
