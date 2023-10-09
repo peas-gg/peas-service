@@ -77,6 +77,7 @@ namespace PEAS.Services
                     {
                         Amount = getPaymentIntentAmount(order, tip),
                         Currency = Currency.CAD.ToString().ToLower(),
+                        SetupFutureUsage = "on_session",
                         Metadata = new Dictionary<string, string>
                         {
                             {"orderId", $"{order.Id}"},
