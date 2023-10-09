@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PEAS.Models.Business;
 using PEAS.Services;
+using Stripe;
 
 namespace PEAS.Controllers
 {
@@ -23,10 +23,18 @@ namespace PEAS.Controllers
         }
 
         [HttpPost("complete")]
-        public ActionResult<string> CompletePayment(Guid orderId)
+        public async void CompletePayment()
         {
-            var response = _paymentService.CompletePayment(orderId);
-            return Ok(response);
+            var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+
+            var stripeEvent = EventUtility.ParseEvent(json);
+
+            // Handle the event
+            if (stripeEvent.Type == Events.PaymentIntentSucceeded)
+            {
+                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+                _paymentService.CompletePayment(paymentIntent!);
+            }
         }
     }
 }

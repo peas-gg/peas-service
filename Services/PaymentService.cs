@@ -11,7 +11,7 @@ namespace PEAS.Services
     public interface IPaymentService
     {
         string StartPayment(Guid orderId, int tip);
-        EmptyResponse CompletePayment(Guid orderId);
+        void CompletePayment(PaymentIntent paymentIntent);
     }
 
     public class PaymentService : IPaymentService
@@ -21,6 +21,7 @@ namespace PEAS.Services
         private readonly ILogger<PaymentService> _logger;
 
         private readonly string tipMetadataKey = "tip";
+        private readonly string orderIdMetadataKey = "orderId";
         private readonly decimal platformFeeRate = 0.08M;
 
         public PaymentService(IConfiguration configuration, DataContext context, IPushNotificationService pushNotificationService, ILogger<PaymentService> logger)
@@ -80,7 +81,7 @@ namespace PEAS.Services
                         SetupFutureUsage = "on_session",
                         Metadata = new Dictionary<string, string>
                         {
-                            {"orderId", $"{order.Id}"},
+                            {orderIdMetadataKey, $"{order.Id}"},
                             {tipMetadataKey, $"{tip}"}
                         },
                         AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
@@ -116,10 +117,11 @@ namespace PEAS.Services
             }
         }
 
-        public EmptyResponse CompletePayment(Guid orderId)
+        public void CompletePayment(PaymentIntent paymentIntent)
         {
             try
             {
+                Guid orderId = Guid.Parse(paymentIntent.Metadata[orderIdMetadataKey]);
                 Order? order = _context.Orders
                     .Include(x => x.Payment)
                     .Include(x => x.Business)
@@ -131,39 +133,23 @@ namespace PEAS.Services
                     throw new AppException("Invalid OrderId");
                 }
 
-                PaymentIntentService paymentIntentService = new PaymentIntentService();
+                //Update the order
+                int receviedAmount = (int)paymentIntent.AmountReceived;
+                string? tipString = paymentIntent.Metadata.GetValueOrDefault(tipMetadataKey);
+                int tipAmount = int.Parse(tipString!);
+                int baseAmount = receviedAmount - tipAmount;
+                int platformFee = (int)Math.Ceiling(baseAmount * platformFeeRate);
 
-                PaymentIntent paymentIntent = paymentIntentService.Get(order.Payment.PaymentIntentId);
-                switch (paymentIntent.Status)
-                {
-                    case "requires_payment_method":
-                    case "requires_confirmation":
-                    case "requires_action":
-                    case "processing":
-                    case "requires_capture":
-                    case "canceled":
-                    default:
-                        throw new AppException("Payment could not be confirmed. Please try that again.");
-                    case "succeeded":
-                        //Update the order
-                        int receviedAmount = (int)paymentIntent.AmountReceived;
-                        string? tipString = paymentIntent.Metadata.GetValueOrDefault(tipMetadataKey);
-                        int tipAmount = int.Parse(tipString!);
-                        int baseAmount = receviedAmount - tipAmount;
-                        int platformFee = (int)Math.Ceiling(baseAmount * platformFeeRate);
+                order.Payment.Base = baseAmount;
+                order.Payment.Tip = tipAmount;
+                order.Payment.Fee = platformFee;
+                order.Payment.Total = baseAmount - platformFee + tipAmount;
+                order.Payment.Completed = DateTime.UtcNow;
 
-                        order.Payment.Base = baseAmount;
-                        order.Payment.Tip = tipAmount;
-                        order.Payment.Fee = platformFee;
-                        order.Payment.Total = baseAmount - platformFee + tipAmount;
-                        order.Payment.Completed = DateTime.UtcNow;
+                _context.Update(order);
+                _context.SaveChanges();
 
-                        _context.Update(order);
-                        _context.SaveChanges();
-
-                        _pushNotificationService.SendPaymentReceivedPush(order.Business.Account, order);
-                        return new EmptyResponse();
-                }
+                _pushNotificationService.SendPaymentReceivedPush(order.Business.Account, order);
             }
             catch (Exception e)
             {
