@@ -104,6 +104,8 @@ namespace PEAS.Services
                         Created = DateTime.UtcNow
                     };
 
+                    order.LastUpdated = DateTime.UtcNow;
+
                     _context.Update(order);
                     _context.SaveChanges();
 
@@ -145,6 +147,8 @@ namespace PEAS.Services
                 order.Payment.Fee = platformFee;
                 order.Payment.Total = baseAmount - platformFee + tipAmount;
                 order.Payment.Completed = DateTime.UtcNow;
+
+                order.LastUpdated = DateTime.UtcNow;
 
                 _context.Update(order);
                 _context.SaveChanges();
