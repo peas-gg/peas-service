@@ -128,7 +128,7 @@ namespace PEAS.Services
                     .ThenInclude(x => x.Account)
                     .First(x => x.Id == orderId);
 
-                if (order == null || order.Payment == null)
+                if (order == null || order.Payment == null || order.Payment.Completed != null)
                 {
                     throw new AppException("Invalid OrderId");
                 }
