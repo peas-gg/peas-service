@@ -77,7 +77,7 @@ namespace PEAS.Services.Email
                     .Replace("#Time#", time)
                     .Replace("#Day#", day);
 
-                sendEmail($"{title} - Reservation With {order.Business.Name}  #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, "", htmlString);
+                sendEmail($"{title} - Reservation With {business.Name}  #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, "", htmlString);
             }
             catch (Exception e)
             {
