@@ -45,8 +45,9 @@ namespace PEAS.Services.Email
                 string subtitle = "";
                 string businessName = $"\"{business.Name}\"";
                 Uri image = order.Image;
-                string time = order.StartTime.ToString("h:mm tt");
-                string day = $"{order.StartTime:ddd}, {order.StartTime:MMM} {order.StartTime.Day}";
+                DateTime orderDate = getBusinessTime(order.StartTime, business.TimeZone);
+                string time = orderDate.ToString("h:mm tt");
+                string day = $"{orderDate:ddd}, {orderDate:MMM} {orderDate.Day}";
                 switch (order.OrderStatus)
                 {
                     case Order.Status.Pending:
@@ -93,7 +94,8 @@ namespace PEAS.Services.Email
 
                 string subtitle = $"{business.Name} is requesting payment";
                 Uri image = order.Image;
-                string time = $"{order.StartTime:h:mm tt} @ {order.StartTime:ddd}, {order.StartTime:MMM} {order.StartTime.Day}";
+                DateTime orderDate = getBusinessTime(order.StartTime, business.TimeZone);
+                string time = $"{orderDate:h:mm tt} @ {orderDate:ddd}, {orderDate:MMM} {orderDate.Day}";
 
                 var htmlString = File
                     .ReadAllText(templatePath)
@@ -131,6 +133,13 @@ namespace PEAS.Services.Email
             var to = new EmailAddress(recipient);
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
             _ = await client.SendEmailAsync(msg);
+        }
+
+        private static DateTime getBusinessTime(DateTime dateTime, string timeZone)
+        {
+            //Convert to business time
+            TimeZoneInfo businessTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZone);
+            return TimeZoneInfo.ConvertTimeFromUtc(dateTime, businessTimeZone);
         }
     }
 }
