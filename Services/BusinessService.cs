@@ -561,19 +561,19 @@ namespace PEAS.Services
                     {
                         Customer newCustomer = new Customer
                         {
-                            FirstName = model.FirstName,
-                            LastName = model.Lastname,
-                            Email = model.Email,
-                            Phone = model.Phone
+                            FirstName = model.FirstName.Trim(),
+                            LastName = model.Lastname.Trim(),
+                            Email = model.Email.Trim(),
+                            Phone = model.Phone.Trim()
                         };
                         _context.Customers.Add(newCustomer);
                         customer = newCustomer;
                     }
                     else
                     {
-                        customer.FirstName = model.FirstName;
-                        customer.LastName = model.Lastname;
-                        customer.Phone = model.Phone;
+                        customer.FirstName = model.FirstName.Trim();
+                        customer.LastName = model.Lastname.Trim();
+                        customer.Phone = model.Phone.Trim();
                         _context.Customers.Update(customer);
                     }
 
