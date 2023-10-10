@@ -489,6 +489,7 @@ namespace PEAS.Services
 
                 return new OrderResponseLite {
                     BusinessSign = order.Business.Sign,
+                    BusinessProfilePhoto = order.Business.ProfilePhoto,
                     Currency = order.Currency,
                     Price = order.Price,
                     Title = order.Title,

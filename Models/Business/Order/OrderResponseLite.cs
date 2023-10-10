@@ -8,6 +8,8 @@ namespace PEAS.Models.Business.Order
     {
         public required string BusinessSign { get; set; }
 
+        public required Uri BusinessProfilePhoto { get; set; }
+
         public required Currency Currency { get; set; }
 
         public required int Price { get; set; }
