@@ -140,9 +140,11 @@ namespace PEAS.Services
 
                     Guid orderId = Guid.Parse(paymentIntent!.Metadata[orderIdMetadataKey]);
                     Order? order = _context.Orders
+                        .Include(x => x.Customer)
                         .Include(x => x.Payment)
                         .Include(x => x.Business)
                         .ThenInclude(x => x.Account)
+                        .ThenInclude(x => x.Devices)
                         .First(x => x.Id == orderId);
 
                     if (order == null || order.Payment == null || order.Payment.Completed != null)
