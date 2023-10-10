@@ -60,6 +60,9 @@
     <PackageReference Include="CorePush" Version="4.1.0" />
     <PackageReference Include="Stripe.net" Version="42.8.0" />
   </ItemGroup>
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
+    <RuntimeHostConfigurationOption Include="System.Globalization.UseNls" Value="false" />
+  </ItemGroup>
   <ItemGroup>
     <Content Remove="Entities\Site\Colors.json" />
   </ItemGroup>
