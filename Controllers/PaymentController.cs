@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PEAS.Models;
 using PEAS.Services;
 
 namespace PEAS.Controllers
@@ -22,9 +23,10 @@ namespace PEAS.Controllers
         }
 
         [HttpPost("complete")]
-        public void CompletePayment()
+        public ActionResult<EmptyResponse> CompletePayment()
         {
-            _paymentService.CompletePayment(HttpContext.Request);
+            var response = _paymentService.CompletePayment(HttpContext.Request).Result;
+            return Ok(response);
         }
     }
 }

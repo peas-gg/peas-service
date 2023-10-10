@@ -3,6 +3,7 @@ using PEAS.Entities;
 using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
+using PEAS.Models;
 using Stripe;
 
 namespace PEAS.Services
@@ -10,7 +11,7 @@ namespace PEAS.Services
     public interface IPaymentService
     {
         string StartPayment(Guid orderId, int tip);
-        void CompletePayment(HttpRequest httpRequest);
+        Task<EmptyResponse> CompletePayment(HttpRequest httpRequest);
     }
 
     public class PaymentService : IPaymentService
@@ -121,7 +122,7 @@ namespace PEAS.Services
             }
         }
 
-        public async void CompletePayment(HttpRequest httpRequest)
+        public async Task<EmptyResponse> CompletePayment(HttpRequest httpRequest)
         {
             try
             {
@@ -132,7 +133,10 @@ namespace PEAS.Services
                 // Handle the event
                 if (stripeEvent.Type == Events.PaymentIntentSucceeded)
                 {
-                    PaymentIntent? paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+                    if (stripeEvent.Data.Object is not PaymentIntent paymentIntent)
+                    {
+                        throw new AppException("Invalid Payment Intent object");
+                    }
 
                     Guid orderId = Guid.Parse(paymentIntent!.Metadata[orderIdMetadataKey]);
                     Order? order = _context.Orders
@@ -165,6 +169,8 @@ namespace PEAS.Services
                     _context.SaveChanges();
 
                     _pushNotificationService.SendPaymentReceivedPush(order.Business.Account, order);
+
+                    return new EmptyResponse();
                 }
                 else
                 {
