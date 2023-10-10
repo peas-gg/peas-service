@@ -1,5 +1,4 @@
-﻿using System;
-using PEAS.Entities.Booking;
+﻿using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 
 namespace PEAS.Models.Business.Order
@@ -33,5 +32,7 @@ namespace PEAS.Models.Business.Order
         public required DateTime EndTime { get; set; }
 
         public required DateTime Created { get; set; }
+
+        public required DateTime LastUpdated { get; set; }
     }
 }

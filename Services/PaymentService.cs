@@ -3,7 +3,6 @@ using PEAS.Entities;
 using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
-using PEAS.Models;
 using Stripe;
 
 namespace PEAS.Services
@@ -11,7 +10,7 @@ namespace PEAS.Services
     public interface IPaymentService
     {
         string StartPayment(Guid orderId, int tip);
-        void CompletePayment(PaymentIntent paymentIntent);
+        void CompletePayment(HttpRequest httpRequest);
     }
 
     public class PaymentService : IPaymentService
@@ -19,6 +18,8 @@ namespace PEAS.Services
         private readonly DataContext _context;
         private readonly IPushNotificationService _pushNotificationService;
         private readonly ILogger<PaymentService> _logger;
+
+        private readonly string stripeWebHookKey;
 
         private readonly string tipMetadataKey = "tip";
         private readonly string orderIdMetadataKey = "orderId";
@@ -29,6 +30,7 @@ namespace PEAS.Services
             _context = context;
             _pushNotificationService = pushNotificationService;
             _logger = logger;
+            stripeWebHookKey = configuration.GetSection("StripeWebHook").Value ?? "";
             StripeConfiguration.ApiKey = configuration.GetSection("Stripe").Value ?? "";
 
         }
@@ -119,41 +121,55 @@ namespace PEAS.Services
             }
         }
 
-        public void CompletePayment(PaymentIntent paymentIntent)
+        public async void CompletePayment(HttpRequest httpRequest)
         {
             try
             {
-                Guid orderId = Guid.Parse(paymentIntent.Metadata[orderIdMetadataKey]);
-                Order? order = _context.Orders
-                    .Include(x => x.Payment)
-                    .Include(x => x.Business)
-                    .ThenInclude(x => x.Account)
-                    .First(x => x.Id == orderId);
+                var json = await new StreamReader(httpRequest.Body).ReadToEndAsync();
+                var stripeEvent = EventUtility.ConstructEvent(json,
+                    httpRequest.Headers["Stripe-Signature"], stripeWebHookKey);
 
-                if (order == null || order.Payment == null || order.Payment.Completed != null)
+                // Handle the event
+                if (stripeEvent.Type == Events.PaymentIntentSucceeded)
                 {
-                    throw new AppException("Invalid OrderId");
+                    PaymentIntent? paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+
+                    Guid orderId = Guid.Parse(paymentIntent!.Metadata[orderIdMetadataKey]);
+                    Order? order = _context.Orders
+                        .Include(x => x.Payment)
+                        .Include(x => x.Business)
+                        .ThenInclude(x => x.Account)
+                        .First(x => x.Id == orderId);
+
+                    if (order == null || order.Payment == null || order.Payment.Completed != null)
+                    {
+                        throw new AppException("Invalid OrderId");
+                    }
+
+                    //Update the order
+                    int receviedAmount = (int)paymentIntent.AmountReceived;
+                    string? tipString = paymentIntent.Metadata.GetValueOrDefault(tipMetadataKey);
+                    int tipAmount = int.Parse(tipString!);
+                    int baseAmount = receviedAmount - tipAmount;
+                    int platformFee = (int)Math.Ceiling(baseAmount * platformFeeRate);
+
+                    order.Payment.Base = baseAmount;
+                    order.Payment.Tip = tipAmount;
+                    order.Payment.Fee = platformFee;
+                    order.Payment.Total = baseAmount - platformFee + tipAmount;
+                    order.Payment.Completed = DateTime.UtcNow;
+
+                    order.LastUpdated = DateTime.UtcNow;
+
+                    _context.Update(order);
+                    _context.SaveChanges();
+
+                    _pushNotificationService.SendPaymentReceivedPush(order.Business.Account, order);
                 }
-
-                //Update the order
-                int receviedAmount = (int)paymentIntent.AmountReceived;
-                string? tipString = paymentIntent.Metadata.GetValueOrDefault(tipMetadataKey);
-                int tipAmount = int.Parse(tipString!);
-                int baseAmount = receviedAmount - tipAmount;
-                int platformFee = (int)Math.Ceiling(baseAmount * platformFeeRate);
-
-                order.Payment.Base = baseAmount;
-                order.Payment.Tip = tipAmount;
-                order.Payment.Fee = platformFee;
-                order.Payment.Total = baseAmount - platformFee + tipAmount;
-                order.Payment.Completed = DateTime.UtcNow;
-
-                order.LastUpdated = DateTime.UtcNow;
-
-                _context.Update(order);
-                _context.SaveChanges();
-
-                _pushNotificationService.SendPaymentReceivedPush(order.Business.Account, order);
+                else
+                {
+                    throw new AppException("Payment not Successful");
+                }
             }
             catch (Exception e)
             {
