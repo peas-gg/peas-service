@@ -5,6 +5,7 @@ using PEAS.Helpers;
 using PEAS.Helpers.Utilities;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using TimeZoneConverter;
 
 namespace PEAS.Services.Email
 {
@@ -138,7 +139,7 @@ namespace PEAS.Services.Email
         private static DateTime getBusinessTime(DateTime dateTime, string timeZone)
         {
             //Convert to business time
-            TimeZoneInfo businessTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZone);
+            TimeZoneInfo businessTimeZone = TZConvert.GetTimeZoneInfo(timeZone);
             return TimeZoneInfo.ConvertTimeFromUtc(dateTime, businessTimeZone);
         }
     }
