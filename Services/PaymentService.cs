@@ -18,7 +18,7 @@ namespace PEAS.Services
     public class PaymentService : IPaymentService
     {
         private readonly DataContext _context;
-        private readonly AppHub _apphub;
+        private readonly IAppHub _apphub;
         private readonly IPushNotificationService _pushNotificationService;
         private readonly ILogger<PaymentService> _logger;
 
@@ -31,7 +31,7 @@ namespace PEAS.Services
         public PaymentService(
             IConfiguration configuration,
             DataContext context,
-            AppHub appHub,
+            IAppHub appHub,
             IPushNotificationService pushNotificationService,
             ILogger<PaymentService> logger
             )

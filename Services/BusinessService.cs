@@ -47,7 +47,7 @@ namespace PEAS.Services
         private readonly DataContext _context;
         private readonly IMapService _mapService;
         private readonly IEmailService _emailService;
-        private readonly AppHub _appHub;
+        private readonly IAppHub _appHub;
         private readonly IPushNotificationService _pushNotificationService;
         private readonly IMapper _mapper;
         private readonly ILogger<BusinessService> _logger;
@@ -56,7 +56,7 @@ namespace PEAS.Services
                 DataContext context,
                 IMapService mapService,
                 IEmailService emailService,
-                AppHub appHub,
+                IAppHub appHub,
                 IPushNotificationService pushNotificationService,
                 IMapper mapper,
                 ILogger<BusinessService> logger

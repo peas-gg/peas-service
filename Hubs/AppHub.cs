@@ -7,7 +7,13 @@ using PEAS.Helpers.Utilities;
 
 namespace PEAS.Hubs
 {
-    public class AppHub : Hub
+    public interface IAppHub
+    {
+        void OrderReceived(Account account, Order order);
+        void PaymentReceived(Account account, Order order);
+    }
+
+    public class AppHub : Hub, IAppHub
     {
         private readonly ILogger<AppHub> _logger;
         private readonly DataContext _dataContext;

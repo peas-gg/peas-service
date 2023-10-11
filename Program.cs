@@ -34,6 +34,7 @@ builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
+builder.Services.AddScoped<IAppHub, AppHub>();
 
 builder.Services.AddDbContext<DataContext>();
 
