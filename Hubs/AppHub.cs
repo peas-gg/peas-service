@@ -18,33 +18,33 @@ namespace PEAS.Hubs
             _dataContext = dataContext;
         }
 
-        public async Task Subscribe()
+        public async Task Subscribe(Guid accountId)
         {
             try
             {
-                Account? account = (Account?)Context.GetHttpContext()?.Items["Account"];
+                Account? account = getAccount(accountId);
                 if (account == null)
                 {
-                    await Clients.Client(Context.ConnectionId).SendAsync("UnAuthorized");
+                    await Clients.Client(Context.ConnectionId).SendAsync("CouldNotSubscribe");
                 }
                 else
                 {
                     await Groups.AddToGroupAsync(Context.ConnectionId, account.Id.ToString());
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
             }
         }
 
-        public async Task UnSubscribe(Guid accountId)
+        public void UnSubscribe(Guid accountId)
         {
             try
             {
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, accountId.ToString());
+                Groups.RemoveFromGroupAsync(Context.ConnectionId, accountId.ToString());
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
             }
@@ -55,9 +55,9 @@ namespace PEAS.Hubs
             try
             {
                 string message = $"Reservation request from {order.Customer.FirstName} {order.Customer.LastName} for {order.Title}";
-                Clients.User(account.Id.ToString()).SendAsync("OrderReceived", message);
+                Clients.Group(account.Id.ToString()).SendAsync("OrderReceived", message);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
             }
@@ -70,9 +70,22 @@ namespace PEAS.Hubs
                 string message = $"Payment received from {order.Customer.FirstName} {order.Customer.LastName} (${Price.Format(order.Payment!.Total)})";
                 Clients.User(account.Id.ToString()).SendAsync("PaymentReceived", message);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 AppLogger.Log(_logger, e);
+            }
+        }
+
+        private Account? getAccount(Guid id)
+        {
+            try
+            {
+                Account? account = _dataContext.Accounts.Find(id);
+                return account;
+            }
+            catch (Exception)
+            {
+                return null;
             }
         }
     }
