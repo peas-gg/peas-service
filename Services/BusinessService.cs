@@ -698,6 +698,11 @@ namespace PEAS.Services
                     throw new AppException($"Price cannot be more than {Price.Format(Price.MaxPrice)}");
                 }
 
+                if (model.Price > Price.FreePrice && model.Price < Price.MinPrice)
+                {
+                    throw new AppException($"The minimum price is ${Price.Format(Price.MinPrice)}");
+                }
+
                 order.Price = model.Price;
 
                 //Send email to customer
