@@ -695,7 +695,7 @@ namespace PEAS.Services
 
                 if (model.Price > Price.MaxPrice)
                 {
-                    throw new AppException($"Price cannot be more than {Price.Format(Price.MaxPrice)}");
+                    throw new AppException($"Price cannot be more than ${Price.Format(Price.MaxPrice)}");
                 }
 
                 if (model.Price > Price.FreePrice && model.Price < Price.MinPrice)
