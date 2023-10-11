@@ -20,7 +20,6 @@ namespace PEAS.Services.Email
     {
         private readonly IConfiguration _configuration;
         private readonly string _apiKey;
-        private readonly string sender = "PEAS";
         private readonly string senderEmailAddress = "hello@peas.gg";
         private readonly string siteUrl;
 
@@ -78,7 +77,7 @@ namespace PEAS.Services.Email
                     .Replace("#Time#", time)
                     .Replace("#Day#", day);
 
-                sendEmail($"{title} - Reservation With {business.Name}  #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, "", htmlString);
+                sendEmail(business.Name, $"{title} - Reservation #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, "", htmlString);
             }
             catch (Exception e)
             {
@@ -107,7 +106,7 @@ namespace PEAS.Services.Email
                     .Replace("#Price#", $"${Price.Format(order.Price)}")
                     .Replace("#Time#", time);
 
-                sendEmail($"Payment request from {business.Name} #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, "", htmlString);
+                sendEmail(business.Name, $"Payment request #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, "", htmlString);
             }
             catch (Exception e)
             {
@@ -119,7 +118,7 @@ namespace PEAS.Services.Email
         {
             try
             {
-                sendEmail($"New withdrawal request # {withdrawal.Id.ToString()[..5].ToUpper()}", "Kingsley@peas.gg", $"{account.FirstName} {account.LastName} is requesting a withdrawal of ${withdrawal.Amount}", "");
+                sendEmail("PEAS", $"New withdrawal request # {withdrawal.Id.ToString()[..5].ToUpper()}", "Kingsley@peas.gg", $"{account.FirstName} {account.LastName} is requesting a withdrawal of ${withdrawal.Amount}", "");
             }
             catch (Exception e)
             {
@@ -127,7 +126,7 @@ namespace PEAS.Services.Email
             }
         }
 
-        private async void sendEmail(string subject, string recipient, string plainTextContent, string htmlContent)
+        private async void sendEmail(string sender, string subject, string recipient, string plainTextContent, string htmlContent)
         {
             var client = new SendGridClient(_apiKey);
             var from = new EmailAddress(senderEmailAddress, sender);
