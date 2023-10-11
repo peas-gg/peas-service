@@ -7,13 +7,7 @@ using PEAS.Helpers.Utilities;
 
 namespace PEAS.Hubs
 {
-    public interface IAppHub
-    {
-        void OrderReceived(Account account, Order order);
-        void PaymentReceived(Account account, Order order);
-    }
-
-    public class AppHub : Hub, IAppHub
+    public class AppHub : Hub
     {
         private readonly ILogger<AppHub> _logger;
         private readonly DataContext _dataContext;
@@ -49,32 +43,6 @@ namespace PEAS.Hubs
             try
             {
                 Groups.RemoveFromGroupAsync(Context.ConnectionId, accountId.ToString());
-            }
-            catch (Exception e)
-            {
-                AppLogger.Log(_logger, e);
-            }
-        }
-
-        public void OrderReceived(Account account, Order order)
-        {
-            try
-            {
-                string message = $"Reservation request from {order.Customer.FirstName} {order.Customer.LastName} for {order.Title}";
-                Clients.Group(account.Id.ToString()).SendAsync("OrderReceived", message);
-            }
-            catch (Exception e)
-            {
-                AppLogger.Log(_logger, e);
-            }
-        }
-
-        public void PaymentReceived(Account account, Order order)
-        {
-            try
-            {
-                string message = $"Payment received from {order.Customer.FirstName} {order.Customer.LastName} (${Price.Format(order.Payment!.Total)})";
-                Clients.User(account.Id.ToString()).SendAsync("PaymentReceived", message);
             }
             catch (Exception e)
             {

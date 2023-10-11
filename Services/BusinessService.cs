@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PEAS.Entities;
@@ -47,7 +48,7 @@ namespace PEAS.Services
         private readonly DataContext _context;
         private readonly IMapService _mapService;
         private readonly IEmailService _emailService;
-        private readonly IAppHub _appHub;
+        private readonly IHubContext<AppHub> _hubContext;
         private readonly IPushNotificationService _pushNotificationService;
         private readonly IMapper _mapper;
         private readonly ILogger<BusinessService> _logger;
@@ -56,7 +57,7 @@ namespace PEAS.Services
                 DataContext context,
                 IMapService mapService,
                 IEmailService emailService,
-                IAppHub appHub,
+                IHubContext<AppHub> hubContext,
                 IPushNotificationService pushNotificationService,
                 IMapper mapper,
                 ILogger<BusinessService> logger
@@ -65,7 +66,7 @@ namespace PEAS.Services
             _context = context;
             _mapService = mapService;
             _emailService = emailService;
-            _appHub = appHub;
+            _hubContext = hubContext;
             _pushNotificationService = pushNotificationService;
             _mapper = mapper;
             _logger = logger;
@@ -611,7 +612,7 @@ namespace PEAS.Services
                     _emailService.SendOrderEmail(order, business);
 
                     //Send to Hub
-                    _appHub.OrderReceived(business.Account, order);
+                    sendOrderRequestToHub(business.Account, order);
 
                     //Send Push Notification to the business owner
                     _pushNotificationService.SendNewOrderPush(business.Account, order);
@@ -979,6 +980,19 @@ namespace PEAS.Services
             {
                 AppLogger.Log(_logger, e);
                 throw new AppException("Error loading business colors");
+            }
+        }
+
+        private async void sendOrderRequestToHub(Account account, Order order)
+        {
+            try
+            {
+                string message = $"Reservation request from {order.Customer.FirstName} {order.Customer.LastName} for {order.Title}";
+                await _hubContext.Clients.Group(account.Id.ToString()).SendAsync("OrderReceived", message);
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
             }
         }
 
