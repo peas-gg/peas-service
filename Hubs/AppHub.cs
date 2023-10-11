@@ -50,7 +50,7 @@ namespace PEAS.Hubs
             }
         }
 
-        public void OrderReceived(Order order, Account account)
+        public void OrderReceived(Account account, Order order)
         {
             try
             {
@@ -63,7 +63,7 @@ namespace PEAS.Hubs
             }
         }
 
-        public void PaymentReceived(Order order, Account account)
+        public void PaymentReceived(Account account, Order order)
         {
             try
             {

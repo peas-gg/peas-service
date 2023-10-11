@@ -7,6 +7,7 @@ using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
 using PEAS.Helpers.Utilities;
+using PEAS.Hubs;
 using PEAS.Models;
 using PEAS.Models.Business;
 using PEAS.Models.Business.Order;
@@ -46,6 +47,7 @@ namespace PEAS.Services
         private readonly DataContext _context;
         private readonly IMapService _mapService;
         private readonly IEmailService _emailService;
+        private readonly AppHub _appHub;
         private readonly IPushNotificationService _pushNotificationService;
         private readonly IMapper _mapper;
         private readonly ILogger<BusinessService> _logger;
@@ -54,6 +56,7 @@ namespace PEAS.Services
                 DataContext context,
                 IMapService mapService,
                 IEmailService emailService,
+                AppHub appHub,
                 IPushNotificationService pushNotificationService,
                 IMapper mapper,
                 ILogger<BusinessService> logger
@@ -62,6 +65,7 @@ namespace PEAS.Services
             _context = context;
             _mapService = mapService;
             _emailService = emailService;
+            _appHub = appHub;
             _pushNotificationService = pushNotificationService;
             _mapper = mapper;
             _logger = logger;
@@ -605,6 +609,9 @@ namespace PEAS.Services
 
                     //Send Email to user stating the reservation has been requested
                     _emailService.SendOrderEmail(order, business);
+
+                    //Send to Hub
+                    _appHub.OrderReceived(business.Account, order);
 
                     //Send Push Notification to the business owner
                     _pushNotificationService.SendNewOrderPush(business.Account, order);

@@ -3,6 +3,7 @@ using PEAS.Entities;
 using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
+using PEAS.Hubs;
 using PEAS.Models;
 using Stripe;
 
@@ -17,6 +18,7 @@ namespace PEAS.Services
     public class PaymentService : IPaymentService
     {
         private readonly DataContext _context;
+        private readonly AppHub _apphub;
         private readonly IPushNotificationService _pushNotificationService;
         private readonly ILogger<PaymentService> _logger;
 
@@ -26,9 +28,16 @@ namespace PEAS.Services
         private readonly string orderIdMetadataKey = "orderId";
         private readonly decimal platformFeeRate = 0.08M;
 
-        public PaymentService(IConfiguration configuration, DataContext context, IPushNotificationService pushNotificationService, ILogger<PaymentService> logger)
+        public PaymentService(
+            IConfiguration configuration,
+            DataContext context,
+            AppHub appHub,
+            IPushNotificationService pushNotificationService,
+            ILogger<PaymentService> logger
+            )
         {
             _context = context;
+            _apphub = appHub;
             _pushNotificationService = pushNotificationService;
             _logger = logger;
             stripeWebHookKey = configuration.GetSection("StripeWebHook").Value ?? "";
@@ -170,6 +179,10 @@ namespace PEAS.Services
                     _context.Update(order);
                     _context.SaveChanges();
 
+                    //Send to Hub
+                    _apphub.PaymentReceived(order.Business.Account, order);
+
+                    //Send Push Notification to the business owner
                     _pushNotificationService.SendPaymentReceivedPush(order.Business.Account, order);
 
                     return new EmptyResponse();
