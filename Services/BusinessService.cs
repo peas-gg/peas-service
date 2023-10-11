@@ -150,7 +150,7 @@ namespace PEAS.Services
                 var business = new Business
                 {
                     Account = account,
-                    Sign = model.Sign.Trim(),
+                    Sign = model.Sign.Trim().ToLower(),
                     Name = model.Name,
                     Category = model.Category,
                     Currency = Currency.CAD,
@@ -196,7 +196,7 @@ namespace PEAS.Services
                 if (model.Sign != null)
                 {
                     validateSign(model.Sign);
-                    business.Sign = model.Sign;
+                    business.Sign = model.Sign.Trim().ToLower();
                 }
 
                 if (model.Name != null)
