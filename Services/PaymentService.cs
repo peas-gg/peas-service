@@ -220,7 +220,7 @@ namespace PEAS.Services
 
         private string getPay(Order order)
         {
-            int totalPaid = order.Payment!.Base + order.Payment!.Deposit + order.Payment.Tip;
+            int totalPaid = order.Payment!.Deposit + order.Payment!.Base + order.Payment.Tip;
             return $"(${Helpers.Utilities.Price.Format(totalPaid)})";
         }
     }
