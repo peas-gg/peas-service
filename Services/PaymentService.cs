@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using PEAS.Entities;
 using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
+using PEAS.Hubs;
 using PEAS.Models;
 using Stripe;
 
@@ -17,6 +19,7 @@ namespace PEAS.Services
     public class PaymentService : IPaymentService
     {
         private readonly DataContext _context;
+        private readonly IHubContext<AppHub> _hubContext;
         private readonly IPushNotificationService _pushNotificationService;
         private readonly ILogger<PaymentService> _logger;
 
@@ -26,9 +29,16 @@ namespace PEAS.Services
         private readonly string orderIdMetadataKey = "orderId";
         private readonly decimal platformFeeRate = 0.08M;
 
-        public PaymentService(IConfiguration configuration, DataContext context, IPushNotificationService pushNotificationService, ILogger<PaymentService> logger)
+        public PaymentService(
+            IConfiguration configuration,
+            DataContext context,
+            IHubContext<AppHub> hubContext,
+            IPushNotificationService pushNotificationService,
+            ILogger<PaymentService> logger
+            )
         {
             _context = context;
+            _hubContext = hubContext;
             _pushNotificationService = pushNotificationService;
             _logger = logger;
             stripeWebHookKey = configuration.GetSection("StripeWebHook").Value ?? "";
@@ -170,6 +180,10 @@ namespace PEAS.Services
                     _context.Update(order);
                     _context.SaveChanges();
 
+                    //Send to Hub
+                    sendPaymentConfirmationToAccount(order);
+
+                    //Send Push Notification to the business owner
                     _pushNotificationService.SendPaymentReceivedPush(order.Business.Account, order);
 
                     return new EmptyResponse();
@@ -189,6 +203,19 @@ namespace PEAS.Services
         private int getPaymentIntentAmount(Order order, int tip)
         {
             return order.Price + tip;
+        }
+
+        private async void sendPaymentConfirmationToAccount(Order order)
+        {
+            try
+            {
+                string message = $"Payment received from {order.Customer.FirstName} {order.Customer.LastName} (${Helpers.Utilities.Price.Format(order.Payment!.Total)})";
+                await _hubContext.Clients.Group(order.Business.Account.Id.ToString()).SendAsync("PaymentReceived", message);
+            }
+            catch(Exception e)
+            {
+                AppLogger.Log(_logger, e);
+            }
         }
     }
 }

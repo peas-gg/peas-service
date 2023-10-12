@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PEAS.Entities;
@@ -7,6 +8,7 @@ using PEAS.Entities.Booking;
 using PEAS.Entities.Site;
 using PEAS.Helpers;
 using PEAS.Helpers.Utilities;
+using PEAS.Hubs;
 using PEAS.Models;
 using PEAS.Models.Business;
 using PEAS.Models.Business.Order;
@@ -46,6 +48,7 @@ namespace PEAS.Services
         private readonly DataContext _context;
         private readonly IMapService _mapService;
         private readonly IEmailService _emailService;
+        private readonly IHubContext<AppHub> _hubContext;
         private readonly IPushNotificationService _pushNotificationService;
         private readonly IMapper _mapper;
         private readonly ILogger<BusinessService> _logger;
@@ -54,6 +57,7 @@ namespace PEAS.Services
                 DataContext context,
                 IMapService mapService,
                 IEmailService emailService,
+                IHubContext<AppHub> hubContext,
                 IPushNotificationService pushNotificationService,
                 IMapper mapper,
                 ILogger<BusinessService> logger
@@ -62,6 +66,7 @@ namespace PEAS.Services
             _context = context;
             _mapService = mapService;
             _emailService = emailService;
+            _hubContext = hubContext;
             _pushNotificationService = pushNotificationService;
             _mapper = mapper;
             _logger = logger;
@@ -150,7 +155,7 @@ namespace PEAS.Services
                 var business = new Business
                 {
                     Account = account,
-                    Sign = model.Sign.Trim(),
+                    Sign = model.Sign.Trim().ToLower(),
                     Name = model.Name,
                     Category = model.Category,
                     Currency = Currency.CAD,
@@ -196,7 +201,7 @@ namespace PEAS.Services
                 if (model.Sign != null)
                 {
                     validateSign(model.Sign);
-                    business.Sign = model.Sign;
+                    business.Sign = model.Sign.Trim().ToLower();
                 }
 
                 if (model.Name != null)
@@ -606,6 +611,9 @@ namespace PEAS.Services
                     //Send Email to user stating the reservation has been requested
                     _emailService.SendOrderEmail(order, business);
 
+                    //Send to Hub
+                    sendOrderRequestToHub(business.Account, order);
+
                     //Send Push Notification to the business owner
                     _pushNotificationService.SendNewOrderPush(business.Account, order);
 
@@ -687,7 +695,12 @@ namespace PEAS.Services
 
                 if (model.Price > Price.MaxPrice)
                 {
-                    throw new AppException($"Price cannot be more than {Price.Format(Price.MaxPrice)}");
+                    throw new AppException($"Price cannot be more than ${Price.Format(Price.MaxPrice)}");
+                }
+
+                if (model.Price > Price.FreePrice && model.Price < Price.MinPrice)
+                {
+                    throw new AppException($"The minimum price is ${Price.Format(Price.MinPrice)}");
                 }
 
                 order.Price = model.Price;
@@ -972,6 +985,19 @@ namespace PEAS.Services
             {
                 AppLogger.Log(_logger, e);
                 throw new AppException("Error loading business colors");
+            }
+        }
+
+        private async void sendOrderRequestToHub(Account account, Order order)
+        {
+            try
+            {
+                string message = $"Reservation request from {order.Customer.FirstName} {order.Customer.LastName} for {order.Title}";
+                await _hubContext.Clients.Group(account.Id.ToString()).SendAsync("OrderReceived", message);
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
             }
         }
 

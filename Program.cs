@@ -7,8 +7,8 @@ using PEAS.Entities;
 using PEAS.Middleware;
 using PEAS.Services;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using PEAS.Services.Email;
+using PEAS.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +36,8 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
 
 builder.Services.AddDbContext<DataContext>();
+
+builder.Services.AddSignalR().AddAzureSignalR(builder.Configuration.GetSection("AzureSignalR").Value!);
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -86,5 +88,7 @@ app.UseAuthorization();
 app.UseMiddleware<ErrorHandlerMiddleware>();
 
 app.MapControllers();
+
+app.MapHub<AppHub>("/appHub");
 
 app.Run();
