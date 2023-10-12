@@ -184,7 +184,7 @@ namespace PEAS.Services
                     sendPaymentConfirmationToAccount(order);
 
                     //Send Push Notification to the business owner
-                    _pushNotificationService.SendPaymentReceivedPush(order.Business.Account, order);
+                    _pushNotificationService.SendPaymentReceivedPush(order.Business.Account, order, getPay(order));
 
                     return new EmptyResponse();
                 }
@@ -209,13 +209,19 @@ namespace PEAS.Services
         {
             try
             {
-                string message = $"Payment received from {order.Customer.FirstName} {order.Customer.LastName} (${Helpers.Utilities.Price.Format(order.Payment!.Total)})";
+                string message = $"Payment received from {order.Customer.FirstName} {order.Customer.LastName} {getPay(order)}";
                 await _hubContext.Clients.Group(order.Business.Account.Id.ToString()).SendAsync("PaymentReceived", message);
             }
             catch(Exception e)
             {
                 AppLogger.Log(_logger, e);
             }
+        }
+
+        private string getPay(Order order)
+        {
+            int totalPaid = order.Payment!.Base + order.Payment!.Deposit + order.Payment.Tip;
+            return $"(${Helpers.Utilities.Price.Format(totalPaid)})";
         }
     }
 }
