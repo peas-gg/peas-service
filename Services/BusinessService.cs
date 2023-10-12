@@ -812,7 +812,7 @@ namespace PEAS.Services
         {
             try
             {
-                Business? business = _context.Businesses.AsNoTracking().Include(x => x.Account).AsNoTracking().Where(x => x.Id == businessId).FirstOrDefault();
+                Business? business = _context.Businesses.Include(x => x.Account).Where(x => x.Id == businessId).FirstOrDefault();
 
                 if (business == null || business.Account.Id != account.Id)
                 {
