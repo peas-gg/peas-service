@@ -118,7 +118,7 @@ namespace PEAS.Services.Email
         {
             try
             {
-                sendEmail("PEAS", $"New withdrawal request # {withdrawal.Id.ToString()[..5].ToUpper()}", "Kingsley@peas.gg", $"{account.FirstName} {account.LastName} is requesting a withdrawal of ${withdrawal.Amount}", "");
+                sendEmail("PEAS", $"New withdrawal request # {withdrawal.Id.ToString()[..5].ToUpper()}", "Kingsley@peas.gg", $"{account.FirstName} {account.LastName} is requesting a withdrawal of ${Price.Format(withdrawal.Amount)}", "");
             }
             catch (Exception e)
             {

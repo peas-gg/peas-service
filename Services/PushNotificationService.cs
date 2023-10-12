@@ -10,7 +10,7 @@ namespace PEAS.Services
     public interface IPushNotificationService
     {
         void SendNewOrderPush(Account account, Order order);
-        void SendPaymentReceivedPush(Account account, Order order);
+        void SendPaymentReceivedPush(Account account, Order order, string pay);
     }
 
     public class PushNotificationService : IPushNotificationService
@@ -82,7 +82,7 @@ namespace PEAS.Services
             }
         }
 
-        public void SendPaymentReceivedPush(Account account, Order order)
+        public void SendPaymentReceivedPush(Account account, Order order, string pay)
         {
             try
             {
@@ -90,7 +90,7 @@ namespace PEAS.Services
                 if (device != null)
                 {
                     string title = "Payment Received";
-                    string body = $"You received ${Price.Format(order.Payment?.Total ?? 0)} from {order.Customer.FirstName} {order.Customer.LastName} for {order.Title}";
+                    string body = $"You received {pay} from {order.Customer.FirstName} {order.Customer.LastName} for {order.Title}";
                     sendApplePush(device.DeviceToken, constructAppleNotification(title, body, "cash.mp3"));
                 }
             }

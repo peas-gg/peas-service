@@ -728,7 +728,7 @@ namespace PEAS.Services
         {
             try
             {
-                Business? business = _context.Businesses.AsNoTracking().Include(x => x.Account).Where(x => x.Id == businessId).FirstOrDefault();
+                Business? business = _context.Businesses.AsNoTracking().Include(x => x.Account).AsNoTracking().Where(x => x.Id == businessId).FirstOrDefault();
 
                 if (business == null || business.Account.Id != account.Id)
                 {
@@ -812,7 +812,7 @@ namespace PEAS.Services
         {
             try
             {
-                Business? business = _context.Businesses.AsNoTracking().Include(x => x.Account).Where(x => x.Id == businessId).FirstOrDefault();
+                Business? business = _context.Businesses.Include(x => x.Account).Where(x => x.Id == businessId).FirstOrDefault();
 
                 if (business == null || business.Account.Id != account.Id)
                 {
@@ -842,7 +842,7 @@ namespace PEAS.Services
                 }
                 else
                 {
-                    throw new AppException($"Cannot withdraw an invalid amount {amountToWithdraw}");
+                    throw new AppException($"Cannot withdraw an invalid amount ${Price.Format(amountToWithdraw)}");
                 }
             }
             catch (Exception e)
