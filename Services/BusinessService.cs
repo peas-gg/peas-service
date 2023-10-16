@@ -1113,7 +1113,7 @@ namespace PEAS.Services
                 throw new AppException("You must have at least 1 block at any given time");
             }
 
-            if (blocks.Count > 5)
+            if (blocks.Count > 20)
             {
                 throw new AppException("You are only allowed to have 5 blocks at this moment");
             }
