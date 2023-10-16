@@ -1113,9 +1113,10 @@ namespace PEAS.Services
                 throw new AppException("You must have at least 1 block at any given time");
             }
 
-            if (blocks.Count > 20)
+            int maxBlockCount = 20;
+            if (blocks.Count > maxBlockCount)
             {
-                throw new AppException("You are only allowed to have 5 blocks at this moment");
+                throw new AppException($"You are only allowed to have {maxBlockCount} blocks at this moment");
             }
 
             blocks.Sort((x, y) => x.Index.CompareTo(y.Index));
