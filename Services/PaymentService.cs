@@ -97,6 +97,13 @@ namespace PEAS.Services
                             {orderIdMetadataKey, $"{order.Id}"},
                             {tipMetadataKey, $"{tip}"}
                         },
+                        PaymentMethodOptions = new PaymentIntentPaymentMethodOptionsOptions
+                        {
+                            Card = new PaymentIntentPaymentMethodOptionsCardOptions
+                            {
+                                RequestThreeDSecure = "any"
+                            },
+                        },
                         AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
                         {
                             Enabled = true,
