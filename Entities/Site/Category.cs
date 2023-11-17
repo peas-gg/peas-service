@@ -16,5 +16,6 @@ namespace PEAS.Entities.Site
         Lashes,
         Food,
         Fitness,
+        Skincare
     }
 }
