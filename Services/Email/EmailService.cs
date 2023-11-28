@@ -67,8 +67,8 @@ namespace PEAS.Services.Email
                     case Order.Status.Approved:
                         colour = "#C4FFBC";
                         subtitle = $"Your reservation with {businessName} has been approved";
-                        googleCalenderTitle = $"Appointment+With+{businessName}+For+{order.Title}";
-                        iCalenderTitle = $"Appointment%20With%20{businessName}%20For%20{order.Title}";
+                        googleCalenderTitle = $"Appointment+With+%22{business.Name}%22+For+{order.Title}";
+                        iCalenderTitle = $"Appointment%20With%20{business.Name}%20For%20{order.Title}";
                         googleCalenderDescription = order.Description.Replace(' ', '+');
                         iCalenderDescription = order.Description.Replace(" ", "%20");
                         addToCalenderDisplay = "block";
