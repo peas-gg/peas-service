@@ -176,6 +176,90 @@
             </td>
           </tr>
         </table>
+        <table
+          role="presentation"
+          style="width: 100%; display: #AddToCalenderDisplay#"
+        >
+          <tr>
+            <td align="center" style="padding-bottom: 10px">
+              <p style="font-size: 14px; font-weight: 600">Add to calender</p>
+            </td>
+          </tr>
+          <!-- -----------------------GOOGLE CALENDER-------------------- -->
+          <tr>
+            <td align="center" style="padding-bottom: 10px">
+              <a
+                href="https://www.google.com/calendar/render?action=TEMPLATE&text=#GoogleCalenderTitle#&dates=#StartTime#/#EndTime#&details=#GoogleCalenderDescription#&location=Event+Location"
+              >
+                <button
+                  style="
+                    background-color: #dee2e6;
+                    max-width: 150px;
+                    width: 100%;
+                    height: 55px;
+                    border-radius: 10px;
+                    border: 2px solid #ced4da;
+                    cursor: pointer;
+                  "
+                >
+                  <table role="presentation" style="width: 100%">
+                    <tr>
+                      <td align="right">
+                        <img
+                          src="https://peasfiles.blob.core.windows.net/website/googleCal.png"
+                          alt="Google"
+                          style="width: 25px"
+                        />
+                      </td>
+                      <td style="width: 5px"></td>
+                      <td align="left">
+                        <p style="font-size: 20px; font-weight: 600">Google</p>
+                      </td>
+                    </tr>
+                  </table>
+                </button>
+              </a>
+            </td>
+          </tr>
+
+          <!-- -----------------------iCAL CALENDER-------------------- -->
+          <tr>
+            <td align="center" style="padding-bottom: 20px">
+              <a
+                href="data:text/calendar;charset=utf-8,%0ABEGIN%3AVCALENDAR%0AVERSION%3A2.0%0A%0ABEGIN%3AVEVENT%0AUID%3A1234567890%0ASUMMARY%3A#ICalenderTitle#%0ADESCRIPTION%3A#ICalenderDescription#%0ADTSTART%3A#StartTime#%0ADTEND%3A#EndTime#%0ALOCATION%3AEvent%20Location%0AEND%3AVEVENT%0A%0AEND%3AVCALENDAR%0A"
+                download="event.ics"
+              >
+                <button
+                  style="
+                    background-color: #dee2e6;
+                    max-width: 150px;
+                    width: 100%;
+                    height: 55px;
+                    border-radius: 10px;
+                    border: 2px solid #ced4da;
+                    cursor: pointer;
+                  "
+                >
+                  <table role="presentation" style="width: 100%">
+                    <tr>
+                      <td align="right">
+                        <img
+                          src="https://peasfiles.blob.core.windows.net/website/appleCal.png"
+                          alt="Google"
+                          style="width: 25px"
+                        />
+                      </td>
+                      <td style="width: 5px"></td>
+                      <td align="left">
+                        <p style="font-size: 20px; font-weight: 600">iCal</p>
+                      </td>
+                    </tr>
+                  </table>
+                </button>
+              </a>
+            </td>
+          </tr>
+        </table>
         <div
           style="width: 80%; margin: 0 auto; height: 1px; background: #e5e5e5"
         ></div>
@@ -217,7 +301,10 @@
         <table role="presentation" style="margin-top: 40px">
           <tr>
             <td>
-              <a target="_blank" href="https://ca.linkedin.com/company/peas-app">
+              <a
+                target="_blank"
+                href="https://ca.linkedin.com/company/peas-app"
+              >
                 <img
                   width="30px"
                   src="https://peasfiles.blob.core.windows.net/website/linkedin.png"

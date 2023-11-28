@@ -41,6 +41,11 @@ namespace PEAS.Services.Email
                 string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Services/Email/OrderStatus.html");
                 string title = order.OrderStatus.ToString().ToUpper();
                 string recipientName = order.Customer.FirstName + " " + order.Customer.LastName;
+                string calenderDateFormat = "yyyyMMddTHHmmssZ";
+                string googleCalenderTitle = "";
+                string iCalenderTitle = "";
+                string googleCalenderDescription = "";
+                string iCalenderDescription = "";
                 string colour = "";
                 string subtitle = "";
                 string businessName = $"\"{business.Name}\"";
@@ -48,6 +53,11 @@ namespace PEAS.Services.Email
                 DateTime orderDate = getBusinessTime(order.StartTime, business.TimeZone);
                 string time = orderDate.ToString("h:mm tt");
                 string day = $"{orderDate:ddd}, {orderDate:MMM} {orderDate.Day}";
+                string startTime = order.StartTime.ToString(calenderDateFormat);
+                string endTime = order.EndTime.ToString(calenderDateFormat);
+                string addToCalenderDisplay = "none";
+                // string dateString = date.ToString("yyyyMMddTHHmmssZ");
+                // DateTime date = DateTime.UtcNow;
                 switch (order.OrderStatus)
                 {
                     case Order.Status.Pending:
@@ -57,6 +67,11 @@ namespace PEAS.Services.Email
                     case Order.Status.Approved:
                         colour = "#C4FFBC";
                         subtitle = $"Your reservation with {businessName} has been approved";
+                        googleCalenderTitle = $"Appointment+With+{businessName}+For+{order.Title}";
+                        iCalenderTitle = $"Appointment%20With%20{businessName}%20For%20{order.Title}";
+                        googleCalenderDescription = order.Description.Replace(' ', '+');
+                        iCalenderDescription = order.Description.Replace(" ", "%20");
+                        addToCalenderDisplay = "block";
                         break;
                     case Order.Status.Declined:
                         colour = "#FF7A7A";
@@ -75,7 +90,14 @@ namespace PEAS.Services.Email
                     .Replace("#OrderTitle#", order.Title)
                     .Replace("#Price#", $"${Price.Format(order.Price)}")
                     .Replace("#Time#", time)
-                    .Replace("#Day#", day);
+                    .Replace("#Day#", day)
+                    .Replace("#StartTime#", startTime)
+                    .Replace("#EndTime#", endTime)
+                    .Replace("#AddToCalenderDisplay#", addToCalenderDisplay)
+                    .Replace("#GoogleCalenderTitle#", googleCalenderTitle)
+                    .Replace("#ICalenderTitle#", iCalenderTitle)
+                    .Replace("#GoogleCalenderDescription#", googleCalenderDescription)
+                    .Replace("#ICalenderDescription#", iCalenderDescription);
 
                 sendEmail(business.Name, $"{title} - Reservation #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, "", htmlString);
             }
