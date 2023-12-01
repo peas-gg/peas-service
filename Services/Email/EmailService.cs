@@ -24,6 +24,7 @@ namespace PEAS.Services.Email
         private readonly string _apiKey;
         private readonly string senderEmailAddress = "hello@peas.gg";
         private readonly string siteUrl;
+        private readonly HttpClient _client;
 
         private readonly ILogger<EmailService> _logger;
 
@@ -163,12 +164,17 @@ namespace PEAS.Services.Email
         }
 
 
-        public async Task<CalenderLinksResponse> getCalenderLinks(string title, string startTime, string endTime)
+        public EmailService()
         {
+            _client = new HttpClient();
+        }
 
+
+
+        private async Task<CalenderLinksResponse> getCalenderLinks(string title, string startTime, string endTime)
+        {
             try
             {
-                 HttpClient _client = new HttpClient();
                 string endpoint = "https://calndr.link/api/events";
                 var values = new Dictionary<string, string>
                 {
