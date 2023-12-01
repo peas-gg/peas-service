@@ -6,6 +6,8 @@ using PEAS.Helpers.Utilities;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using TimeZoneConverter;
+using Newtonsoft.Json;
+
 
 namespace PEAS.Services.Email
 {
@@ -33,7 +35,7 @@ namespace PEAS.Services.Email
             siteUrl = (configuration.GetSection("Environment").Value ?? "") == "Production" ? "https://peas.gg/" : "https://dev.peas.gg/";
         }
 
-        public void SendOrderEmail(Order order, Business business)
+        public async void SendOrderEmail(Order order, Business business)
         {
             try
             {
@@ -62,21 +64,13 @@ namespace PEAS.Services.Email
                         subtitle = $"You requested a reservation with {businessName}. You will receive an email when your reservation is approved";
                         break;
                     case Order.Status.Approved:
+                        CalenderLinksResponse calenderLinksResponse = await getCalenderLinks($"{order.Title} with {business.Name}", startTime, endTime);
+
                         colour = "#C4FFBC";
                         subtitle = $"Your reservation with {businessName} has been approved";
                         addToCalenderDisplay = "block";
-                        // TODO: Make an API call to "https://calndr.link/api/events"
-                        //TODO: with this payload 
-                        /*
-                            {
-                                "title" : "Keep Pushing",
-                                "start" : "20240123T102300Z",
-                                "end" : "20240123T112300Z"
-                            }
-                        */  
-                        // TODO: Replace the Links
-                        googleCalenderLink = "";
-                        appleCalenderLink = "";
+                        googleCalenderLink = calenderLinksResponse.Links.Google;
+                        appleCalenderLink = calenderLinksResponse.Links.Apple;
                         
                         break;
                     case Order.Status.Declined:
@@ -166,6 +160,36 @@ namespace PEAS.Services.Email
             //Convert to business time
             TimeZoneInfo businessTimeZone = TZConvert.GetTimeZoneInfo(timeZone);
             return TimeZoneInfo.ConvertTimeFromUtc(dateTime, businessTimeZone);
+        }
+
+
+        public async Task<CalenderLinksResponse> getCalenderLinks(string title, string startTime, string endTime)
+        {
+
+            try
+            {
+                 HttpClient _client = new HttpClient();
+                string endpoint = "https://calndr.link/api/events";
+                var values = new Dictionary<string, string>
+                {
+                    { "title", $"{title}" },
+                    { "start", $"{startTime}" },
+                    { "end", $"{endTime}" }
+                };
+
+                var content = new FormUrlEncodedContent(values);
+
+                var response = await _client.PostAsync(endpoint, content);
+                string responseString = await response.Content.ReadAsStringAsync();
+                CalenderLinksResponse jsonResponse = JsonConvert.DeserializeObject<CalenderLinksResponse>(responseString);
+
+                return jsonResponse;
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException("Could not get Calender Links");
+            }
         }
     }
 }
