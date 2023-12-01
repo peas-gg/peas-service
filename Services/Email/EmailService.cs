@@ -6,6 +6,9 @@ using PEAS.Helpers.Utilities;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using TimeZoneConverter;
+using Newtonsoft.Json;
+using PEAS.Models;
+
 
 namespace PEAS.Services.Email
 {
@@ -22,6 +25,7 @@ namespace PEAS.Services.Email
         private readonly string _apiKey;
         private readonly string senderEmailAddress = "hello@peas.gg";
         private readonly string siteUrl;
+        private readonly HttpClient _client;
 
         private readonly ILogger<EmailService> _logger;
 
@@ -31,9 +35,10 @@ namespace PEAS.Services.Email
             _apiKey = _configuration.GetSection("SendGrid").Value ?? "";
             _logger = logger;
             siteUrl = (configuration.GetSection("Environment").Value ?? "") == "Production" ? "https://peas.gg/" : "https://dev.peas.gg/";
+            _client = new HttpClient();
         }
 
-        public void SendOrderEmail(Order order, Business business)
+        public async void SendOrderEmail(Order order, Business business)
         {
             try
             {
@@ -41,6 +46,9 @@ namespace PEAS.Services.Email
                 string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Services/Email/OrderStatus.html");
                 string title = order.OrderStatus.ToString().ToUpper();
                 string recipientName = order.Customer.FirstName + " " + order.Customer.LastName;
+                string calenderDateFormat = "yyyyMMddTHHmmssZ";
+                string googleCalenderLink = "";
+                string appleCalenderLink = "";
                 string colour = "";
                 string subtitle = "";
                 string businessName = $"\"{business.Name}\"";
@@ -48,6 +56,10 @@ namespace PEAS.Services.Email
                 DateTime orderDate = getBusinessTime(order.StartTime, business.TimeZone);
                 string time = orderDate.ToString("h:mm tt");
                 string day = $"{orderDate:ddd}, {orderDate:MMM} {orderDate.Day}";
+                string startTime = order.StartTime.ToString(calenderDateFormat);
+                string endTime = order.EndTime.ToString(calenderDateFormat);
+                string addToCalenderDisplay = "none";
+
                 switch (order.OrderStatus)
                 {
                     case Order.Status.Pending:
@@ -55,8 +67,14 @@ namespace PEAS.Services.Email
                         subtitle = $"You requested a reservation with {businessName}. You will receive an email when your reservation is approved";
                         break;
                     case Order.Status.Approved:
+                        CalenderLinksResponse calenderLinksResponse = await getCalenderLinks($"{order.Title} with {business.Name}", startTime, endTime);
+
                         colour = "#C4FFBC";
                         subtitle = $"Your reservation with {businessName} has been approved";
+                        addToCalenderDisplay = "block";
+                        googleCalenderLink = calenderLinksResponse.Links.Google;
+                        appleCalenderLink = calenderLinksResponse.Links.Apple;
+                        
                         break;
                     case Order.Status.Declined:
                         colour = "#FF7A7A";
@@ -75,7 +93,12 @@ namespace PEAS.Services.Email
                     .Replace("#OrderTitle#", order.Title)
                     .Replace("#Price#", $"${Price.Format(order.Price)}")
                     .Replace("#Time#", time)
-                    .Replace("#Day#", day);
+                    .Replace("#Day#", day)
+                    .Replace("#StartTime#", startTime)
+                    .Replace("#EndTime#", endTime)
+                    .Replace("#AddToCalenderDisplay#", addToCalenderDisplay)
+                    .Replace("#GoogleCalenderLink#", googleCalenderLink)
+                    .Replace("#AppleCalenderLink#", appleCalenderLink);
 
                 sendEmail(business.Name, $"{title} - Reservation #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, "", htmlString);
             }
@@ -140,6 +163,33 @@ namespace PEAS.Services.Email
             //Convert to business time
             TimeZoneInfo businessTimeZone = TZConvert.GetTimeZoneInfo(timeZone);
             return TimeZoneInfo.ConvertTimeFromUtc(dateTime, businessTimeZone);
+        }
+
+        private async Task<CalenderLinksResponse> getCalenderLinks(string title, string startTime, string endTime)
+        {
+            try
+            {
+                string endpoint = "https://calndr.link/api/events";
+                var values = new Dictionary<string, string>
+                {
+                    { "title", $"{title}" },
+                    { "start", $"{startTime}" },
+                    { "end", $"{endTime}" }
+                };
+
+                var content = new FormUrlEncodedContent(values);
+
+                var response = await _client.PostAsync(endpoint, content);
+                string responseString = await response.Content.ReadAsStringAsync();
+                CalenderLinksResponse jsonResponse = JsonConvert.DeserializeObject<CalenderLinksResponse>(responseString);
+
+                return jsonResponse;
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw new AppException("Could not get Calender Links");
+            }
         }
     }
 }
