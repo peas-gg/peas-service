@@ -1,4 +1,4 @@
-namespace PEAS
+namespace PEAS.Models
 {
     public struct CalenderLinksResponse
     {

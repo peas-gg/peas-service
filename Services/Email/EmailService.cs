@@ -7,6 +7,7 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 using TimeZoneConverter;
 using Newtonsoft.Json;
+using PEAS.Models;
 
 
 namespace PEAS.Services.Email
@@ -34,6 +35,7 @@ namespace PEAS.Services.Email
             _apiKey = _configuration.GetSection("SendGrid").Value ?? "";
             _logger = logger;
             siteUrl = (configuration.GetSection("Environment").Value ?? "") == "Production" ? "https://peas.gg/" : "https://dev.peas.gg/";
+            _client = new HttpClient();
         }
 
         public async void SendOrderEmail(Order order, Business business)
@@ -162,14 +164,6 @@ namespace PEAS.Services.Email
             TimeZoneInfo businessTimeZone = TZConvert.GetTimeZoneInfo(timeZone);
             return TimeZoneInfo.ConvertTimeFromUtc(dateTime, businessTimeZone);
         }
-
-
-        public EmailService()
-        {
-            _client = new HttpClient();
-        }
-
-
 
         private async Task<CalenderLinksResponse> getCalenderLinks(string title, string startTime, string endTime)
         {
