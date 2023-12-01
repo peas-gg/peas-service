@@ -42,10 +42,8 @@ namespace PEAS.Services.Email
                 string title = order.OrderStatus.ToString().ToUpper();
                 string recipientName = order.Customer.FirstName + " " + order.Customer.LastName;
                 string calenderDateFormat = "yyyyMMddTHHmmssZ";
-                string googleCalenderTitle = "";
-                string iCalenderTitle = "";
-                string googleCalenderDescription = "";
-                string iCalenderDescription = "";
+                string googleCalenderLink = "";
+                string appleCalenderLink = "";
                 string colour = "";
                 string subtitle = "";
                 string businessName = $"\"{business.Name}\"";
@@ -56,8 +54,7 @@ namespace PEAS.Services.Email
                 string startTime = order.StartTime.ToString(calenderDateFormat);
                 string endTime = order.EndTime.ToString(calenderDateFormat);
                 string addToCalenderDisplay = "none";
-                // string dateString = date.ToString("yyyyMMddTHHmmssZ");
-                // DateTime date = DateTime.UtcNow;
+
                 switch (order.OrderStatus)
                 {
                     case Order.Status.Pending:
@@ -67,11 +64,20 @@ namespace PEAS.Services.Email
                     case Order.Status.Approved:
                         colour = "#C4FFBC";
                         subtitle = $"Your reservation with {businessName} has been approved";
-                        googleCalenderTitle = $"Appointment+With+%22{business.Name}%22+For+{order.Title}";
-                        iCalenderTitle = $"Appointment%20With%20{business.Name}%20For%20{order.Title}";
-                        googleCalenderDescription = order.Description.Replace(' ', '+');
-                        iCalenderDescription = order.Description.Replace(" ", "%20");
                         addToCalenderDisplay = "block";
+                        // TODO: Make an API call to "https://calndr.link/api/events"
+                        //TODO: with this payload 
+                        /*
+                            {
+                                "title" : "Keep Pushing",
+                                "start" : "20240123T102300Z",
+                                "end" : "20240123T112300Z"
+                            }
+                        */  
+                        // TODO: Replace the Links
+                        googleCalenderLink = "";
+                        appleCalenderLink = "";
+                        
                         break;
                     case Order.Status.Declined:
                         colour = "#FF7A7A";
@@ -94,10 +100,8 @@ namespace PEAS.Services.Email
                     .Replace("#StartTime#", startTime)
                     .Replace("#EndTime#", endTime)
                     .Replace("#AddToCalenderDisplay#", addToCalenderDisplay)
-                    .Replace("#GoogleCalenderTitle#", googleCalenderTitle)
-                    .Replace("#ICalenderTitle#", iCalenderTitle)
-                    .Replace("#GoogleCalenderDescription#", googleCalenderDescription)
-                    .Replace("#ICalenderDescription#", iCalenderDescription);
+                    .Replace("#GoogleCalenderLink#", googleCalenderLink)
+                    .Replace("#AppleCalenderLink#", appleCalenderLink);
 
                 sendEmail(business.Name, $"{title} - Reservation #{order.Id.ToString()[..5].ToUpper()}", order.Customer.Email, "", htmlString);
             }
@@ -162,69 +166,6 @@ namespace PEAS.Services.Email
             //Convert to business time
             TimeZoneInfo businessTimeZone = TZConvert.GetTimeZoneInfo(timeZone);
             return TimeZoneInfo.ConvertTimeFromUtc(dateTime, businessTimeZone);
-        }
-
-        private static void createICSFile(string summary, string description, string fileName, string location, string timeZone, DateTime startTime, DateTime endTime)
-        {
-            //some variables for demo purposes
-            // DateTime DateStart = DateTime.Now;
-            // DateTime DateEnd = DateStart.AddMinutes(105);
-            // string Summary = "Small summary text";
-            // string Location = "Event location";
-            // string Description = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit.";
-            // string FileName = "CalendarItem";
-
-            //create a new stringbuilder instance
-            StringBuilder sb = new StringBuilder();
-
-            //start the calendar item
-            sb.AppendLine("BEGIN:VCALENDAR");
-            sb.AppendLine("VERSION:2.0");
-            sb.AppendLine("PRODID:stackoverflow.com");
-            sb.AppendLine("CALSCALE:GREGORIAN");
-            sb.AppendLine("METHOD:PUBLISH");
-
-            //create a time zone if needed, TZID to be used in the event itself
-            sb.AppendLine("BEGIN:VTIMEZONE");
-            sb.AppendLine($"TZID:{timeZone}");
-            sb.AppendLine("BEGIN:STANDARD");
-            sb.AppendLine("TZOFFSETTO:+0100");
-            sb.AppendLine("TZOFFSETFROM:+0100");
-            sb.AppendLine("END:STANDARD");
-            sb.AppendLine("END:VTIMEZONE");
-
-            //add the event
-            sb.AppendLine("BEGIN:VEVENT");
-
-            //with time zone specified
-            sb.AppendLine($"DTSTART;TZID={timeZone}:" + startTime.ToString("yyyyMMddTHHmm00"));
-            sb.AppendLine($"DTEND;TZID={timeZone}:" + endTime.ToString("yyyyMMddTHHmm00"));
-            //or without
-            sb.AppendLine("DTSTART:" + DateStart.ToString("yyyyMMddTHHmm00Z"));
-            sb.AppendLine("DTEND:" + DateEnd.ToString("yyyyMMddTHHmm00Z"));
-
-            sb.AppendLine("SUMMARY:" + summary + "");
-            sb.AppendLine("LOCATION:" + location + "");
-            sb.AppendLine("DESCRIPTION:" + description + "");
-            sb.AppendLine("PRIORITY:3");
-            sb.AppendLine("END:VEVENT");
-
-            //end calendar item
-            sb.AppendLine("END:VCALENDAR");
-
-            //create a string from the stringbuilder
-            string CalendarItem = sb.ToString();
-
-            //send the calendar item to the browser
-            Response.ClearHeaders();
-            Response.Clear();
-            Response.Buffer = true;
-            Response.ContentType = "text/calendar";
-            Response.AddHeader("content-length", CalendarItem.Length.ToString());
-            Response.AddHeader("content-disposition", "attachment; filename=\"" + fileName + ".ics\"");
-            Response.Write(CalendarItem);
-            Response.Flush();
-            HttpContext.Current.ApplicationInstance.CompleteRequest();
         }
     }
 }
