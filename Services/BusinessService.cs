@@ -443,7 +443,7 @@ namespace PEAS.Services
 
                     //Get existing orders for the selected date
                     List<DateRange> ordersDateRanges = ordersInTheDay.Select(x => new DateRange(x.StartTime, x.EndTime)).ToList() ?? new List<DateRange>();
-                    return DateRange.GetAvailability(scheduleForTheDate, new TimeSpan(0, 0, block.Duration), ordersDateRanges);
+                    return DateRange.GetAvailability(scheduleForTheDate, new TimeSpan(0, 0, block.Duration), ordersDateRanges, new List<DateRange>());
                 }
             }
             catch (Exception e)
