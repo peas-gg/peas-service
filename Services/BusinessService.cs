@@ -433,7 +433,12 @@ namespace PEAS.Services
                     //Get availability
                     List<Order>? ordersInTheDay = _context.Orders
                         .AsNoTracking()
-                        .Where(x => x.Business.Id == businessId && x.OrderStatus != Order.Status.Declined && x.StartTime > DateTime.UtcNow)
+                        .Where(x => x.Business.Id == businessId
+                        && x.OrderStatus == Order.Status.Pending
+                        && x.OrderStatus == Order.Status.Approved
+                        && x.StartTime >= startDate
+                        && x.EndTime <= endDate
+                        )
                         .ToList();
 
                     //Get existing orders for the selected date
@@ -637,35 +642,46 @@ namespace PEAS.Services
                     throw new AppException("Cannot update a service that has been declined");
                 }
 
-                switch (model.OrderStatus)
+                if (model.OrderStatus != null)
                 {
-                    case Order.Status.Pending:
-                        throw new AppException("Cannot set a service to pending");
-                    case Order.Status.Approved:
-                        if (order.StartTime < DateTime.UtcNow)
-                        {
-                            throw new AppException("This service cannot be approved because it's start time is in the past");
-                        }
-                        order.OrderStatus = Order.Status.Approved;
-                        //Send email to customer
-                        _emailService.SendOrderEmail(order, business);
-                        break;
-                    case Order.Status.Declined:
-                        if (order.Payment != null)
-                        {
-                            throw new AppException("You cannot decline a service that has been paid for. Please reach out for help @ hello@peas.gg");
-                        }
-                        order.OrderStatus = Order.Status.Declined;
-                        //Send email to the customer
-                        _emailService.SendOrderEmail(order, business);
-                        break;
-                    case Order.Status.Completed:
-                        if (order.OrderStatus != Order.Status.Approved)
-                        {
-                            throw new AppException("You cannot complete a service you did not approve");
-                        }
-                        order.OrderStatus = Order.Status.Completed;
-                        break;
+                    switch (model.OrderStatus)
+                    {
+                        case Order.Status.Pending:
+                            throw new AppException("Cannot set a service to pending");
+                        case Order.Status.Approved:
+                            if (order.StartTime < DateTime.UtcNow)
+                            {
+                                throw new AppException("This service cannot be approved because it's start time is in the past");
+                            }
+                            order.OrderStatus = Order.Status.Approved;
+                            //Send email to customer
+                            _emailService.SendOrderEmail(order, business);
+                            break;
+                        case Order.Status.Declined:
+                            if (order.Payment != null)
+                            {
+                                throw new AppException("You cannot decline a service that has been paid for. Please reach out for help @ hello@peas.gg");
+                            }
+                            order.OrderStatus = Order.Status.Declined;
+                            //Send email to the customer
+                            _emailService.SendOrderEmail(order, business);
+                            break;
+                        case Order.Status.Completed:
+                            if (order.OrderStatus != Order.Status.Approved)
+                            {
+                                throw new AppException("You cannot complete a service you did not approve");
+                            }
+                            order.OrderStatus = Order.Status.Completed;
+                            break;
+                    }
+                }
+
+                if (model.DateRange != null)
+                {
+                    if (model.DateRange.Start <= DateTime.UtcNow || model.DateRange.End < model.DateRange.Start)
+                    {
+                        throw new AppException("Invalid time. Please ensure the end time is greater than the start time");
+                    }
                 }
 
                 order.LastUpdated = DateTime.UtcNow;
