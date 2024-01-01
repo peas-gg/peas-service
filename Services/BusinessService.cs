@@ -416,7 +416,6 @@ namespace PEAS.Services
 
                 Block block = getBlock(business, blockId);
 
-                //Get availability for the day
                 Schedule? schedule = business.Schedules?.Where(x => x.DayOfWeek == date.DayOfWeek).FirstOrDefault();
 
                 if (schedule == null)
@@ -428,22 +427,12 @@ namespace PEAS.Services
                     //Get the schedule for the date the user wants
                     DateTime startDate = date.ResetTimeToStartOfDay().Add(new TimeSpan(schedule.StartTime.Hour, schedule.StartTime.Minute, 0));
                     DateTime endDate = startDate + (schedule.EndTime - schedule.StartTime);
-                    DateRange scheduleForTheDate = new DateRange(startDate, endDate);
 
-                    //Get availability
-                    List<Order>? ordersInTheDay = _context.Orders
-                        .AsNoTracking()
-                        .Where(x => x.Business.Id == businessId
-                        && x.OrderStatus == Order.Status.Pending
-                        && x.OrderStatus == Order.Status.Approved
-                        && x.StartTime >= startDate
-                        && x.EndTime <= endDate
-                        )
-                        .ToList();
+                    DateRange scheduleForDate = new DateRange(startDate, endDate);
 
-                    //Get existing orders for the selected date
-                    List<DateRange> ordersDateRanges = ordersInTheDay.Select(x => new DateRange(x.StartTime, x.EndTime)).ToList() ?? new List<DateRange>();
-                    return DateRange.GetAvailability(scheduleForTheDate, new TimeSpan(0, 0, block.Duration), ordersDateRanges, new List<DateRange>());
+                    List<DateRange> orderTimesForDate = getOrderTimesForDateRange(business, scheduleForDate);
+
+                    return DateRange.GetAvailability(scheduleForDate, new TimeSpan(0, 0, block.Duration), orderTimesForDate, new List<DateRange>());
                 }
             }
             catch (Exception e)
@@ -682,6 +671,14 @@ namespace PEAS.Services
                     {
                         throw new AppException("Invalid time. Please ensure the end time is greater than the start time");
                     }
+
+                    List<DateRange> orderTimesInDate = getOrderTimesForDateRange(business, model.DateRange);
+
+                    //Validate the date range
+                    validateDateRangeAvailability(model.DateRange, orderTimesInDate, new List<DateRange>());
+
+                    order.StartTime = model.DateRange.Start;
+                    order.EndTime = model.DateRange.End;
                 }
 
                 order.LastUpdated = DateTime.UtcNow;
@@ -1001,6 +998,34 @@ namespace PEAS.Services
             {
                 AppLogger.Log(_logger, e);
                 throw new AppException("Error loading business colors");
+            }
+        }
+
+        private List<DateRange> getOrderTimesForDateRange(Business business, DateRange dateRange)
+        {
+            //Get existing orders for the selected date
+            List<Order>? ordersInTheDay = _context.Orders
+                .AsNoTracking()
+                .Where(x => x.Business.Id == business.Id
+                && x.OrderStatus == Order.Status.Pending
+                && x.OrderStatus == Order.Status.Approved
+                && x.StartTime >= dateRange.Start
+                && x.EndTime <= dateRange.End
+                )
+                .ToList();
+
+            return ordersInTheDay.Select(x => new DateRange(x.StartTime, x.EndTime)).ToList() ?? new List<DateRange>();
+        }
+
+        private void validateDateRangeAvailability(DateRange dateRange, List<DateRange> ordersInTheDay, List<DateRange> blockedTimeSlots)
+        {
+            if (ordersInTheDay.Any(x => x.WithInRange(dateRange)))
+            {
+                throw new AppException("You have an existing appointment in this time slot. Please reschedule it to proceed or pick a different time.");
+            }
+            if (blockedTimeSlots.Any(x => x.WithInRange(dateRange)))
+            {
+                throw new AppException("You have blocked this timeslot. Please delete the time block to proceed.");
             }
         }
 
