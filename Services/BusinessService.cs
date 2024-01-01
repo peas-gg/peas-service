@@ -1007,10 +1007,10 @@ namespace PEAS.Services
             List<Order>? ordersInTheDay = _context.Orders
                 .AsNoTracking()
                 .Where(x => x.Business.Id == business.Id
-                && x.OrderStatus == Order.Status.Pending
-                && x.OrderStatus == Order.Status.Approved
                 && x.StartTime >= dateRange.Start
                 && x.EndTime <= dateRange.End
+                && x.OrderStatus != Order.Status.Declined
+                && x.OrderStatus != Order.Status.Completed
                 )
                 .ToList();
 
