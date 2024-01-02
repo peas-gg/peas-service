@@ -53,6 +53,8 @@ namespace PEAS.Services
         private readonly IMapper _mapper;
         private readonly ILogger<BusinessService> _logger;
 
+        private readonly int maxBlockDuration = 86400; //(24 hours) in seconds
+
         public BusinessService(
                 DataContext context,
                 IMapService mapService,
@@ -416,7 +418,6 @@ namespace PEAS.Services
 
                 Block block = getBlock(business, blockId);
 
-                //Get availability for the day
                 Schedule? schedule = business.Schedules?.Where(x => x.DayOfWeek == date.DayOfWeek).FirstOrDefault();
 
                 if (schedule == null)
@@ -428,17 +429,12 @@ namespace PEAS.Services
                     //Get the schedule for the date the user wants
                     DateTime startDate = date.ResetTimeToStartOfDay().Add(new TimeSpan(schedule.StartTime.Hour, schedule.StartTime.Minute, 0));
                     DateTime endDate = startDate + (schedule.EndTime - schedule.StartTime);
-                    DateRange scheduleForTheDate = new DateRange(startDate, endDate);
 
-                    //Get availability
-                    List<Order>? ordersInTheDay = _context.Orders
-                        .AsNoTracking()
-                        .Where(x => x.Business.Id == businessId && x.OrderStatus != Order.Status.Declined && x.StartTime > DateTime.UtcNow)
-                        .ToList();
+                    DateRange scheduleForDate = new DateRange(startDate, endDate);
 
-                    //Get existing orders for the selected date
-                    List<DateRange> ordersDateRanges = ordersInTheDay.Select(x => new DateRange(x.StartTime, x.EndTime)).ToList() ?? new List<DateRange>();
-                    return DateRange.GetAvailability(scheduleForTheDate, new TimeSpan(0, 0, block.Duration), ordersDateRanges);
+                    List<DateRange> orderTimesForDate = getOrderTimesForDay(business, startDate);
+
+                    return DateRange.GetAvailability(scheduleForDate, new TimeSpan(0, 0, block.Duration), orderTimesForDate, new List<DateRange>());
                 }
             }
             catch (Exception e)
@@ -637,35 +633,54 @@ namespace PEAS.Services
                     throw new AppException("Cannot update a service that has been declined");
                 }
 
-                switch (model.OrderStatus)
+                if (model.OrderStatus != null)
                 {
-                    case Order.Status.Pending:
-                        throw new AppException("Cannot set a service to pending");
-                    case Order.Status.Approved:
-                        if (order.StartTime < DateTime.UtcNow)
-                        {
-                            throw new AppException("This service cannot be approved because it's start time is in the past");
-                        }
-                        order.OrderStatus = Order.Status.Approved;
-                        //Send email to customer
-                        _emailService.SendOrderEmail(order, business);
-                        break;
-                    case Order.Status.Declined:
-                        if (order.Payment != null)
-                        {
-                            throw new AppException("You cannot decline a service that has been paid for. Please reach out for help @ hello@peas.gg");
-                        }
-                        order.OrderStatus = Order.Status.Declined;
-                        //Send email to the customer
-                        _emailService.SendOrderEmail(order, business);
-                        break;
-                    case Order.Status.Completed:
-                        if (order.OrderStatus != Order.Status.Approved)
-                        {
-                            throw new AppException("You cannot complete a service you did not approve");
-                        }
-                        order.OrderStatus = Order.Status.Completed;
-                        break;
+                    switch (model.OrderStatus)
+                    {
+                        case Order.Status.Pending:
+                            throw new AppException("Cannot set a service to pending");
+                        case Order.Status.Approved:
+                            if (order.StartTime < DateTime.UtcNow)
+                            {
+                                throw new AppException("This service cannot be approved because it's start time is in the past");
+                            }
+                            order.OrderStatus = Order.Status.Approved;
+                            //Send email to customer
+                            _emailService.SendOrderEmail(order, business);
+                            break;
+                        case Order.Status.Declined:
+                            if (order.Payment != null)
+                            {
+                                throw new AppException("You cannot decline a service that has been paid for. Please reach out for help @ hello@peas.gg");
+                            }
+                            order.OrderStatus = Order.Status.Declined;
+                            //Send email to the customer
+                            _emailService.SendOrderEmail(order, business);
+                            break;
+                        case Order.Status.Completed:
+                            if (order.OrderStatus != Order.Status.Approved)
+                            {
+                                throw new AppException("You cannot complete a service you did not approve");
+                            }
+                            order.OrderStatus = Order.Status.Completed;
+                            break;
+                    }
+                }
+
+                if (model.DateRange != null)
+                {
+                    if (model.DateRange.Start <= DateTime.UtcNow || model.DateRange.End < model.DateRange.Start)
+                    {
+                        throw new AppException("Invalid time. Please ensure the end time is greater than the start time");
+                    }
+
+                    List<DateRange> orderTimesInDate = getOrderTimesForDay(business, model.DateRange.Start, order.Id);
+
+                    //Validate the date range
+                    validateDateRangeAvailability(model.DateRange, orderTimesInDate, new List<DateRange>());
+
+                    order.StartTime = model.DateRange.Start;
+                    order.EndTime = model.DateRange.End;
                 }
 
                 order.LastUpdated = DateTime.UtcNow;
@@ -988,6 +1003,38 @@ namespace PEAS.Services
             }
         }
 
+        private List<DateRange> getOrderTimesForDay(Business business, DateTime date, Guid? orderIdToExclude = null)
+        {
+            //Get existing orders for the selected date
+            List<Order>? ordersInTheDay = _context.Orders
+                .AsNoTracking()
+                .Where(x => x.Business.Id == business.Id
+                && x.StartTime.Day == date.Day
+                && x.OrderStatus != Order.Status.Declined
+                && x.OrderStatus != Order.Status.Completed
+                )
+                .ToList();
+
+            if (orderIdToExclude != null)
+            {
+                ordersInTheDay.RemoveAll(x => x.Id == orderIdToExclude);
+            }
+
+            return ordersInTheDay.Select(x => new DateRange(x.StartTime, x.EndTime)).ToList() ?? new List<DateRange>();
+        }
+
+        private void validateDateRangeAvailability(DateRange dateRange, List<DateRange> ordersInTheDay, List<DateRange> blockedTimeSlots)
+        {
+            if (ordersInTheDay.Any(x => x.Overlap(dateRange)))
+            {
+                throw new AppException("You have an existing appointment in this time slot. Please reschedule it to proceed or pick a different time.");
+            }
+            if (blockedTimeSlots.Any(x => x.Overlap(dateRange)))
+            {
+                throw new AppException("You have blocked this timeslot. Please delete the time block to proceed.");
+            }
+        }
+
         private async void sendOrderRequestToHub(Account account, Order order)
         {
             try
@@ -1161,6 +1208,11 @@ namespace PEAS.Services
             if (string.IsNullOrEmpty(block.Description))
             {
                 throw new AppException($"Please enter a Description");
+            }
+
+            if (block.Duration > maxBlockDuration)
+            {
+                throw new AppException($"Please enter a duration less than or equal to 24 hours");
             }
         }
 
