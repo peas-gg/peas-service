@@ -15,6 +15,7 @@ namespace PEAS.Helpers.Utilities
         T End { get; }
         bool WithInRange(T value);
         bool WithInRange(IRange<T> range);
+        bool Overlap(IRange<T> range);
     }
 
     public class DateRange : IRange<DateTime>
@@ -43,6 +44,11 @@ namespace PEAS.Helpers.Utilities
             return (Start <= range.Start) && (range.End <= End);
         }
 
+        public bool Overlap(IRange<DateTime> range)
+        {
+            return (Start < range.End) && (range.Start < End);
+        }
+
         public static List<DateRange> GetAvailability(DateRange schedule, TimeSpan orderDuration, List<DateRange> existingOrders, List<DateRange> blockedTimeSlots)
         {
             DateTime prevDate = schedule.Start;
@@ -56,7 +62,7 @@ namespace PEAS.Helpers.Utilities
                 var timeSlot = new DateRange(prevDate, currentDate);
 
                 //Check if there is an order in the timeslot
-                DateRange? existingOrderConflict = existingOrders.FirstOrDefault(x => x.WithInRange(timeSlot));
+                DateRange? existingOrderConflict = existingOrders.FirstOrDefault(x => x.Overlap(timeSlot));
                 if (existingOrderConflict != null)
                 {
                     prevDate = existingOrderConflict.End;
@@ -65,7 +71,7 @@ namespace PEAS.Helpers.Utilities
                 }
 
                 //Check if there is a blocked time in the timeslot
-                DateRange? blockedTimeConflict = blockedTimeSlots.FirstOrDefault(x => x.WithInRange(timeSlot));
+                DateRange? blockedTimeConflict = blockedTimeSlots.FirstOrDefault(x => x.Overlap(timeSlot));
                 if (blockedTimeConflict != null)
                 {
                     prevDate = blockedTimeConflict.End;

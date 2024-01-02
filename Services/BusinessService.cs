@@ -1020,11 +1020,11 @@ namespace PEAS.Services
 
         private void validateDateRangeAvailability(DateRange dateRange, List<DateRange> ordersInTheDay, List<DateRange> blockedTimeSlots)
         {
-            if (ordersInTheDay.Any(x => x.Start >= dateRange.Start && x.End <= dateRange.End))
+            if (ordersInTheDay.Any(x => x.Overlap(dateRange)))
             {
                 throw new AppException("You have an existing appointment in this time slot. Please reschedule it to proceed or pick a different time.");
             }
-            if (blockedTimeSlots.Any(x => x.Start >= dateRange.Start && x.End <= dateRange.End))
+            if (blockedTimeSlots.Any(x => x.Overlap(dateRange)))
             {
                 throw new AppException("You have blocked this timeslot. Please delete the time block to proceed.");
             }
