@@ -53,6 +53,8 @@ namespace PEAS.Services
         private readonly IMapper _mapper;
         private readonly ILogger<BusinessService> _logger;
 
+        private readonly int maxBlockDuration = 86400; //(24 hours) in seconds
+
         public BusinessService(
                 DataContext context,
                 IMapService mapService,
@@ -430,7 +432,9 @@ namespace PEAS.Services
 
                     DateRange scheduleForDate = new DateRange(startDate, endDate);
 
-                    List<DateRange> orderTimesForDate = getOrderTimesForDateRange(business, scheduleForDate);
+                    DateRange dateRangeForOrders = new DateRange(startDate, startDate.AddSeconds(maxBlockDuration));
+
+                    List<DateRange> orderTimesForDate = getOrderTimesForDateRange(business, dateRangeForOrders);
 
                     return DateRange.GetAvailability(scheduleForDate, new TimeSpan(0, 0, block.Duration), orderTimesForDate, new List<DateRange>());
                 }
@@ -672,7 +676,10 @@ namespace PEAS.Services
                         throw new AppException("Invalid time. Please ensure the end time is greater than the start time");
                     }
 
-                    List<DateRange> orderTimesInDate = getOrderTimesForDateRange(business, model.DateRange);
+                    //DateRange for existing orders to list
+                    DateRange dateRangeForOrders = new DateRange(model.DateRange.Start, model.DateRange.Start.AddSeconds(maxBlockDuration));
+
+                    List<DateRange> orderTimesInDate = getOrderTimesForDateRange(business, dateRangeForOrders);
 
                     //Validate the date range
                     validateDateRangeAvailability(model.DateRange, orderTimesInDate, new List<DateRange>());
@@ -1202,6 +1209,11 @@ namespace PEAS.Services
             if (string.IsNullOrEmpty(block.Description))
             {
                 throw new AppException($"Please enter a Description");
+            }
+
+            if (block.Duration > maxBlockDuration)
+            {
+                throw new AppException($"Please enter a duration less than or equal to 24 hours");
             }
         }
 
