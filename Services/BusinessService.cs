@@ -674,7 +674,7 @@ namespace PEAS.Services
                         throw new AppException("Invalid time. Please ensure the end time is greater than the start time");
                     }
 
-                    List<DateRange> orderTimesInDate = getOrderTimesForDay(business, model.DateRange.Start);
+                    List<DateRange> orderTimesInDate = getOrderTimesForDay(business, model.DateRange.Start, order.Id);
 
                     //Validate the date range
                     validateDateRangeAvailability(model.DateRange, orderTimesInDate, new List<DateRange>());
@@ -1003,7 +1003,7 @@ namespace PEAS.Services
             }
         }
 
-        private List<DateRange> getOrderTimesForDay(Business business, DateTime date)
+        private List<DateRange> getOrderTimesForDay(Business business, DateTime date, Guid? orderIdToExclude = null)
         {
             //Get existing orders for the selected date
             List<Order>? ordersInTheDay = _context.Orders
@@ -1014,6 +1014,11 @@ namespace PEAS.Services
                 && x.OrderStatus != Order.Status.Completed
                 )
                 .ToList();
+
+            if (orderIdToExclude != null)
+            {
+                ordersInTheDay.RemoveAll(x => x.Id == orderIdToExclude);
+            }
 
             return ordersInTheDay.Select(x => new DateRange(x.StartTime, x.EndTime)).ToList() ?? new List<DateRange>();
         }
