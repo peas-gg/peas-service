@@ -671,7 +671,7 @@ namespace PEAS.Services
                 {
                     if (model.DateRange.Start <= DateTime.UtcNow || model.DateRange.End < model.DateRange.Start)
                     {
-                        throw new AppException("Invalid time. Please ensure the end time is greater than the start time");
+                        throw new AppException("Invalid time. Please ensure the start time is in the future and the end time is greater than the start time");
                     }
 
                     List<DateRange> orderTimesInDate = getOrderTimesForDay(business, model.DateRange.Start, order.Id);
