@@ -23,6 +23,7 @@
     <None Remove="Models\Business\Order\" />
     <None Remove="Services\Email\" />
     <None Remove="Hubs\" />
+    <None Remove="Models\Business\TimeBlock\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -41,6 +42,7 @@
     <Folder Include="Models\Business\Order\" />
     <Folder Include="Services\Email\" />
     <Folder Include="Hubs\" />
+    <Folder Include="Models\Business\TimeBlock\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.11" />

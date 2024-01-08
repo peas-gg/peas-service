@@ -19,6 +19,8 @@ namespace PEAS.Entities
 
         public DbSet<Withdrawal> Withdrawals { get; set; }
 
+        public DbSet<TimeBlock> TimeBlocks { get; set; }
+
         private readonly IConfiguration Configuration;
 
         public DataContext(IConfiguration configuration)

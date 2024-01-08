@@ -1,10 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
-using PEAS.Entities.Site;
 
-namespace PEAS.Entities.Booking
+namespace PEAS.Entities.Site
 {
-    [Owned]
     public class TimeBlock
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -17,5 +14,9 @@ namespace PEAS.Entities.Booking
         public required DateTime StartTime { get; set; }
 
         public required DateTime EndTime { get; set; }
+
+        public required DateTime Created { get; set; }
+
+        public required DateTime LastUpdated { get; set; }
     }
 }
