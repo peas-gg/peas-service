@@ -12,6 +12,7 @@ using PEAS.Hubs;
 using PEAS.Models;
 using PEAS.Models.Business;
 using PEAS.Models.Business.Order;
+using PEAS.Models.Business.TimeBlock;
 using PEAS.Services.Email;
 
 namespace PEAS.Services
@@ -34,6 +35,8 @@ namespace PEAS.Services
         OrderResponse CreateOrder(Guid businessId, OrderRequest model);
         OrderResponse RequestPayment(Account account, Guid businessId, PaymentRequest model);
         OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model);
+        List<TimeBlockResponse> GetTimeBlocks(Account account, Guid businessId);
+        TimeBlockResponse CreateTimeBlock(Account account, CreateTimeBlock model);
         WalletResponse GetWallet(Account account, Guid businessId);
         WalletResponse Withdraw(Account account, Guid businessId);
         EmptyResponse CompleteWithdraw(Guid withdrawalId);
@@ -469,6 +472,68 @@ namespace PEAS.Services
                     .ToList();
 
                 return customers;
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        //TimeBlock
+        public List<TimeBlockResponse> GetTimeBlocks(Account account, Guid businessId)
+        {
+            try
+            {
+                Business? business = _context.Businesses.Find(businessId);
+
+                validateBusinessAndAccount(account, business);
+
+                List<TimeBlock> timeBlocks = _context.TimeBlocks.AsNoTracking().Where(x => x.Business.Id == business!.Id).ToList();
+
+                return _mapper.Map<List<TimeBlockResponse>>(timeBlocks);
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        public TimeBlockResponse CreateTimeBlock(Account account, CreateTimeBlock model)
+        {
+            try
+            {
+                Business? business = _context.Businesses.Find(model.BusinessId);
+
+                validateBusinessAndAccount(account, business);
+
+                string title = model.Title.Trim();
+
+                if (string.IsNullOrEmpty(title))
+                {
+                    throw new AppException("Time Block title cannot be empty");
+                }
+
+                if (model.EndTime < model.StartTime)
+                {
+                    throw new AppException("Invalid Time Range: Please ensure the end time is greater than the start time");
+                }
+
+                TimeBlock newTimeBlock = new TimeBlock
+                {
+                    Business = business!,
+                    Title = title,
+                    StartTime = model.StartTime,
+                    EndTime = model.EndTime,
+                    Created = DateTime.UtcNow,
+                    LastUpdated = DateTime.UtcNow
+                };
+
+                _context.TimeBlocks.Add(newTimeBlock);
+                _context.SaveChanges();
+
+                return _mapper.Map<TimeBlockResponse>(newTimeBlock);
             }
             catch (Exception e)
             {
@@ -1134,12 +1199,17 @@ namespace PEAS.Services
                 .Include(x => x.Blocks)
                 .SingleOrDefault(x => x.Id == businessId);
 
+            validateBusinessAndAccount(account, business);
+
+            return business!;
+        }
+
+        private void validateBusinessAndAccount(Account account, Business? business)
+        {
             if (business == null || business.Account.Id != account.Id)
             {
                 throw new AppException("Invalid Business Id");
             }
-
-            return business;
         }
 
         private Block getBlock(Business business, Guid blockId)
