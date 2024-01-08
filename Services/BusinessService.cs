@@ -36,7 +36,7 @@ namespace PEAS.Services
         OrderResponse RequestPayment(Account account, Guid businessId, PaymentRequest model);
         OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model);
         List<TimeBlockResponse> GetTimeBlocks(Account account, Guid businessId);
-        TimeBlockResponse CreateTimeBlock(Account account, CreateTimeBlock model);
+        TimeBlockResponse CreateTimeBlock(Account account, Guid businessId, CreateTimeBlock model);
         WalletResponse GetWallet(Account account, Guid businessId);
         WalletResponse Withdraw(Account account, Guid businessId);
         EmptyResponse CompleteWithdraw(Guid withdrawalId);
@@ -500,11 +500,11 @@ namespace PEAS.Services
             }
         }
 
-        public TimeBlockResponse CreateTimeBlock(Account account, CreateTimeBlock model)
+        public TimeBlockResponse CreateTimeBlock(Account account, Guid businessId, CreateTimeBlock model)
         {
             try
             {
-                Business? business = _context.Businesses.Find(model.BusinessId);
+                Business? business = _context.Businesses.Find(businessId);
 
                 validateBusinessAndAccount(account, business);
 
