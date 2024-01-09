@@ -523,7 +523,7 @@ namespace PEAS.Services
                 }
 
                 List<DateRange> orderTimesInDate = getOrderTimesForDay(business!, model.StartTime);
-                List<DateRange> timeBlocksForDate = getTimeBlocksForDate(business!, model.EndTime);
+                List<DateRange> timeBlocksForDate = getTimeBlocksForDate(business!, model.StartTime);
 
                 //Validate the date range
                 validateDateRangeAvailability(new DateRange(model.StartTime, model.EndTime), orderTimesInDate, timeBlocksForDate);
