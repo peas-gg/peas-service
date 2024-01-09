@@ -760,7 +760,7 @@ namespace PEAS.Services
 
                     order.StartTime = model.DateRange.Start;
                     order.EndTime = model.DateRange.End;
-                    _emailService.SendOrderEmail(order, business);
+                    _emailService.SendOrderEmail(order, business, true);
                 }
 
                 order.LastUpdated = DateTime.UtcNow;
