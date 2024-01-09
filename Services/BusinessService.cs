@@ -437,7 +437,9 @@ namespace PEAS.Services
 
                     List<DateRange> orderTimesForDate = getOrderTimesForDay(business, startDate);
 
-                    return DateRange.GetAvailability(scheduleForDate, new TimeSpan(0, 0, block.Duration), orderTimesForDate, new List<DateRange>());
+                    List<DateRange> timeBlocksForDate = getTimeBlocksForDate(business, startDate);
+
+                    return DateRange.GetAvailability(scheduleForDate, new TimeSpan(0, 0, block.Duration), orderTimesForDate, timeBlocksForDate);
                 }
             }
             catch (Exception e)
@@ -519,6 +521,12 @@ namespace PEAS.Services
                 {
                     throw new AppException("Invalid Time Range: Please ensure the end time is greater than the start time");
                 }
+
+                List<DateRange> orderTimesInDate = getOrderTimesForDay(business!, model.StartTime);
+                List<DateRange> timeBlocksForDate = getTimeBlocksForDate(business!, model.EndTime);
+
+                //Validate the date range
+                validateDateRangeAvailability(new DateRange(model.StartTime, model.EndTime), orderTimesInDate, timeBlocksForDate);
 
                 TimeBlock newTimeBlock = new TimeBlock
                 {
@@ -740,9 +748,10 @@ namespace PEAS.Services
                     }
 
                     List<DateRange> orderTimesInDate = getOrderTimesForDay(business, model.DateRange.Start, order.Id);
+                    List<DateRange> timeBlocksForDate = getTimeBlocksForDate(business, model.DateRange.Start);
 
                     //Validate the date range
-                    validateDateRangeAvailability(model.DateRange, orderTimesInDate, new List<DateRange>());
+                    validateDateRangeAvailability(model.DateRange, orderTimesInDate, timeBlocksForDate);
 
                     order.StartTime = model.DateRange.Start;
                     order.EndTime = model.DateRange.End;
@@ -1087,6 +1096,24 @@ namespace PEAS.Services
             }
 
             return ordersInTheDay.Select(x => new DateRange(x.StartTime, x.EndTime)).ToList() ?? new List<DateRange>();
+        }
+
+        private List<DateRange> getTimeBlocksForDate(Business business, DateTime date, Guid? timeBlockIdToExclude = null)
+        {
+            //Get existing time blocks for the selected date range
+            List<TimeBlock>? timeBlocksForDateRange = _context.TimeBlocks
+                .AsNoTracking()
+                .Where(x => x.Business.Id == business.Id
+                && x.StartTime >= date
+                )
+                .ToList();
+
+            if (timeBlockIdToExclude != null)
+            {
+                timeBlocksForDateRange.RemoveAll(x => x.Id == timeBlockIdToExclude);
+            }
+
+            return timeBlocksForDateRange.Select(x => new DateRange(x.StartTime, x.EndTime)).ToList() ?? new List<DateRange>();
         }
 
         private void validateDateRangeAvailability(DateRange dateRange, List<DateRange> ordersInTheDay, List<DateRange> blockedTimeSlots)
