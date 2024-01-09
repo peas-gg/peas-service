@@ -517,6 +517,11 @@ namespace PEAS.Services
                     throw new AppException("Time Block title cannot be empty");
                 }
 
+                if (model.StartTime <= DateTime.UtcNow)
+                {
+                    throw new AppException("Invalid Start Time: Please ensure the start time is not in the past");
+                }
+
                 if (model.EndTime < model.StartTime)
                 {
                     throw new AppException("Invalid Time Range: Please ensure the end time is greater than the start time");
