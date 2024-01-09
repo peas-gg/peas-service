@@ -1098,13 +1098,13 @@ namespace PEAS.Services
             return ordersInTheDay.Select(x => new DateRange(x.StartTime, x.EndTime)).ToList() ?? new List<DateRange>();
         }
 
-        private List<DateRange> getTimeBlocksForDate(Business business, DateTime date, Guid? timeBlockIdToExclude = null)
+        private List<DateRange> getTimeBlocksForDate(Business business, DateTime startDate, Guid? timeBlockIdToExclude = null)
         {
             //Get existing time blocks for the selected date range
             List<TimeBlock>? timeBlocksForDateRange = _context.TimeBlocks
                 .AsNoTracking()
                 .Where(x => x.Business.Id == business.Id
-                && x.StartTime >= date
+                && x.StartTime >= startDate
                 )
                 .ToList();
 
