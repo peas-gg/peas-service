@@ -7,6 +7,7 @@ using PEAS.Helpers.Utilities;
 using PEAS.Models;
 using PEAS.Models.Business;
 using PEAS.Models.Business.Order;
+using PEAS.Models.Business.TimeBlock;
 using PEAS.Services;
 
 namespace PEAS.Controllers
@@ -119,6 +120,22 @@ namespace PEAS.Controllers
         public ActionResult<OrderResponse> UpdateOrder(Guid businessId, [FromBody] UpdateOrderRequest model)
         {
             var response = _businessService.UpdateOrder(Account!, businessId, model);
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("time/block")]
+        public ActionResult<List<TimeBlockResponse>> GetTimeBlocks(Guid businessId)
+        {
+            var response = _businessService.GetTimeBlocks(Account!, businessId);
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPost("time/block")]
+        public ActionResult<TimeBlockResponse> CreateTimeBlock(Guid businessId, [FromBody] CreateTimeBlock model)
+        {
+            var response = _businessService.CreateTimeBlock(Account!, businessId, model);
             return Ok(response);
         }
 

@@ -5,6 +5,7 @@ using PEAS.Entities.Site;
 using PEAS.Models.Account;
 using PEAS.Models.Business;
 using PEAS.Models.Business.Order;
+using PEAS.Models.Business.TimeBlock;
 
 namespace PEAS.Helpers
 {
@@ -17,6 +18,7 @@ namespace PEAS.Helpers
             CreateMap<Business, BusinessResponse>();
             CreateMap<Order, OrderResponse>();
             CreateMap<Withdrawal, WithdrawalResponse>();
+            CreateMap<TimeBlock, TimeBlockResponse>();
         }
     }
 }
