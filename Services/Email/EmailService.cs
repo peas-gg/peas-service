@@ -44,7 +44,7 @@ namespace PEAS.Services.Email
             {
                 //Set HTML Content
                 string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Services/Email/OrderStatus.html");
-                string title = order.OrderStatus.ToString().ToUpper();
+                string title = didUpdateTime ? "Time Updated" : order.OrderStatus.ToString().ToUpper();
                 string recipientName = order.Customer.FirstName + " " + order.Customer.LastName;
                 string calenderDateFormat = "yyyyMMddTHHmmssZ";
                 string googleCalenderLink = "";
