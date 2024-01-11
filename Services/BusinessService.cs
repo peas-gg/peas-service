@@ -1109,7 +1109,7 @@ namespace PEAS.Services
             List<TimeBlock>? timeBlocksForDateRange = _context.TimeBlocks
                 .AsNoTracking()
                 .Where(x => x.Business.Id == business.Id
-                && x.StartTime >= startDate
+                && x.EndTime >= DateTime.UtcNow
                 )
                 .ToList();
 
