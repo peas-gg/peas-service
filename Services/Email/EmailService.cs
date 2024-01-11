@@ -14,7 +14,7 @@ namespace PEAS.Services.Email
 {
     public interface IEmailService
     {
-        void SendOrderEmail(Order order, Business business);
+        void SendOrderEmail(Order order, Business business, bool didUpdateTime = false);
         void SendPaymentEmail(Order order, Business business);
         void SendWithdrawEmailToAdmin(Account account, Withdrawal withdrawal);
     }
@@ -38,13 +38,13 @@ namespace PEAS.Services.Email
             _client = new HttpClient();
         }
 
-        public async void SendOrderEmail(Order order, Business business)
+        public async void SendOrderEmail(Order order, Business business, bool didUpdateTime = false)
         {
             try
             {
                 //Set HTML Content
                 string templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Services/Email/OrderStatus.html");
-                string title = order.OrderStatus.ToString().ToUpper();
+                string title = didUpdateTime ? "Time Updated" : order.OrderStatus.ToString().ToUpper();
                 string recipientName = order.Customer.FirstName + " " + order.Customer.LastName;
                 string calenderDateFormat = "yyyyMMddTHHmmssZ";
                 string googleCalenderLink = "";
@@ -70,7 +70,14 @@ namespace PEAS.Services.Email
                         CalenderLinksResponse calenderLinksResponse = await getCalenderLinks($"{order.Title} with {business.Name}", startTime, endTime);
 
                         colour = "#C4FFBC";
-                        subtitle = $"Your reservation with {businessName} has been approved";
+                        if (didUpdateTime)
+                        {
+                            subtitle = $"The time for your reservation with {businessName} has been updated";
+                        }
+                        else
+                        {
+                            subtitle = $"Your reservation with {businessName} has been approved";
+                        }
                         addToCalenderDisplay = "block";
                         googleCalenderLink = calenderLinksResponse.Links.Google;
                         appleCalenderLink = calenderLinksResponse.Links.Apple;
