@@ -34,7 +34,19 @@ namespace PEAS.Services
         private readonly ITwilioService _twilioService;
         private readonly IMapper _mapper;
 
-        private readonly string testEmail = "kingsleyokeke14@icloud.com";
+        private readonly string[] testEmails = {
+            "kingsleyokeke14@icloud.com",
+            "step_weaver_0g@icloud.com",
+            "amid.piton0t@icloud.com",
+            "cursor.04.soy@icloud.com",
+            "valence.snicks.0v@icloud.com",
+            "airways_pogo0a@icloud.com",
+            "raiser-riotous.0d@icloud.com",
+            "turtles_snider.06@icloud.com",
+            "walkway-04-eyed@icloud.com",
+            "rights.doubts-0w@icloud.com",
+            "mast-09-gavels@icloud.com"
+        };
 
         private readonly ILogger<AccountService> _logger;
 
@@ -406,7 +418,7 @@ namespace PEAS.Services
         {
             try
             {
-                if (email.ToUpper() == testEmail.ToUpper())
+                if (testEmails.Any(x => x.ToUpper() == email.ToUpper()))
                 {
                     return new EmptyResponse();
                 }
