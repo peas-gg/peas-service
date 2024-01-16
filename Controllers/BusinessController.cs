@@ -115,6 +115,13 @@ namespace PEAS.Controllers
             return Ok(response);
         }
 
+        [HttpGet("customer")]
+        public ActionResult<bool> DoesCustomerExist(string email)
+        {
+            var response = _businessService.DoesCustomerExist(email);
+            return Ok(response);
+        }
+
         [Authorize]
         [HttpPatch("order")]
         public ActionResult<OrderResponse> UpdateOrder(Guid businessId, [FromBody] UpdateOrderRequest model)
