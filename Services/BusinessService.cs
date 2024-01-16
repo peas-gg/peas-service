@@ -32,6 +32,7 @@ namespace PEAS.Services
         List<Customer> GetCustomers(Account account, Guid businessId);
         OrderResponseLite GetOrder(Guid orderId);
         List<OrderResponse> GetOrders(Account account, Guid businessId);
+        bool DoesCustomerExist(string email);
         OrderResponse CreateOrder(Guid businessId, OrderRequest model);
         OrderResponse RequestPayment(Account account, Guid businessId, PaymentRequest model);
         OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model);
@@ -599,6 +600,20 @@ namespace PEAS.Services
                     .Where(x => x.Business.Id == business.Id).ToList();
 
                 return _mapper.Map<List<OrderResponse>>(orders);
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        public bool DoesCustomerExist(string email)
+        {
+            try
+            {
+                Customer? customer = _context.Customers.AsNoTracking().Where(x => x.Email.ToUpper() == email.ToUpper()).FirstOrDefault();
+                return customer != null;
             }
             catch (Exception e)
             {
