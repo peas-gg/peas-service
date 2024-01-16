@@ -657,20 +657,24 @@ namespace PEAS.Services
                     {
                         Customer newCustomer = new Customer
                         {
-                            FirstName = model.FirstName.Trim(),
-                            LastName = model.Lastname.Trim(),
-                            Email = model.Email.Trim(),
-                            Phone = model.Phone.Trim()
+                            FirstName = model.FirstName!.Trim(),
+                            LastName = model.Lastname!.Trim(),
+                            Email = model.Email!.Trim(),
+                            Phone = model.Phone!.Trim()
                         };
                         _context.Customers.Add(newCustomer);
                         customer = newCustomer;
                     }
                     else
                     {
-                        customer.FirstName = model.FirstName.Trim();
-                        customer.LastName = model.Lastname.Trim();
-                        customer.Phone = model.Phone.Trim();
-                        _context.Customers.Update(customer);
+                        //Only update the customer info if the customer changes any of their existing details 
+                        if (model.FirstName != null && model.Lastname != null && model.Phone != null)
+                        {
+                            customer.FirstName = model.FirstName.Trim();
+                            customer.LastName = model.Lastname.Trim();
+                            customer.Phone = model.Phone.Trim();
+                            _context.Customers.Update(customer);
+                        }
                     }
 
                     //Create Order
