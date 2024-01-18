@@ -155,9 +155,9 @@ namespace PEAS.Controllers
         }
 
         [HttpGet("availability")]
-        public ActionResult<List<DateRange>> GetAvailability(Guid businessId, Guid blockId, DayOfWeek dayOfWeek, DateTime date)
+        public ActionResult<List<DateRange>> GetAvailability(Guid businessId, Guid blockId, DateTime date)
         {
-            var response = _businessService.GetAvailablity(businessId, blockId, dayOfWeek, date);
+            var response = _businessService.GetAvailablity(businessId, blockId, date);
             return Ok(response);
         }
 

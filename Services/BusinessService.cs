@@ -14,6 +14,7 @@ using PEAS.Models.Business;
 using PEAS.Models.Business.Order;
 using PEAS.Models.Business.TimeBlock;
 using PEAS.Services.Email;
+using TimeZoneConverter;
 
 namespace PEAS.Services
 {
@@ -28,7 +29,7 @@ namespace PEAS.Services
         BusinessResponse UpdateBlock(Account account, Guid businessId, UpdateBlock model);
         BusinessResponse DeleteBlock(Account account, Guid businessId, Guid blockId);
         BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleModel> model);
-        List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DayOfWeek dayOfWeek, DateTime date);
+        List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date);
         List<Customer> GetCustomers(Account account, Guid businessId);
         OrderResponseLite GetOrder(Guid orderId);
         List<OrderResponse> GetOrders(Account account, Guid businessId);
@@ -403,7 +404,7 @@ namespace PEAS.Services
             }
         }
 
-        public List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DayOfWeek dayOfWeek, DateTime date)
+        public List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date)
         {
             try
             {
@@ -422,7 +423,7 @@ namespace PEAS.Services
 
                 Block block = getBlock(business, blockId);
 
-                Schedule? schedule = business.Schedules?.Where(x => x.DayOfWeek == dayOfWeek).FirstOrDefault();
+                Schedule? schedule = business.Schedules?.Where(x => x.DayOfWeek == date.DayOfWeek).FirstOrDefault();
 
                 if (schedule == null)
                 {
@@ -431,9 +432,13 @@ namespace PEAS.Services
                 else
                 {
                     //Kingsley: BAD CODE (HACK)
+                    //Convert to business time
+                    TimeZoneInfo businessTimeZone = TZConvert.GetTimeZoneInfo(business.TimeZone);
+                    DateTime dateFromBusinessTimeZone = TimeZoneInfo.ConvertTimeToUtc(new DateTime(date.Year, date.Month, date.Day), businessTimeZone);
+
                     int hoursInADay = 24;
-                    DateTime startDate = date;
-                    DateTime endDate = date.AddHours(hoursInADay);
+                    DateTime startDate = dateFromBusinessTimeZone;
+                    DateTime endDate = dateFromBusinessTimeZone.AddHours(hoursInADay);
 
                     DateRange possibleDateRange = new DateRange(startDate, endDate);
 
@@ -662,7 +667,7 @@ namespace PEAS.Services
                 Block block = getBlock(business, model.BlockId);
 
                 //Get Availability
-                List<DateRange> availabilityDates = GetAvailablity(businessId, model.BlockId, model.DayOfWeek, model.Date);
+                List<DateRange> availabilityDates = GetAvailablity(businessId, model.BlockId, model.Date);
                 DateRange? timeSlot = availabilityDates.FirstOrDefault(x => x.Start == model.DateRange.Start);
 
                 if (timeSlot == null)
