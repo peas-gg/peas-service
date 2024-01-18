@@ -28,7 +28,7 @@ namespace PEAS.Services
         BusinessResponse UpdateBlock(Account account, Guid businessId, UpdateBlock model);
         BusinessResponse DeleteBlock(Account account, Guid businessId, Guid blockId);
         BusinessResponse SetSchedule(Account account, Guid businessId, List<ScheduleModel> model);
-        List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date);
+        List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DayOfWeek dayOfWeek, DateTime date);
         List<Customer> GetCustomers(Account account, Guid businessId);
         OrderResponseLite GetOrder(Guid orderId);
         List<OrderResponse> GetOrders(Account account, Guid businessId);
@@ -403,7 +403,7 @@ namespace PEAS.Services
             }
         }
 
-        public List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DateTime date)
+        public List<DateRange> GetAvailablity(Guid businessId, Guid blockId, DayOfWeek dayOfWeek, DateTime date)
         {
             try
             {
@@ -422,7 +422,7 @@ namespace PEAS.Services
 
                 Block block = getBlock(business, blockId);
 
-                Schedule? schedule = business.Schedules?.Where(x => x.DayOfWeek == date.DayOfWeek).FirstOrDefault();
+                Schedule? schedule = business.Schedules?.Where(x => x.DayOfWeek == dayOfWeek).FirstOrDefault();
 
                 if (schedule == null)
                 {
@@ -430,17 +430,37 @@ namespace PEAS.Services
                 }
                 else
                 {
+                    //Kingsley: BAD CODE (HACK)
+                    int hoursInADay = 24;
+                    DateTime startDate = date;
+                    DateTime endDate = date.AddHours(hoursInADay);
+
+                    DateRange possibleDateRange = new DateRange(startDate, endDate);
+
                     //Get the schedule for the date the user wants
-                    DateTime startDate = date.ResetTimeToStartOfDay().Add(new TimeSpan(schedule.StartTime.Hour, schedule.StartTime.Minute, 0));
-                    DateTime endDate = startDate + (schedule.EndTime - schedule.StartTime);
+                    DateTime scheduleStartDate = startDate.Date.Add(new TimeSpan(schedule.StartTime.Hour, schedule.StartTime.Minute, 0));
+                    DateTime scheduleEndDate = scheduleStartDate + (schedule.EndTime - schedule.StartTime);
 
-                    DateRange scheduleForDate = new DateRange(startDate, endDate);
+                    DateRange scheduleDateRange = new DateRange(scheduleStartDate, scheduleEndDate);
 
-                    List<DateRange> orderTimesForDate = getOrderTimesForDay(business, startDate);
+                    //Adjust the schedule to ensure it fits in the possibleDateRange
+                    if (!scheduleDateRange.Overlap(possibleDateRange))
+                    {
+                        int hoursAdjuster = scheduleDateRange.End <= possibleDateRange.Start ? hoursInADay : -hoursInADay;
+                        DateRange updatedDateRangeForSchedule = new DateRange(scheduleDateRange.Start.AddHours(hoursInADay), scheduleDateRange.End.AddHours(hoursInADay));
+                        scheduleDateRange = updatedDateRangeForSchedule;
+                    }
 
-                    List<DateRange> timeBlocksForDate = getTimeBlocksForDate(business, startDate);
+                    if (!scheduleDateRange.Overlap(possibleDateRange))
+                    {
+                        throw new AppException("Something went wrong with calculating the availability. Contact support.");
+                    }
 
-                    return DateRange.GetAvailability(scheduleForDate, new TimeSpan(0, 0, block.Duration), orderTimesForDate, timeBlocksForDate);
+                    List<DateRange> orderTimesForDate = getOrderTimesForDay(business, scheduleDateRange.Start);
+
+                    List<DateRange> timeBlocksForDate = getTimeBlocksForDate(business, scheduleDateRange.Start);
+
+                    return DateRange.GetAvailability(scheduleDateRange, new TimeSpan(0, 0, block.Duration), orderTimesForDate, timeBlocksForDate);
                 }
             }
             catch (Exception e)
@@ -642,7 +662,7 @@ namespace PEAS.Services
                 Block block = getBlock(business, model.BlockId);
 
                 //Get Availability
-                List<DateRange> availabilityDates = GetAvailablity(businessId, model.BlockId, model.Date);
+                List<DateRange> availabilityDates = GetAvailablity(businessId, model.BlockId, model.DayOfWeek, model.Date);
                 DateRange? timeSlot = availabilityDates.FirstOrDefault(x => x.Start == model.DateRange.Start);
 
                 if (timeSlot == null)
