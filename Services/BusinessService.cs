@@ -14,6 +14,7 @@ using PEAS.Models.Business;
 using PEAS.Models.Business.Order;
 using PEAS.Models.Business.TimeBlock;
 using PEAS.Services.Email;
+using TimeZoneConverter;
 
 namespace PEAS.Services
 {
@@ -32,6 +33,7 @@ namespace PEAS.Services
         List<Customer> GetCustomers(Account account, Guid businessId);
         OrderResponseLite GetOrder(Guid orderId);
         List<OrderResponse> GetOrders(Account account, Guid businessId);
+        bool DoesCustomerExist(string email);
         OrderResponse CreateOrder(Guid businessId, OrderRequest model);
         OrderResponse RequestPayment(Account account, Guid businessId, PaymentRequest model);
         OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model);
@@ -429,17 +431,41 @@ namespace PEAS.Services
                 }
                 else
                 {
+                    //Kingsley: BAD CODE (HACK)
+                    //Convert to business time
+                    TimeZoneInfo businessTimeZone = TZConvert.GetTimeZoneInfo(business.TimeZone);
+                    DateTime dateFromBusinessTimeZone = TimeZoneInfo.ConvertTimeToUtc(new DateTime(date.Year, date.Month, date.Day), businessTimeZone);
+
+                    int hoursInADay = 24;
+                    DateTime startDate = dateFromBusinessTimeZone;
+                    DateTime endDate = dateFromBusinessTimeZone.AddHours(hoursInADay);
+
+                    DateRange possibleDateRange = new DateRange(startDate, endDate);
+
                     //Get the schedule for the date the user wants
-                    DateTime startDate = date.ResetTimeToStartOfDay().Add(new TimeSpan(schedule.StartTime.Hour, schedule.StartTime.Minute, 0));
-                    DateTime endDate = startDate + (schedule.EndTime - schedule.StartTime);
+                    DateTime scheduleStartDate = startDate.Date.Add(new TimeSpan(schedule.StartTime.Hour, schedule.StartTime.Minute, 0));
+                    DateTime scheduleEndDate = scheduleStartDate + (schedule.EndTime - schedule.StartTime);
 
-                    DateRange scheduleForDate = new DateRange(startDate, endDate);
+                    DateRange scheduleDateRange = new DateRange(scheduleStartDate, scheduleEndDate);
 
-                    List<DateRange> orderTimesForDate = getOrderTimesForDay(business, startDate);
+                    //Adjust the schedule to ensure it fits in the possibleDateRange
+                    if (!scheduleDateRange.Overlap(possibleDateRange))
+                    {
+                        int hoursAdjuster = scheduleDateRange.End <= possibleDateRange.Start ? hoursInADay : -hoursInADay;
+                        DateRange updatedDateRangeForSchedule = new DateRange(scheduleDateRange.Start.AddHours(hoursInADay), scheduleDateRange.End.AddHours(hoursInADay));
+                        scheduleDateRange = updatedDateRangeForSchedule;
+                    }
 
-                    List<DateRange> timeBlocksForDate = getTimeBlocksForDate(business, startDate);
+                    if (!scheduleDateRange.Overlap(possibleDateRange))
+                    {
+                        throw new AppException("Something went wrong with calculating the availability. Contact support.");
+                    }
 
-                    return DateRange.GetAvailability(scheduleForDate, new TimeSpan(0, 0, block.Duration), orderTimesForDate, timeBlocksForDate);
+                    List<DateRange> orderTimesForDate = getOrderTimesForDay(business, scheduleDateRange.Start);
+
+                    List<DateRange> timeBlocksForDate = getTimeBlocksForDate(business, scheduleDateRange.Start);
+
+                    return DateRange.GetAvailability(scheduleDateRange, new TimeSpan(0, 0, block.Duration), orderTimesForDate, timeBlocksForDate);
                 }
             }
             catch (Exception e)
@@ -607,6 +633,20 @@ namespace PEAS.Services
             }
         }
 
+        public bool DoesCustomerExist(string email)
+        {
+            try
+            {
+                Customer? customer = _context.Customers.AsNoTracking().Where(x => x.Email.ToUpper() == email.ToUpper()).FirstOrDefault();
+                return customer != null;
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
         public OrderResponse CreateOrder(Guid businessId, OrderRequest model)
         {
             try
@@ -642,20 +682,24 @@ namespace PEAS.Services
                     {
                         Customer newCustomer = new Customer
                         {
-                            FirstName = model.FirstName.Trim(),
-                            LastName = model.Lastname.Trim(),
-                            Email = model.Email.Trim(),
-                            Phone = model.Phone.Trim()
+                            FirstName = model.FirstName!.Trim(),
+                            LastName = model.Lastname!.Trim(),
+                            Email = model.Email!.Trim(),
+                            Phone = model.Phone!.Trim()
                         };
                         _context.Customers.Add(newCustomer);
                         customer = newCustomer;
                     }
                     else
                     {
-                        customer.FirstName = model.FirstName.Trim();
-                        customer.LastName = model.Lastname.Trim();
-                        customer.Phone = model.Phone.Trim();
-                        _context.Customers.Update(customer);
+                        //Only update the customer info if the customer changes any of their existing details 
+                        if (model.FirstName != null && model.Lastname != null && model.Phone != null)
+                        {
+                            customer.FirstName = model.FirstName.Trim();
+                            customer.LastName = model.Lastname.Trim();
+                            customer.Phone = model.Phone.Trim();
+                            _context.Customers.Update(customer);
+                        }
                     }
 
                     //Create Order
