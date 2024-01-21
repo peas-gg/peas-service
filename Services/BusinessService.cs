@@ -461,11 +461,11 @@ namespace PEAS.Services
                         throw new AppException("Something went wrong with calculating the availability. Contact support.");
                     }
 
-                    List<DateRange> orderTimesForDate = getOrderTimesForDay(business, scheduleDateRange.Start);
+                    List<DateRange> orderTimesWithDate = getOrderTimesWithDate(business, scheduleDateRange.Start);
 
                     List<DateRange> timeBlocksForDate = getTimeBlocksForDate(business, scheduleDateRange.Start);
 
-                    return DateRange.GetAvailability(scheduleDateRange, new TimeSpan(0, 0, block.Duration), orderTimesForDate, timeBlocksForDate);
+                    return DateRange.GetAvailability(scheduleDateRange, new TimeSpan(0, 0, block.Duration), orderTimesWithDate, timeBlocksForDate);
                 }
             }
             catch (Exception e)
@@ -553,11 +553,11 @@ namespace PEAS.Services
                     throw new AppException("Invalid Time Range: Please ensure the end time is greater than the start time");
                 }
 
-                List<DateRange> orderTimesInDate = getOrderTimesForDay(business!, model.StartTime);
+                List<DateRange> orderTimesWithDate = getOrderTimesWithDate(business!, model.StartTime);
                 List<DateRange> timeBlocksForDate = getTimeBlocksForDate(business!, model.StartTime);
 
                 //Validate the date range
-                validateDateRangeAvailability(new DateRange(model.StartTime, model.EndTime), orderTimesInDate, timeBlocksForDate);
+                validateDateRangeAvailability(new DateRange(model.StartTime, model.EndTime), orderTimesWithDate, timeBlocksForDate);
 
                 TimeBlock newTimeBlock = new TimeBlock
                 {
@@ -796,11 +796,11 @@ namespace PEAS.Services
                         throw new AppException("Invalid time. Please ensure the start time is in the future and the end time is greater than the start time");
                     }
 
-                    List<DateRange> orderTimesInDate = getOrderTimesForDay(business, model.DateRange.Start, order.Id);
+                    List<DateRange> orderTimesWithDate = getOrderTimesWithDate(business, model.DateRange.Start, order.Id);
                     List<DateRange> timeBlocksForDate = getTimeBlocksForDate(business, model.DateRange.Start);
 
                     //Validate the date range
-                    validateDateRangeAvailability(model.DateRange, orderTimesInDate, timeBlocksForDate);
+                    validateDateRangeAvailability(model.DateRange, orderTimesWithDate, timeBlocksForDate);
 
                     order.StartTime = model.DateRange.Start;
                     order.EndTime = model.DateRange.End;
@@ -1127,13 +1127,13 @@ namespace PEAS.Services
             }
         }
 
-        private List<DateRange> getOrderTimesForDay(Business business, DateTime date, Guid? orderIdToExclude = null)
+        private List<DateRange> getOrderTimesWithDate(Business business, DateTime minimumEndDate, Guid? orderIdToExclude = null)
         {
             //Get existing orders for the selected date
             List<Order>? ordersInTheDay = _context.Orders
                 .AsNoTracking()
                 .Where(x => x.Business.Id == business.Id
-                && x.StartTime.Day == date.Day
+                && x.EndTime >= minimumEndDate
                 && x.OrderStatus != Order.Status.Declined
                 && x.OrderStatus != Order.Status.Completed
                 )
