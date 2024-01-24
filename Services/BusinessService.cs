@@ -39,6 +39,7 @@ namespace PEAS.Services
         OrderResponse UpdateOrder(Account account, Guid businessId, UpdateOrderRequest model);
         List<TimeBlockResponse> GetTimeBlocks(Account account, Guid businessId);
         TimeBlockResponse CreateTimeBlock(Account account, Guid businessId, CreateTimeBlock model);
+        EmptyResponse DeleteTimeBlock(Account account, Guid businessId, Guid timeBlockId);
         WalletResponse GetWallet(Account account, Guid businessId);
         WalletResponse Withdraw(Account account, Guid businessId);
         EmptyResponse CompleteWithdraw(Guid withdrawalId);
@@ -573,6 +574,33 @@ namespace PEAS.Services
                 _context.SaveChanges();
 
                 return _mapper.Map<TimeBlockResponse>(newTimeBlock);
+            }
+            catch (Exception e)
+            {
+                AppLogger.Log(_logger, e);
+                throw AppException.ConstructException(e);
+            }
+        }
+
+        public EmptyResponse DeleteTimeBlock(Account account, Guid businessId, Guid timeBlockId)
+        {
+            try
+            {
+                Business? business = _context.Businesses.Find(businessId);
+
+                validateBusinessAndAccount(account, business);
+
+                TimeBlock? timeBlockToRemove = _context.TimeBlocks.FirstOrDefault(x => x.Id == timeBlockId);
+
+                if (timeBlockToRemove == null)
+                {
+                    throw new AppException("Invalid TimeblockId");
+                }
+
+                _context.TimeBlocks.Remove(timeBlockToRemove);
+                _context.SaveChanges();
+
+                return new EmptyResponse();
             }
             catch (Exception e)
             {

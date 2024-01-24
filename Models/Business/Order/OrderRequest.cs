@@ -1,5 +1,4 @@
-﻿using System;
-using PEAS.Helpers.Utilities;
+﻿using PEAS.Helpers.Utilities;
 
 namespace PEAS.Models.Business
 {

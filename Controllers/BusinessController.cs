@@ -147,6 +147,14 @@ namespace PEAS.Controllers
         }
 
         [Authorize]
+        [HttpDelete("time/block")]
+        public ActionResult<EmptyResponse> DeleteTimeBlock(Guid businessId, Guid timeBlockId)
+        {
+            var response = _businessService.DeleteTimeBlock(Account!, businessId, timeBlockId);
+            return Ok(response);
+        }
+
+        [Authorize]
         [HttpPost("payment")]
         public ActionResult<OrderResponse> RequestPayment(Guid businessId, [FromBody] PaymentRequest model)
         {
