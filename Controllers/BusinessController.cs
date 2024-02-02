@@ -158,8 +158,8 @@ namespace PEAS.Controllers
         [HttpPost("payment")]
         public ActionResult<OrderResponse> RequestPayment(Guid businessId, [FromBody] PaymentRequest model)
         {
-            var response = _businessService.RequestPayment(Account!, businessId, model);
-            return Ok(response);
+            //var response = _businessService.RequestPayment(Account!, businessId, model);
+            return NotFound();
         }
 
         [HttpGet("availability")]
