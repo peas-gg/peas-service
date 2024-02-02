@@ -18,8 +18,8 @@ namespace PEAS.Controllers
         [HttpPost]
         public ActionResult<string> StartPayment(Guid orderId, int tip)
         {
-            var response = _paymentService.StartPayment(orderId, tip);
-            return Ok(response);
+            //var response = _paymentService.StartPayment(orderId, tip);
+            return NotFound();
         }
 
         [HttpPost("complete")]
